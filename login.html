@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Rental System</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="login-page bg-gray-50">
+
+    <div class="w-full max-w-md">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800">Rental System</h1>
+            <p class="text-gray-500">Sign in to manage your properties</p>
+        </div>
+
+        <div class="data-card p-8">
+            <form id="login-form" class="space-y-6">
+                <div class="form-group">
+                    <label for="email" class="form-label">Email Address</label>
+                    <input type="email" id="email" class="form-input" required autocomplete="email" value="demo@user.com">
+                </div>
+
+                <div class="form-group">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" id="password" class="form-input" required autocomplete="current-password" value="password">
+                </div>
+
+                <div>
+                    <button type="submit" class="btn-primary w-full justify-center">Sign In</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="auth.js"></script>
+</body>
+</html>

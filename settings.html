@@ -6,12 +6,9 @@
     <title>Settings - Rental System</title>
     <!-- Load Chart.js for Analytics -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
-    <!-- Load Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Custom Styles -->
     <link rel="stylesheet" href="styles.css">
-    <!-- Custom Script -->
-    <script src="script.js"></script>
+    <link rel="stylesheet" href="settings.css">
 </head>
 <body class="flex min-h-screen">
 
@@ -23,7 +20,6 @@
 
         <nav class="p-4 flex-grow">
             <ul>
-                <!-- Data-view attribute is used by JS to switch content -->
                 <li><a class="nav-link" href="index.html"><i data-lucide="layout-dashboard"></i>Dashboard</a></li>
                 <li><a class="nav-link" href="properties.html"><i data-lucide="building-2"></i>Properties</a></li>
                 <li><a class="nav-link" href="tenants.html"><i data-lucide="users"></i>Tenants</a></li>
@@ -43,8 +39,6 @@
 
     <!-- 2. Main Content Area -->
     <main id="main-content" class="main-content ml-70">
-
-        <!-- 2c. Settings View -->
         <div id="settings-view" class="view-content active">
             <h1 class="text-3xl font-bold text-gray-900 mb-6">Settings</h1>
             <p class="text-gray-500 mb-6">Manage your account and application preferences</p>
@@ -218,5 +212,9 @@
         </div>
     </main>
 
+    <script src="auth.js"></script>
+    <script src="api.js"></script>
+    <script src="shared.js"></script>
+    <script src="settings.js"></script>
 </body>
 </html>
