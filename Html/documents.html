@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documents - Rental System</title>
+    <!-- Load Chart.js for Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="documents.css">
+</head>
+<body class="flex min-h-screen">
+
+    <div id="sidebar-container"></div>
+
+    <main id="main-content" class="main-content ml-[280px]">
+        <div id="documents-view" class="view-content active">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">Documents</h1>
+                    <p class="text-gray-500">Manage all your important files and documents</p>
+                </div>
+                <button id="upload-doc-btn" class="btn-primary flex items-center space-x-2">
+                    <i data-lucide="upload-cloud" class="w-4 h-4"></i>
+                    <span>Upload Document</span>
+                </button>
+            </div>
+
+            <div class="mb-6">
+                <div class="relative"><i data-lucide="search" class="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i><input type="text" id="search-input" placeholder="Search by title or file name..." class="form-input w-full pl-10"></div>
+            </div>
+
+            <div class="data-card overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-white">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">File Name</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Size</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Associated With</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Upload Date</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="documents-table-body" class="bg-white divide-y divide-gray-200">
+                        <!-- Document rows will be dynamically inserted here -->
+                    </tbody>
+                </table>
+                <div id="empty-state" class="text-center py-16 border-2 border-dashed rounded-xl mt-8 hidden"><i data-lucide="folder-open" class="mx-auto h-12 w-12 text-gray-400"></i><h3 class="mt-2 text-sm font-semibold text-gray-900">No documents found</h3><p class="mt-1 text-sm text-gray-500">Get started by uploading a new document.</p></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Add/Edit Document Modal -->
+    <div id="document-modal" class="modal-overlay hidden"></div>
+
+    <script src="auth.js"></script>
+    <script src="api.js"></script>
+    <script src="shared.js"></script>
+    <script src="documents.js"></script>
+</body>
+</html>
