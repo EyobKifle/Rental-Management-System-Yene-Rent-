@@ -1,58 +1,51 @@
-// Page-specific JavaScript for index.html (Dashboard)
-// This file handles dashboard-specific functionality
+// dashboard.js - Page-specific JavaScript for index.html (Dashboard)
 
-document.addEventListener('DOMContentLoaded', function() {
-    // Dashboard-specific initialization
-    initializeDashboard();
+document.addEventListener('DOMContentLoaded', () => {
+    const sidebarContainer = document.getElementById('sidebar-container');
 
-    // Use shared utilities for common functionality
-    if (window.rentalUtils) {
-        // Navigation is handled by shared.js
-        // Modal handling is handled by shared.js
-    }
-});
-
-function initializeDashboard() {
-    // Load dashboard data
-    loadDashboardStats();
-    loadRecentActivity();
-}
-
-function loadDashboardStats() {
-    // In a real app, this would fetch data from an API
-    // For now, using mock data
-    const stats = {
-        properties: 12,
-        tenants: 8,
-        revenue: 450000,
-        outstanding: 45000
+    const loadSidebar = async () => {
+        const response = await fetch('sidebar.html');
+        sidebarContainer.innerHTML = await response.text();
+        rentalUtils.setupNavigation();
+        rentalUtils.setupLucideIcons();
     };
 
-    // Update stats cards
-    document.querySelectorAll('.data-card h2').forEach((el, index) => {
-        const values = [stats.properties, stats.tenants, `ETB ${stats.revenue.toLocaleString()}`, `ETB ${stats.outstanding.toLocaleString()}`];
-        if (values[index]) {
-            el.textContent = values[index];
+    const loadDashboardStats = () => {
+        const properties = rentalUtils.loadData('properties') || [];
+        const tenants = rentalUtils.loadData('tenants') || [];
+        const payments = rentalUtils.loadData('payments') || []; // Assuming payments will be stored
+
+        const totalProperties = properties.length;
+        const totalTenants = tenants.length;
+        
+        // Calculate monthly revenue from properties
+        const monthlyRevenue = properties.reduce((sum, prop) => sum + (prop.rent || 0), 0);
+
+        // Placeholder for outstanding balance logic
+        const outstandingBalance = 0; 
+
+        const statCards = document.querySelectorAll('#dashboard-view .data-card h2');
+        if (statCards.length >= 4) {
+            statCards[0].textContent = totalProperties;
+            statCards[1].textContent = totalTenants;
+            statCards[2].textContent = rentalUtils.formatCurrency(monthlyRevenue);
+            statCards[3].textContent = rentalUtils.formatCurrency(outstandingBalance);
         }
-    });
-}
+    };
 
-function loadRecentActivity() {
-    // Mock recent activity data
-    const activities = [
-        { type: 'payment', message: 'Payment received from John Doe - ETB 25,000', time: '2 hours ago', color: 'green' },
-        { type: 'lease', message: 'New lease signed for Apartment 101', time: '1 day ago', color: 'blue' },
-        { type: 'maintenance', message: 'Maintenance request for Villa 5', time: '2 days ago', color: 'yellow' }
-    ];
+    const loadRecentActivity = () => {
+        // This can be expanded to show recent property/tenant additions
+        const activityContainer = document.querySelector('#dashboard-view .space-y-4');
+        const tenants = rentalUtils.loadData('tenants') || [];
+        
+        if (tenants.length > 0) {
+            activityContainer.innerHTML = tenants.slice(-3).reverse().map(tenant => {
+                return `<div class="flex items-center space-x-3 text-sm"><p class="text-gray-600">New tenant added: <strong>${tenant.name}</strong></p><span class="text-xs text-gray-400 ml-auto whitespace-nowrap">${rentalUtils.formatDate(tenant.moveInDate)}</span></div>`;
+            }).join('');
+        } else {
+            activityContainer.innerHTML = '<p class="text-sm text-gray-500">No recent activity.</p>';
+        }
+    };
 
-    const activityContainer = document.querySelector('.space-y-4');
-    if (activityContainer) {
-        activityContainer.innerHTML = activities.map(activity => `
-            <div class="flex items-center space-x-3">
-                <div class="w-2 h-2 bg-${activity.color}-500 rounded-full"></div>
-                <p class="text-sm text-gray-600">${activity.message}</p>
-                <span class="text-xs text-gray-400 ml-auto">${activity.time}</span>
-            </div>
-        `).join('');
-    }
-}
+    loadSidebar().then(loadDashboardStats).then(loadRecentActivity);
+});

@@ -4,50 +4,53 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Properties - Rental System</title>
-    <!-- Load Chart.js for Analytics -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
     <!-- Load Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Custom Styles -->
     <link rel="stylesheet" href="styles.css">
-    <!-- Custom Script -->
-    <script src="script.js"></script>
+    <link rel="stylesheet" href="properties.css">
 </head>
 <body class="flex min-h-screen">
 
     <!-- 1. Sidebar Navigation -->
-    <aside id="sidebar" class="sidebar flex flex-col fixed inset-y-0 left-0 z-30">
-        <div class="p-6 border-b border-gray-100">
-            <h1 class="text-xl font-bold text-gray-800">Rental System</h1>
-        </div>
-
-        <nav class="p-4 flex-grow">
-            <ul>
-                <!-- Data-view attribute is used by JS to switch content -->
-                <li><a class="nav-link" href="index.html"><i data-lucide="layout-dashboard"></i>Dashboard</a></li>
-                <li class="active"><a class="nav-link active" href="properties.html"><i data-lucide="building-2"></i>Properties</a></li>
-                <li><a class="nav-link" href="tenants.html"><i data-lucide="users"></i>Tenants</a></li>
-                <li><a class="nav-link" href="leases.html"><i data-lucide="file-text"></i>Leases</a></li>
-                <li><a class="nav-link" href="payments.html"><i data-lucide="credit-card"></i>Payments</a></li>
-                <li><a class="nav-link" href="utilities.html"><i data-lucide="zap"></i>Utilities</a></li>
-                <li><a class="nav-link" href="expenses.html"><i data-lucide="wallet"></i>Expenses</a></li>
-                <li><a class="nav-link" href="documents.html"><i data-lucide="folder"></i>Documents</a></li>
-                <li><a class="nav-link" href="analytics.html"><i data-lucide="bar-chart-3"></i>Analytics</a></li>
-            </ul>
-        </nav>
-
-        <div class="p-4 border-t border-gray-100 mt-auto">
-            <a class="nav-link" href="settings.html"><i data-lucide="settings"></i>Settings</a>
-        </div>
-    </aside>
+    <div id="sidebar-container"></div>
 
     <!-- 2. Main Content Area -->
-    <main id="main-content" class="main-content ml-70">
-        <div id="properties-view" class="view-content active">
-            <h1 class="text-3xl font-bold text-gray-900">Properties</h1>
-            <p class="text-gray-500">Manage properties here...</p>
+    <main id="main-content" class="main-content ml-[280px]">
+        <div id="properties-view" class="view-content active">            <div class="flex justify-between items-center mb-6">
+                <button id="add-property-btn" class="btn-primary flex items-center space-x-2">
+                    <i data-lucide="plus" class="w-4 h-4"></i>
+                    <span>Add Property</span>
+                </button>
+            </div>
+
+            <!-- Search and Filter Bar -->
+            <div class="mb-6">
+                <div class="relative">
+                    <i data-lucide="search" class="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    <input type="text" id="search-input" placeholder="Search by name or address..." class="form-input w-full pl-10">
+                </div>
+            </div>
+
+            <!-- Property List -->
+            <div id="property-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Property cards will be dynamically inserted here -->
+            </div>
+
+            <div id="empty-state" class="text-center py-16 border-2 border-dashed rounded-xl mt-8 hidden">
+                <i data-lucide="building-2" class="mx-auto h-12 w-12 text-gray-400"></i>
+                <h3 class="mt-2 text-sm font-semibold text-gray-900">No properties found</h3>
+                <p class="mt-1 text-sm text-gray-500">Get started by adding a new property.</p>
+            </div>
         </div>
     </main>
 
+    <!-- Add/Edit Property Modal -->
+    <div id="property-modal" class="modal-overlay hidden"></div>
+
+    <script src="auth.js"></script>
+    <script src="api.js"></script>
+    <script src="shared.js"></script>
+    <script src="properties.js"></script>
 </body>
 </html>
