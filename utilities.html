@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Utilities - Rental System</title>
+    <!-- Load Chart.js for Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+    <!-- Load Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="styles.css">
+    <!-- Custom Script -->
+    <script src="script.js"></script>
+</head>
+<body class="flex min-h-screen">
+
+    <!-- 1. Sidebar Navigation -->
+    <aside id="sidebar" class="sidebar flex flex-col fixed inset-y-0 left-0 z-30">
+        <div class="p-6 border-b border-gray-100">
+            <h1 class="text-xl font-bold text-gray-800">Rental System</h1>
+        </div>
+
+        <nav class="p-4 flex-grow">
+            <ul>
+                <!-- Data-view attribute is used by JS to switch content -->
+                <li><a class="nav-link" href="index.html"><i data-lucide="layout-dashboard"></i>Dashboard</a></li>
+                <li><a class="nav-link" href="properties.html"><i data-lucide="building-2"></i>Properties</a></li>
+                <li><a class="nav-link" href="tenants.html"><i data-lucide="users"></i>Tenants</a></li>
+                <li><a class="nav-link" href="leases.html"><i data-lucide="file-text"></i>Leases</a></li>
+                <li><a class="nav-link" href="payments.html"><i data-lucide="credit-card"></i>Payments</a></li>
+                <li class="active"><a class="nav-link active" href="utilities.html"><i data-lucide="zap"></i>Utilities</a></li>
+                <li><a class="nav-link" href="expenses.html"><i data-lucide="wallet"></i>Expenses</a></li>
+                <li><a class="nav-link" href="documents.html"><i data-lucide="folder"></i>Documents</a></li>
+                <li><a class="nav-link" href="analytics.html"><i data-lucide="bar-chart-3"></i>Analytics</a></li>
+            </ul>
+        </nav>
+
+        <div class="p-4 border-t border-gray-100 mt-auto">
+            <a class="nav-link" href="settings.html"><i data-lucide="settings"></i>Settings</a>
+        </div>
+    </aside>
+
+    <!-- 2. Main Content Area -->
+    <main id="main-content" class="main-content ml-70">
+        <div id="utilities-view" class="view-content active">
+            <h1 class="text-3xl font-bold text-gray-900">Utilities</h1>
+            <p class="text-gray-500">Manage utilities here...</p>
+        </div>
+    </main>
+
+</body>
+</html>
