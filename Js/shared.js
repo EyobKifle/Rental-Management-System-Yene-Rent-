@@ -8,6 +8,8 @@
  */
 class RentalUtils {
     constructor() {
+        this.headerPromise = null;
+        this.sidebarPromise = null;
         this.init();
     }
 
@@ -15,25 +17,66 @@ class RentalUtils {
      * Initializes all the utility setups.
      */
     init() {
-        this.loadHeader();
-        this.setupNavigation();
-        this.setupGlobalEventListeners();
-        this.setupModalHandlers();
-        this.setupLucideIcons();
+        this.headerPromise = this.loadComponent('#header-container', 'header.html').then(headerContainer => {
+            if (headerContainer) this.setPageTitle();
+            return headerContainer;
+        });
+        this.sidebarPromise = this.loadComponent('#sidebar-container', 'header.html').then(() => {
+            this.setupNavigation();
+        });
+        this.setupGlobalEventListeners(); // This now includes modal handlers
     }
 
     /**
      * Loads the header component and sets the page title.
      */
-    async loadHeader() {
-        const headerContainer = document.querySelector('main');
-        if (headerContainer) {
-            const response = await fetch('header.html');
-            const headerHtml = await response.text();
-            headerContainer.insertAdjacentHTML('afterbegin', headerHtml);
-            const pageTitle = document.title.split(' - ')[0];
-            document.getElementById('page-title').textContent = pageTitle;
+    async loadComponent(selector, filePath) {
+        const container = document.querySelector(selector);
+        if (container && !container.dataset.loaded) { // Prevent re-loading
+            try {
+                const response = await fetch(filePath);
+                if (!response.ok) {
+                    console.error(`Failed to load component from ${filePath}. Status: ${response.status}`);
+                    return null;
+                }
+                let htmlContent = await response.text();
+                if (filePath.endsWith('header.html')) htmlContent = this.extractComponentHtml(htmlContent, selector);
+                container.insertAdjacentHTML('afterbegin', htmlContent);
+                this.setupLucideIcons(); // Re-run to render icons in loaded components
+                return container;
+            } catch (error) {
+                console.error(`Error loading component from ${filePath}:`, error);
+                return null;
+            }
+        } else if (!container) {
+            // This is not an error on pages that don't have these containers (e.g., login page)
+            return null;
         }
+        return container;
+    }
+
+    /**
+     * Extracts the relevant HTML from a file that contains multiple components.
+     * @param {string} html - The full HTML content.
+     * @param {string} selector - The selector for the container ('#sidebar-container' or '#header-container').
+     * @returns {string} The extracted HTML for the component.
+     */
+    extractComponentHtml(html, selector) {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        if (selector === '#sidebar-container') {
+            return doc.querySelector('.sidebar')?.outerHTML || '';
+        } else if (selector === '#header-container') {
+            return doc.querySelector('.header')?.outerHTML || '';
+        }
+    }
+    /**
+     * Sets the page title in the header.
+     */
+    setPageTitle() {
+        const pageTitleEl = document.getElementById('page-title');
+        const pageTitle = document.title.split(' - ')[0];
+        if (pageTitleEl && pageTitle) pageTitleEl.textContent = pageTitle;
     }
 
     /**
@@ -48,13 +91,6 @@ class RentalUtils {
             if (href === currentPath) {
                 link.classList.add('active');
             }
-
-            link.addEventListener('click', (e) => {
-                // Remove active class from all links
-                navLinks.forEach(l => l.classList.remove('active'));
-                // Add active class to clicked link
-                link.classList.add('active');
-            });
         });
     }
 
@@ -62,9 +98,9 @@ class RentalUtils {
      * Sets up global event listeners, such as closing dropdowns when clicking outside.
      */
     setupGlobalEventListeners() {
-        document.addEventListener('click', (e) => {
+        document.addEventListener('click', (event) => {
             // Close all open dropdowns if click is outside
-            const dropdownBtn = e.target.closest('.action-dropdown-btn');
+            const dropdownBtn = event.target.closest('.action-dropdown-btn');
             const openDropdowns = document.querySelectorAll('.dropdown-menu:not(.hidden)');
             
             if (!dropdownBtn) {
@@ -72,24 +108,19 @@ class RentalUtils {
                     dropdown.classList.add('hidden');
                 });
             }
-        });
-    }
 
-    /**
-     * Sets up handlers for opening and closing modals globally.
-     */
-    setupModalHandlers() {
-        // Close modal when clicking outside
-        document.addEventListener('click', (e) => {
-            if (e.target.classList.contains('modal-overlay')) {
-                this.closeModal(e.target);
+            // Close user menu if click is outside
+            const userMenu = document.getElementById('user-menu');
+            if (userMenu && !userMenu.classList.contains('hidden') && !event.target.closest('#user-menu-button') && !userMenu.contains(event.target)) {
+                userMenu.classList.add('hidden');
             }
-        });
 
-        // Close modal with close buttons
-        document.addEventListener('click', (e) => {
-            if (e.target.classList.contains('close-modal-btn')) {
-                const modal = e.target.closest('.modal-overlay');
+            // Modal closing logic
+            if (event.target.classList.contains('modal-overlay')) {
+                this.closeModal(event.target);
+            }
+            if (event.target.closest('.close-modal-btn')) {
+                const modal = event.target.closest('.modal-overlay');
                 if (modal) this.closeModal(modal);
             }
         });
@@ -102,6 +133,14 @@ class RentalUtils {
             }
         });
     }
+    
+    /**
+     * Sets up handlers for opening and closing modals globally.
+     * @deprecated This method is merged into setupGlobalEventListeners for efficiency.
+     */
+    setupModalHandlers() {
+        // This method is now part of setupGlobalEventListeners.
+    }
 
     /**
      * Opens a modal and prevents background scrolling.
@@ -110,6 +149,7 @@ class RentalUtils {
     openModal(modal) {
         modal.classList.remove('hidden');
         document.body.style.overflow = 'hidden';
+        this.setupLucideIcons(); // Ensure icons in modals are rendered
     }
 
     /**

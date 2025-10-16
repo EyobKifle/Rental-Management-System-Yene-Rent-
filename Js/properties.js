@@ -9,16 +9,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const STORAGE_KEY = 'properties';
     let properties = [];
 
-    const loadSidebar = async () => {
-        const response = await fetch('sidebar.html');
-        sidebarContainer.innerHTML = await response.text();
-        // Re-run nav setup after sidebar is loaded
-        rentalUtils.setupNavigation();
-        rentalUtils.setupLucideIcons();
-    };
-
     const initialize = async () => {
-        await loadSidebar();
+        // Wait for shared components to load before fetching page-specific data
+        await window.rentalUtils.sidebarPromise;
         properties = await api.get(STORAGE_KEY);
         renderProperties();
     };

@@ -7,50 +7,53 @@
     <!-- Load Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="properties.css">
+    <link rel="stylesheet" href="/Css/styles.css">
+    <link rel="stylesheet" href="/Css/sidebar.css">
+    <link rel="stylesheet" href="/Css/properties.css">
 </head>
-<body class="flex min-h-screen">
+<body>
 
     <!-- 1. Sidebar Navigation -->
     <div id="sidebar-container"></div>
 
     <!-- 2. Main Content Area -->
-    <main id="main-content" class="main-content ml-[280px]">
-        <div id="properties-view" class="view-content active">            <div class="flex justify-between items-center mb-6">
-                <button id="add-property-btn" class="btn-primary flex items-center space-x-2">
-                    <i data-lucide="plus" class="w-4 h-4"></i>
+    <main id="main-content" class="main-content">
+        <!-- Header Container -->
+        <div id="header-container"></div>
+        <div id="properties-view" class="view-content active">
+                <button id="add-property-btn" class="btn-primary">
+                    <i data-lucide="plus"></i>
                     <span>Add Property</span>
                 </button>
             </div>
 
             <!-- Search and Filter Bar -->
-            <div class="mb-6">
-                <div class="relative">
-                    <i data-lucide="search" class="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                    <input type="text" id="search-input" placeholder="Search by name or address..." class="form-input w-full pl-10">
+            <div>
+                <div>
+                    <i data-lucide="search"></i>
+                    <input type="text" id="search-input" placeholder="Search by name or address..." class="form-input">
                 </div>
             </div>
 
             <!-- Property List -->
-            <div id="property-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div id="property-list">
                 <!-- Property cards will be dynamically inserted here -->
             </div>
 
-            <div id="empty-state" class="text-center py-16 border-2 border-dashed rounded-xl mt-8 hidden">
-                <i data-lucide="building-2" class="mx-auto h-12 w-12 text-gray-400"></i>
-                <h3 class="mt-2 text-sm font-semibold text-gray-900">No properties found</h3>
-                <p class="mt-1 text-sm text-gray-500">Get started by adding a new property.</p>
+            <div id="empty-state">
+                <i data-lucide="building-2"></i>
+                <h3>No properties found</h3>
+                <p>Get started by adding a new property.</p>
             </div>
         </div>
     </main>
 
     <!-- Add/Edit Property Modal -->
-    <div id="property-modal" class="modal-overlay hidden"></div>
+    <div id="property-modal" class="modal-overlay"></div>
 
-    <script src="auth.js"></script>
-    <script src="api.js"></script>
-    <script src="shared.js"></script>
-    <script src="properties.js"></script>
+    <script src="/Js/auth.js"></script>
+    <script src="/Js/api.js"></script>
+    <script src="/Js/shared.js"></script>
+    <script src="/Js/properties.js"></script>
 </body>
 </html>

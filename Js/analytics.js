@@ -1,13 +1,10 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const sidebarContainer = document.getElementById('sidebar-container');
-
     // Chart instances
     let profitLossChartInstance, incomeOverviewChartInstance, expenseBreakdownChartInstance;
 
     const initialize = async () => {
-        await loadSidebar();
+        await window.rentalUtils.headerPromise; // Ensure header/sidebar are loaded
         const payments = await api.get('payments');
-        // Mock expenses data until the feature is built
         const expenses = [
             { category: 'Maintenance', amount: 4200, date: '2024-04-15' },
             { category: 'Utilities', amount: 1500, date: '2024-04-20' },
@@ -15,25 +12,24 @@ document.addEventListener('DOMContentLoaded', () => {
             { category: 'Taxes', amount: 12000, date: '2024-05-25' },
         ];
 
-        updateStatCards(payments, expenses);
-        renderProfitLossChart(payments, expenses);
-        renderIncomeOverviewChart(payments);
-        renderExpenseBreakdownChart(expenses);
-        updateFinancialSummary(payments, expenses);
-    };
-
-    const loadSidebar = async () => {
-        const response = await fetch('sidebar.html');
-        sidebarContainer.innerHTML = await response.text();
-        rentalUtils.setupNavigation();
-        rentalUtils.setupLucideIcons();
-    };
-
-    const updateStatCards = (payments, expenses) => {
         const totalRevenue = payments.reduce((sum, p) => sum + p.amount, 0);
         const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
         const netProfit = totalRevenue - totalExpenses;
 
+        updateStatCards(totalRevenue, totalExpenses, netProfit);
+        renderProfitLossChart(payments, expenses);
+        renderIncomeOverviewChart(payments);
+        renderExpenseBreakdownChart(expenses);
+        updateFinancialSummary(payments, expenses, totalRevenue, totalExpenses, netProfit);
+    };
+
+    /**
+     * Updates the main statistic cards at the top of the page.
+     * @param {number} totalRevenue 
+     * @param {number} totalExpenses 
+     * @param {number} netProfit 
+     */
+    const updateStatCards = (totalRevenue, totalExpenses, netProfit) => {
         document.getElementById('stat-total-revenue').textContent = rentalUtils.formatCurrency(totalRevenue);
         document.getElementById('stat-total-expenses').textContent = rentalUtils.formatCurrency(totalExpenses);
         document.getElementById('stat-net-profit').textContent = rentalUtils.formatCurrency(netProfit);
@@ -107,11 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    const updateFinancialSummary = (payments, expenses) => {
-        const totalRevenue = payments.reduce((sum, p) => sum + p.amount, 0);
-        const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
-        const netProfit = totalRevenue - totalExpenses;
-
+    const updateFinancialSummary = (payments, expenses, totalRevenue, totalExpenses, netProfit) => {
         const incomeSourcesContainer = document.getElementById('summary-income-sources');
         const expenseCategoriesContainer = document.getElementById('summary-expense-categories');
 

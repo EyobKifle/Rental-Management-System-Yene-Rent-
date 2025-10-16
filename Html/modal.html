@@ -1,10 +1,10 @@
 <!-- Generic Modal Component -->
-<div id="generic-modal" class="modal-overlay fixed inset-0 z-50 hidden flex items-center justify-center p-4">
-    <div class="data-card w-full max-w-lg relative" onclick="event.stopPropagation()">
-        <div class="flex justify-between items-center border-b pb-3 mb-4">
-            <h2 id="modal-title" class="text-xl font-semibold text-gray-800">Modal Title</h2>
-            <button class="close-modal-btn text-gray-400 hover:text-gray-600">
-                <i data-lucide="x" class="w-6 h-6"></i>
+<div id="generic-modal" class="modal-overlay">
+    <div class="data-card" onclick="event.stopPropagation()">
+        <div>
+            <h2 id="modal-title">Modal Title</h2>
+            <button class="close-modal-btn">
+                <i data-lucide="x"></i>
             </button>
         </div>
         <div id="modal-content">
