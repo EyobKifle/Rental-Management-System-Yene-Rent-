@@ -1,15 +1,6 @@
 // dashboard.js - Page-specific JavaScript for index.html (Dashboard)
 
 document.addEventListener('DOMContentLoaded', () => {
-    const sidebarContainer = document.getElementById('sidebar-container');
-
-    const loadSidebar = async () => {
-        const response = await fetch('sidebar.html');
-        sidebarContainer.innerHTML = await response.text();
-        rentalUtils.setupNavigation();
-        rentalUtils.setupLucideIcons();
-    };
-
     const loadDashboardStats = () => {
         const properties = rentalUtils.loadData('properties') || [];
         const tenants = rentalUtils.loadData('tenants') || [];
@@ -47,5 +38,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    loadSidebar().then(loadDashboardStats).then(loadRecentActivity);
+    loadDashboardStats();
+    loadRecentActivity();
 });

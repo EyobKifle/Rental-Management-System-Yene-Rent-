@@ -18,20 +18,14 @@ document.addEventListener('DOMContentLoaded', () => {
     let properties = [];
 
     const initialize = async () => {
-        await loadSidebar();
+        // Wait for shared components like the sidebar to be ready
+        await window.rentalUtils.sidebarPromise;
         [leases, tenants, properties] = await Promise.all([
             api.get(LEASE_KEY),
             api.get(TENANT_KEY),
             api.get(PROPERTY_KEY)
         ]);
         renderLeases();
-    };
-
-    const loadSidebar = async () => {
-        const response = await fetch('sidebar.html');
-        sidebarContainer.innerHTML = await response.text();
-        rentalUtils.setupNavigation();
-        rentalUtils.setupLucideIcons();
     };
 
     const getLeaseStatus = (lease) => {

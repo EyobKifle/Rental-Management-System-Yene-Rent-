@@ -81,6 +81,73 @@
     display: flex;
     justify-content: flex-end;
 }
+/* Fix Header + Sidebar Layout */
+body {
+  display: flex;
+  margin: 0;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: var(--sidebar-width);
+  transition: transform 0.3s ease-in-out;
+  transform: translateX(0);
+}
+
+.main-content {
+  flex-grow: 1;
+  margin-left: var(--sidebar-width);
+  transition: margin-left 0.3s ease-in-out;
+  padding-top: calc(var(--header-height) + 2rem);
+}
+
+/* Sidebar Collapsed */
+body.sidebar-collapsed .sidebar {
+  transform: translateX(-100%);
+}
+body.sidebar-collapsed .main-content {
+  margin-left: 0;
+}
+
+/* Header fixed atop */
+header.header {
+  height: var(--header-height);
+  position: fixed;
+  top: 0;
+  left: var(--sidebar-width);
+  right: 0;
+  background: #fff;
+  border-bottom: 1px solid var(--color-border);
+  z-index: 100;
+  transition: left 0.3s ease-in-out;
+}
+body.sidebar-collapsed header.header {
+  left: 0;
+}
+
+/* Mobile behavior */
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    transform: translateX(-100%);
+    z-index: 50;
+  }
+  body.sidebar-toggled-on-mobile .sidebar {
+    transform: translateX(0);
+  }
+  header.header {
+    left: 0;
+  }
+}
+
+
+/* Collapsed sidebar state for header */
+.sidebar-collapsed .header {
+    left: 0;
+}
 
 /* Base Styles */
 * {
@@ -176,6 +243,129 @@ body.login-page {
 .status-completed { color: #10b981; background-color: #ecfdf5; }
 .status-unpaid { color: #f59e0b; background-color: #fffbeb; }
 .status-overdue { color: #ef4444; background-color: #fef2f2; }
+
+/* Additional Utilities */
+.text-center { text-align: center; }
+.py-16 { padding-top: 4rem; padding-bottom: 4rem; }
+.mx-auto { margin-left: auto; margin-right: auto; }
+.h-12 { height: 3rem; }
+.w-12 { width: 3rem; }
+.mt-2 { margin-top: 0.5rem; }
+.mt-1 { margin-top: 0.25rem; }
+.hidden { display: none; }
+
+/* Table Styles */
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 0.75rem 1.5rem; text-align: left; border-bottom: 1px solid #e5e7eb; }
+th { font-weight: 600; color: #374151; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+
+/* Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    z-index: 50;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+.modal-overlay .data-card {
+    width: 100%;
+    max-width: 32rem;
+}
+.modal-overlay .data-card > div:first-child {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 0.75rem;
+    margin-bottom: 1rem;
+}
+.close-modal-btn {
+    color: #9ca3af;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+.close-modal-btn:hover {
+    color: #4b5563;
+}
+.close-modal-btn svg {
+    width: 1.5rem;
+    height: 1.5rem;
+}
+
+/* Search Styles */
+.search-container {
+    position: relative;
+}
+.search-container i {
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9ca3af;
+    width: 1.25rem;
+    height: 1.25rem;
+}
+.search-container .form-input {
+    padding-left: 2.5rem;
+}
+
+/* Layout Styles */
+#analytics-view > div:first-child {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+#analytics-view > div:nth-child(2) {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+#tenant-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+#property-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+/* Empty State Styles */
+#empty-state {
+    text-align: center;
+    padding: 4rem 0;
+    border: 2px dashed #e5e7eb;
+    border-radius: 0.75rem;
+    margin-top: 2rem;
+    display: none;
+}
+#empty-state i {
+    margin: 0 auto;
+    height: 3rem;
+    width: 3rem;
+    color: #9ca3af;
+    margin-bottom: 0.5rem;
+}
+#empty-state h3 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 0.25rem;
+}
+#empty-state p {
+    font-size: 0.875rem;
+    color: #6b7280;
+}
 
 /* Button Styles */
 .btn-primary {

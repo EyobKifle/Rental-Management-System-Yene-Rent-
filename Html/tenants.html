@@ -7,43 +7,46 @@
     <!-- Load Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="tenants.css">
+    <link rel="stylesheet" href="/Css/styles.css">
+    <link rel="stylesheet" href="/Css/sidebar.css">
+    <link rel="stylesheet" href="/Css/tenants.css">
 </head>
-<body class="flex min-h-screen">
+<body>
 
     <!-- 1. Sidebar Navigation -->
     <div id="sidebar-container"></div>
 
     <!-- 2. Main Content Area -->
-    <main id="main-content" class="main-content ml-[280px]">
+    <main id="main-content" class="main-content">
+        <!-- Header Container -->
+        <div id="header-container"></div>
         <div id="tenants-view" class="view-content active">
-            <div class="flex justify-between items-center mb-6">
+            <div>
                 <div>
-                    <h1 class="text-3xl font-bold text-gray-900">Tenants</h1>
-                    <p class="text-gray-500">Manage all your tenants in one place</p>
+                    <h1>Tenants</h1>
+                    <p>Manage all your tenants in one place</p>
                 </div>
-                <button id="add-tenant-btn" class="btn-primary flex items-center space-x-2">
-                    <i data-lucide="user-plus" class="w-4 h-4"></i>
+                <button id="add-tenant-btn" class="btn-primary">
+                    <i data-lucide="user-plus"></i>
                     <span>Add Tenant</span>
                 </button>
             </div>
 
-            <div class="mb-6">
-                <div class="relative"><i data-lucide="search" class="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i><input type="text" id="search-input" placeholder="Search by name or email..." class="form-input w-full pl-10"></div>
+            <div>
+                <div><i data-lucide="search"></i><input type="text" id="search-input" placeholder="Search by name or email..." class="form-input"></div>
             </div>
 
-            <div id="tenant-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+            <div id="tenant-list"></div>
 
-            <div id="empty-state" class="text-center py-16 border-2 border-dashed rounded-xl mt-8 hidden"><i data-lucide="users" class="mx-auto h-12 w-12 text-gray-400"></i><h3 class="mt-2 text-sm font-semibold text-gray-900">No tenants found</h3><p class="mt-1 text-sm text-gray-500">Get started by adding a new tenant.</p></div>
+            <div id="empty-state"><i data-lucide="users"></i><h3>No tenants found</h3><p>Get started by adding a new tenant.</p></div>
         </div>
     </main>
 
-    <div id="tenant-modal" class="modal-overlay hidden"></div>
+    <div id="tenant-modal" class="modal-overlay"></div>
 
-    <script src="auth.js"></script>
-    <script src="api.js"></script>
-    <script src="shared.js"></script>
-    <script src="tenants.js"></script>
+    <script src="/Js/auth.js"></script>
+    <script src="/Js/api.js"></script>
+    <script src="/Js/shared.js"></script>
+    <script src="/Js/tenants.js"></script>
 </body>
 </html>

@@ -7,26 +7,28 @@
     <!-- Load Chart.js for Analytics -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="utilities.css">
+    <link rel="stylesheet" href="/Css/styles.css">
+    <link rel="stylesheet" href="/Css/sidebar.css">
+    <link rel="stylesheet" href="/Css/utilities.css">
 </head>
-<body class="flex min-h-screen">
+<body>
 
     <div id="sidebar-container"></div>
-    <main id="main-content" class="main-content ml-[280px]">
+    <main id="main-content" class="main-content">
+        <!-- Header Container -->
+        <div id="header-container"></div>
         <div id="utilities-view" class="view-content active">
-            <div class="flex justify-between items-center mb-6">
+            <div>
                 <div>
-                    <h1 class="text-3xl font-bold text-gray-900">Utilities</h1>
-                    <p class="text-gray-500">Track and manage utility bills</p>
+                    <h1>Utilities</h1>
+                    <p>Track and manage utility bills</p>
                 </div>
             </div>
-            <div class="data-card text-center py-16"><i data-lucide="zap-off" class="mx-auto h-12 w-12 text-gray-400"></i><h3 class="mt-2 text-sm font-semibold text-gray-900">Feature Coming Soon</h3><p class="mt-1 text-sm text-gray-500">Utility tracking will be available in a future update.</p></div>
+            <div class="data-card"><i data-lucide="zap-off"></i><h3>Feature Coming Soon</h3><p>Utility tracking will be available in a future update.</p></div>
         </div>
     </main>
 
-    <script src="auth.js"></script>
-    <script src="shared.js"></script>
-    <!-- <script src="utilities.js"></script> -->
+    <script src="/Js/auth.js"></script>
+    <script src="/Js/api.js"></script>
 </body>
 </html>

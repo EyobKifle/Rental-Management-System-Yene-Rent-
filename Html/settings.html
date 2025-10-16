@@ -7,54 +7,56 @@
     <!-- Load Chart.js for Analytics -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="settings.css">
+    <link rel="stylesheet" href="/Css/styles.css">
+    <link rel="stylesheet" href="/Css/settings.css">
 </head>
-<body class="flex min-h-screen">
+<body>
 
     <div id="sidebar-container"></div>
     <main id="main-content" class="main-content ml-[280px]">
+        <!-- Header Container -->
+        <div id="header-container"></div>
         <div id="settings-view" class="view-content active">
             <h1 class="text-3xl font-bold text-gray-900 mb-6">Settings</h1>
             <p class="text-gray-500 mb-6">Manage your account and application preferences</p>
 
             <!-- Settings Tabs -->
             <div class="border-b border-gray-200 mb-6">
-                <nav class="-mb-px flex space-x-8" aria-label="Tabs">
-                    <a href="#" class="setting-tab active-tab" data-tab="profile">Profile</a>
-                    <a href="#" class="setting-tab" data-tab="preferences">Preferences</a>
-                    <a href="#" class="setting-tab" data-tab="security">Security</a>
+                <nav class="-mb-px flex space-x-8" aria-label="Tabs" role="tablist">
+                    <a href="#" id="profile-tab-link" class="setting-tab active-tab" data-tab="profile" role="tab" aria-controls="profile-tab-panel" aria-selected="true">Profile</a>
+                    <a href="#" id="preferences-tab-link" class="setting-tab" data-tab="preferences" role="tab" aria-controls="preferences-tab-panel" aria-selected="false">Preferences</a>
+                    <a href="#" id="security-tab-link" class="setting-tab" data-tab="security" role="tab" aria-controls="security-tab-panel" aria-selected="false">Security</a>
                 </nav>
             </div>
 
             <!-- Profile Tab Content -->
-            <div id="profile-tab" class="setting-tab-content">
+            <div id="profile-tab-panel" class="setting-tab-content" role="tabpanel" aria-labelledby="profile-tab-link">
                 <div class="data-card mb-6">
                     <h3 class="text-xl font-semibold mb-4">Profile Information</h3>
                     <p class="text-sm text-gray-500 mb-6">Update your personal information and contact details</p>
                     <div class="space-y-4">
                         <label class="block">
                             <span class="text-gray-700">Full Name</span>
-                            <input type="text" value="Abebe Bekele" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2.5">
+                            <input type="text" id="fullName" value="Abebe Bekele" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2.5">
                         </label>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <label class="block">
                                 <span class="text-gray-700">Email</span>
-                                <input type="email" value="abebe.bekele@email.com" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2.5">
+                                <input type="email" id="email" value="abebe.bekele@email.com" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2.5">
                             </label>
                             <label class="block">
                                 <span class="text-gray-700">Phone Number</span>
-                                <input type="text" value="+251 911 234567" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2.5">
+                                <input type="text" id="phone" value="+251 911 234567" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2.5">
                             </label>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <label class="block">
                                 <span class="text-gray-700">TIN (Tax Identification Number)</span>
-                                <input type="text" value="1234567890" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2.5">
+                                <input type="text" id="tin" value="1234567890" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2.5">
                             </label>
                             <label class="block">
                                 <span class="text-gray-700">Role</span>
-                                <input type="text" value="Owner" disabled class="mt-1 block w-full rounded-md border-gray-200 bg-gray-50 shadow-sm p-2.5">
+                                <input type="text" id="role" value="Owner" disabled class="mt-1 block w-full rounded-md border-gray-200 bg-gray-50 shadow-sm p-2.5">
                             </label>
                         </div>
                         <div class="flex justify-end pt-4">
@@ -65,7 +67,7 @@
             </div>
 
             <!-- Preferences Tab Content -->
-            <div id="preferences-tab" class="setting-tab-content hidden">
+            <div id="preferences-tab-panel" class="setting-tab-content hidden" role="tabpanel" aria-labelledby="preferences-tab-link">
                  <div class="data-card mb-6">
                     <h3 class="text-xl font-semibold mb-4">Language & Regional</h3>
                     <p class="text-sm text-gray-500 mb-6">Set your language and currency preferences</p>
@@ -146,22 +148,22 @@
             </div>
 
             <!-- Security Tab Content -->
-            <div id="security-tab" class="setting-tab-content hidden">
+            <div id="security-tab-panel" class="setting-tab-content hidden" role="tabpanel" aria-labelledby="security-tab-link">
                 <div class="data-card mb-6">
                     <h3 class="text-xl font-semibold mb-4">Change Password</h3>
                     <p class="text-sm text-gray-500 mb-6">Update your password to keep your account secure</p>
                     <div class="space-y-4">
                         <label class="block">
                             <span class="text-gray-700">Current Password</span>
-                            <input type="password" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2.5">
+                            <input type="password" id="current-password" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2.5">
                         </label>
                         <label class="block">
                             <span class="text-gray-700">New Password</span>
-                            <input type="password" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2.5">
+                            <input type="password" id="new-password" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2.5">
                         </label>
                         <label class="block">
                             <span class="text-gray-700">Confirm New Password</span>
-                            <input type="password" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2.5">
+                            <input type="password" id="confirm-password" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2.5">
                         </label>
                         <div class="flex justify-end pt-4">
                             <button class="px-6 py-2 text-sm font-medium border border-gray-300 rounded-lg hover:bg-gray-50 transition">Update Password</button>
@@ -185,11 +187,13 @@
                 </div>
             </div>
         </div>
-    </main>
+        </main>
+    </div>
 
-    <script src="auth.js"></script>
-    <script src="api.js"></script>
-    <script src="shared.js"></script>
-    <script src="settings.js"></script>
+    <script src="/Js/auth.js"></script>
+    <script src="/Js/api.js"></script>
+    <script src="/Js/shared.js"></script>
+    <script src="/Js/main.js"></script>
+    <script src="/Js/settings.js"></script>
 </body>
 </html>

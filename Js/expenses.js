@@ -16,19 +16,13 @@ document.addEventListener('DOMContentLoaded', () => {
     let properties = [];
 
     const initialize = async () => {
-        await loadSidebar();
+        // Wait for shared components like the sidebar to be ready
+        await window.rentalUtils.sidebarPromise;
         [expenses, properties] = await Promise.all([
             api.get(EXPENSE_KEY),
             api.get(PROPERTY_KEY)
         ]);
         renderExpenses();
-    };
-
-    const loadSidebar = async () => {
-        const response = await fetch('sidebar.html');
-        sidebarContainer.innerHTML = await response.text();
-        rentalUtils.setupNavigation();
-        rentalUtils.setupLucideIcons();
     };
 
     const renderExpenses = (filter = '') => {
