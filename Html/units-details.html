@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unit Details - Rental System</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="../Css/styles.css">
+    <link rel="stylesheet" href="../Css/sidebar.css">
+    <link rel="stylesheet" href="../Css/header.css">
+    <link rel="stylesheet" href="../Css/units-details.css">
+</head>
+<body>
+
+    <!-- 1. Sidebar Navigation -->
+    <div id="sidebar-container"></div>
+
+    <!-- 2. Main Content Area -->
+    <div id="header-container"></div>
+    <main id="main-content" class="main-content">
+        <div id="unit-details-view">
+            <div class="page-header">
+                <div>
+                    <button id="back-btn" class="btn-secondary back-btn">
+                        <i class="fa-solid fa-arrow-left"></i>
+                        Back to Units
+                    </button>
+                    <h1 id="unit-title">Unit Details</h1>
+                    <p id="unit-subtitle">Manage tenant information, payments, and documents</p>
+                </div>
+            </div>
+
+            <div class="unit-details-tabs">
+                <button class="tab-btn active" data-tab="tenant">Tenant Information</button>
+                <button class="tab-btn" data-tab="payments">Payment Tracking</button>
+                <button class="tab-btn" data-tab="documents">Documents</button>
+            </div>
+
+            <div id="tenant-tab" class="tab-content active">
+                <div class="data-card">
+                    <h3 class="data-card-header">Assign or Update Tenant</h3>
+                    <form id="tenant-form">
+                        <input type="hidden" id="tenant-id">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="tenant-name" class="form-label">Full Name</label>
+                                <input type="text" id="tenant-name" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="tenant-phone" class="form-label">Phone Number</label>
+                                <input type="tel" id="tenant-phone" class="form-input" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="tenant-email" class="form-label">Email (Optional)</label>
+                                <input type="email" id="tenant-email" class="form-input">
+                            </div>
+                            <div class="form-group">
+                                <label for="tenant-tin" class="form-label">TIN Number (Optional)</label>
+                                <input type="text" id="tenant-tin" class="form-input">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="lease-start" class="form-label">Lease Start Date</label>
+                                <input type="date" id="lease-start" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="lease-end" class="form-label">Lease End Date</label>
+                                <input type="date" id="lease-end" class="form-input" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="tenant-deposit" class="form-label">Security Deposit (ETB)</label>
+                                <input type="number" id="tenant-deposit" class="form-input" min="0" value="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="tenant-rent" class="form-label">Monthly Rent (ETB)</label>
+                                <input type="number" id="tenant-rent" class="form-input" required>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn-primary">Save Tenant Information</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div id="payments-tab" class="tab-content">
+                <div class="data-card">
+                    <div class="data-card-header">
+                        <h3>Payment History</h3>
+                        <button id="add-payment-btn" class="btn-primary">
+                            <i class="fa-solid fa-plus"></i>
+                            Record Payment
+                        </button>
+                    </div>
+                    <div id="payments-table-container" class="table-container">
+                        <table id="payments-table" class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Type</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="payments-tbody">
+                                <!-- Payments will be dynamically inserted here -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="payments-empty-state" class="empty-state">
+                        <i class="fa-solid fa-money-bill-wave"></i>
+                        <h3>No payments recorded</h3>
+                        <p>Record payments to track tenant payment history.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="documents-tab" class="tab-content">
+                <div class="data-card">
+                    <div class="data-card-header">
+                        <h3>Documents & Receipts</h3>
+                        <button id="add-document-btn" class="btn-primary">
+                            <i class="fa-solid fa-plus"></i>
+                            Upload Document
+                        </button>
+                    </div>
+                    <div id="documents-table-container" class="table-container">
+                        <table id="documents-table" class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Document Name</th>
+                                    <th>Type</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="documents-tbody">
+                                <!-- Documents will be dynamically inserted here -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="documents-empty-state" class="empty-state">
+                        <i class="fa-solid fa-file-alt"></i>
+                        <h3>No documents uploaded</h3>
+                        <p>Upload receipts and documents for this unit.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modals -->
+    <div id="payment-modal"></div>
+    <div id="document-modal"></div>
+    <div id="document-view-modal"></div>
+
+    <script src="../Js/auth.js"></script>
+    <script src="../Js/api.js"></script>
+    <script src="../Js/shared.js"></script>
+    <script src="../Js/units-details.js"></script>
+</body>
+</html>

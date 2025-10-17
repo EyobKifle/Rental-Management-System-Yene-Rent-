@@ -1,48 +1,36 @@
-.action-buttons {
-    display: flex;
-    gap: 0.75rem;
-}
-
-.action-buttons .btn-secondary,
-.action-buttons .btn-primary {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
+/* === Payments Page Specific Styles === */
 
 .stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 1.5rem;
     margin-bottom: 1.5rem;
 }
 
-.stats-grid .data-card p:first-of-type {
-    margin-bottom: 0.25rem;
+.stat-card {
+    padding: 1.5rem;
 }
 
-.stats-grid .data-card h2 {
-    font-size: 1.5rem;
+.stat-card h3 {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--gray-500);
+    margin: 0 0 0.5rem 0;
+}
+
+.stat-card h2 {
+    font-size: 1.75rem;
     font-weight: 700;
+    color: var(--gray-800);
     margin: 0;
 }
 
-.stats-grid .data-card p:last-of-type {
-    font-size: 0.875rem;
-    color: var(--gray-500);
-    margin-top: 0.25rem;
-    margin-bottom: 0;
+.receipt-link {
+    color: var(--primary-600);
+    text-decoration: none;
+    font-weight: 500;
 }
 
-.stats-grid .text-red {
-    color: var(--danger-color);
-}
-
-.stats-grid .text-green {
-    color: var(--success-color);
-}
-
-.status-completed {
-    color: var(--success-color);
-    background-color: #f0fdf4;
+.receipt-link:hover {
+    text-decoration: underline;
 }

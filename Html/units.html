@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Units - Rental System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="../Css/styles.css">
+    <link rel="stylesheet" href="../Css/header.css">
+    <link rel="stylesheet" href="../Css/sidebar.css">
+    <link rel="stylesheet" href="../Css/units.css">
+</head>
+<body>
+
+    <div id="sidebar-container"></div>
+    <div id="header-container"></div>
+
+    <main id="main-content" class="main-content">
+        <div id="units-view">
+            <div class="page-header">
+                <div>
+                    <h1 id="property-name-header">Units</h1>
+                    <p id="property-address-subheader">Manage units for the selected property.</p>
+                </div>
+                <div class="header-actions">
+                    <a href="properties.html" class="btn-secondary">
+                        <i class="fa-solid fa-arrow-left"></i>
+                        <span>Back to Properties</span>
+                    </a>
+                    <button id="add-unit-btn" class="btn-primary">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>Add Unit</span>
+                    </button>
+                </div>
+            </div>
+
+            <div id="unit-list" class="unit-grid"></div>
+
+            <div id="empty-state" class="hidden empty-state"><i class="fa-solid fa-door-open"></i><h3>No Units Found</h3><p>Get started by adding a new unit to this property.</p></div>
+        </div>
+    </main>
+    <div id="unit-modal"></div>
+    <script src="../Js/auth.js"></script>
+    <script src="../Js/api.js"></script>
+    <script src="../Js/shared.js"></script>
+    <script src="../Js/units.js"></script>
+</body>
+</html>

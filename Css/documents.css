@@ -1,52 +1,47 @@
-.search-container {
-    position: relative;
-    margin-bottom: 1.5rem;
-}
+/* === Documents Page Specific Styles === */
 
-.search-container i {
-    position: absolute;
-    left: 0.75rem;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--gray-400);
-}
-
-.search-container .form-input {
-    padding-left: 2.5rem;
-}
-
-#document-list {
+.document-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 1.5rem;
+    margin-top: 1.5rem;
 }
 
 .document-card {
+    background-color: #fff;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--gray-200);
+    padding: 1rem;
     display: flex;
     align-items: center;
     gap: 1rem;
+    position: relative;
+    transition: box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out;
+}
+
+.document-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
 }
 
 .document-icon {
+    font-size: 2rem;
     flex-shrink: 0;
-    width: 3rem;
-    height: 3rem;
+    width: 50px;
+    height: 50px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: var(--radius-md);
-    background-color: var(--gray-100);
-    color: var(--gray-500);
 }
 
-.document-icon.icon-pdf {
-    background-color: #fee2e2;
-    color: #dc2626;
-}
+.document-icon.icon-pdf { color: var(--danger-500); }
+.document-icon.icon-image { color: var(--primary-500); }
+.document-icon.icon-doc { color: #2b579a; }
+.document-icon.icon-other { color: var(--gray-500); }
 
-.document-icon.icon-image {
-    background-color: #f0f9ff;
-    color: #2563eb;
+.document-info {
+    flex-grow: 1;
+    overflow: hidden;
 }
 
 .document-info h3 {
@@ -57,15 +52,16 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 150px;
 }
 
 .document-info p {
     font-size: 0.875rem;
     color: var(--gray-500);
-    margin: 0;
+    margin: 0.25rem 0 0 0;
 }
 
 .document-actions {
-    margin-left: auto;
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
 }

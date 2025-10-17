@@ -1,0 +1,101 @@
+/* =========================================
+   Styles for Unit Details Page
+   ========================================= */
+
+#unit-details-view {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* Back Button */
+.back-btn {
+    margin-bottom: 1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Details Summary Card */
+.details-summary-card {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    padding: 1.5rem;
+    background-color: var(--color-white);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-sm);
+}
+
+.summary-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.summary-label {
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+    font-weight: 500;
+}
+
+.summary-value {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+/* Tabs Navigation */
+.unit-details-tabs {
+    display: flex;
+    gap: 0.5rem;
+    border-bottom: 2px solid var(--color-border);
+    padding: 0 0.5rem;
+}
+
+.tab-btn {
+    padding: 0.75rem 1.25rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    background-color: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    margin-bottom: -2px; /* Align with the container's border */
+}
+
+.tab-btn:hover {
+    color: var(--color-primary);
+    background-color: var(--color-background-light);
+}
+
+.tab-btn.active {
+    color: var(--color-primary);
+    border-bottom-color: var(--color-primary);
+}
+
+/* Tab Content */
+.tab-content {
+    display: none;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* Document View Modal Specifics */
+.document-view {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.document-preview iframe,
+.document-preview img {
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-md);
+}

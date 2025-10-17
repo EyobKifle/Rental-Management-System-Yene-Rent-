@@ -20,8 +20,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const totalProperties = properties.length;
         const totalTenants = tenants.length;
         const monthlyRevenue = properties.reduce((sum, prop) => sum + (prop.rent || 0), 0);
-        const outstandingBalance = 0; // Placeholder
-        
+        const outstandingBalance = payments.reduce((sum, payment) => {
+            return sum + (payment.status === 'Unpaid' ? payment.amount : 0);
+        }, 0);
+
         const statCards = document.querySelectorAll('#dashboard-view .data-card h2');
         if (statCards.length >= 4) {
             statCards[0].textContent = totalProperties;

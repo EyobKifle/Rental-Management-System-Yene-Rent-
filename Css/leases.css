@@ -1,21 +1,18 @@
-.status-badge {
-    padding: 0.125rem 0.5rem;
-    font-size: 0.75rem;
-    line-height: 1.25rem;
-    font-weight: 600;
-    border-radius: 9999px;
-    display: inline-flex;
+/* === Leases Page Specific Styles === */
+
+.status-badge.status-expired {
+    background-color: var(--gray-200);
+    color: var(--gray-700);
 }
 
-.status-active {
-    color: var(--success-color);
-    background-color: #f0fdf4;
+.status-badge.status-upcoming {
+    background-color: var(--warning-100);
+    color: var(--warning-700);
 }
-.status-expired {
-    color: var(--danger-color);
-    background-color: #fef2f2;
-}
-.status-upcoming {
-    color: var(--warning-color);
-    background-color: #fffbeb;
+
+.lease-property-unit {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--gray-500);
+    margin-top: 2px;
 }

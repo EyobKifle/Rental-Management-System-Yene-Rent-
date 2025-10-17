@@ -31,8 +31,17 @@ document.addEventListener('DOMContentLoaded', () => {
             emptyState.classList.add('hidden');
             propertyList.classList.remove('hidden');
             filteredProperties.forEach(prop => {
+                const taxTypeMap = {
+                    'property-only': 'Property Tax',
+                    'withholding-annual': 'Withholding + Annual',
+                    'withholding-property': 'Withholding + Property',
+                    'all-taxes': 'All Taxes',
+                };
+                const taxTypeText = taxTypeMap[prop.taxType] || 'Not Set';
+
                 const card = document.createElement('div');
                 card.className = 'data-card property-card';
+                card.dataset.id = prop.id;
                 card.innerHTML = `
                     <div class="property-image-container">
                         ${prop.image ? `<img src="${prop.image}" alt="${prop.name}" class="property-image">` : `<div class="property-placeholder"><i data-lucide="building"></i><span>No image</span></div>`}
@@ -42,12 +51,14 @@ document.addEventListener('DOMContentLoaded', () => {
                         <p><i data-lucide="map-pin"></i> ${prop.address}</p>
                         <div class="property-details">
                             <span>Total Units: ${prop.units || 0}</span>
+                            <span class="tax-info"><i data-lucide="landmark"></i> ${taxTypeText}</span>
                         </div>
                     </div>
                     <div class="action-dropdown">
                         <button class="action-dropdown-btn" data-id="${prop.id}"><i data-lucide="more-horizontal"></i></button>
                         <div id="dropdown-${prop.id}" class="dropdown-menu hidden">
                             <a href="#" class="dropdown-item edit-btn" data-id="${prop.id}">Edit</a>
+                            <a href="units.html?propertyId=${prop.id}" class="dropdown-item view-units-btn" data-id="${prop.id}">View Units</a>
                             <a href="#" class="dropdown-item delete-btn" data-id="${prop.id}">Delete</a>
                         </div>
                     </div>
@@ -196,9 +207,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Event Delegation for actions
     propertyList.addEventListener('click', (e) => {
         const target = e.target;
-        const id = target.closest('[data-id]')?.dataset.id;
+        const card = target.closest('.property-card');
+        const id = card?.dataset.id || target.closest('[data-id]')?.dataset.id;
 
         if (target.closest('.action-dropdown-btn')) {
+            // Handle dropdown toggle
             document.querySelectorAll('.dropdown-menu').forEach(menu => menu.classList.add('hidden'));
             document.getElementById(`dropdown-${id}`).classList.toggle('hidden');
         } else if (target.closest('.edit-btn')) {
@@ -214,6 +227,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 rentalUtils.showNotification('Property deleted successfully!', 'error');
             });
             }
+        } else if (card && !target.closest('.action-dropdown')) {
+            // Click on property card (excluding dropdown) navigates to units overview
+            window.location.href = `units.html?propertyId=${id}`;
         }
     });
 
