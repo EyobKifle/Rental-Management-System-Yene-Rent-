@@ -463,6 +463,20 @@ class RentalUtils {
         });
     }
 
+    /**
+     * Converts a file to base64 string.
+     * @param {File} file - The file to convert.
+     * @returns {Promise<string>} A promise that resolves with the base64 string.
+     */
+    convertFileToBase64(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = (error) => reject(error);
+            reader.readAsDataURL(file);
+        });
+    }
+
 
     /**
      * Creates a debounced function that delays invoking func until after wait milliseconds.

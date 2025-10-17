@@ -34,27 +34,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 const card = document.createElement('div');
                 card.className = 'data-card property-card';
                 card.innerHTML = `
-                    <div class="property-card-header">
-                        <div>
-                            <h3>${prop.name}</h3>
-                            <p>${prop.address}</p>
-                        </div>
-                        <div class="action-dropdown">
-                            <button class="action-dropdown-btn" data-id="${prop.id}"><i data-lucide="more-horizontal"></i></button>
-                            <div id="dropdown-${prop.id}" class="dropdown-menu hidden">
-                                <a href="#" class="dropdown-item edit-btn" data-id="${prop.id}">Edit</a>
-                                <a href="#" class="dropdown-item delete-btn" data-id="${prop.id}">Delete</a>
-                            </div>
+                    <div class="property-image-container">
+                        ${prop.image ? `<img src="${prop.image}" alt="${prop.name}" class="property-image">` : `<div class="property-placeholder"><i data-lucide="building"></i><span>No image</span></div>`}
+                    </div>
+                    <div class="property-content">
+                        <h3>${prop.name}</h3>
+                        <p><i data-lucide="map-pin"></i> ${prop.address}</p>
+                        <div class="property-details">
+                            <span>Total Units: ${prop.units || 0}</span>
                         </div>
                     </div>
-                    <div class="property-card-details">
-                        <div>
-                            <span>Type</span>
-                            <span>${prop.type}</span>
-                        </div>
-                        <div>
-                            <span>Rent</span>
-                            <span>${rentalUtils.formatCurrency(prop.rent)}</span>
+                    <div class="action-dropdown">
+                        <button class="action-dropdown-btn" data-id="${prop.id}"><i data-lucide="more-horizontal"></i></button>
+                        <div id="dropdown-${prop.id}" class="dropdown-menu hidden">
+                            <a href="#" class="dropdown-item edit-btn" data-id="${prop.id}">Edit</a>
+                            <a href="#" class="dropdown-item delete-btn" data-id="${prop.id}">Delete</a>
                         </div>
                     </div>
                 `;
@@ -88,6 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <option value="Apartment" ${property && property.type === 'Apartment' ? 'selected' : ''}>Apartment</option>
                             <option value="Villa" ${property && property.type === 'Villa' ? 'selected' : ''}>Villa</option>
                             <option value="Office" ${property && property.type === 'Office' ? 'selected' : ''}>Office</option>
+                            <option value="Commercial" ${property && property.type === 'Commercial' ? 'selected' : ''}>Commercial</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -95,7 +90,27 @@ document.addEventListener('DOMContentLoaded', () => {
                         <input type="number" id="property-rent" class="form-input" value="${property ? property.rent : ''}" required>
                     </div>
                 </div>
+                <div class="form-group">
+                    <label for="property-tax-type" class="form-label">Tax Type</label>
+                    <select id="property-tax-type" class="form-input" required>
+                        <option value="property-only" ${property && property.taxType === 'property-only' ? 'selected' : ''}>Property Tax Only</option>
+                        <option value="withholding-annual" ${property && property.taxType === 'withholding-annual' ? 'selected' : ''}>Withholding + Annual Tax</option>
+                        <option value="withholding-property" ${property && property.taxType === 'withholding-property' ? 'selected' : ''}>Withholding + Property Tax</option>
+                        <option value="all-taxes" ${property && property.taxType === 'all-taxes' ? 'selected' : ''}>All Taxes (Withholding + Property + Annual)</option>
+                    </select>
+                    <small class="form-hint">Select applicable taxes for this property type in Ethiopia.</small>
+                </div>
+                <div class="form-group">
+                    <label for="property-units" class="form-label">Total Units</label>
+                    <input type="number" id="property-units" class="form-input" value="${property ? property.units || '' : ''}" min="0">
+                </div>
+                <div class="form-group">
+                    <label for="property-image" class="form-label">Property Image</label>
+                    <input type="file" id="property-image" class="form-input" accept="image/*">
+                    <small class="form-hint">Upload an image for the property. If not provided, a placeholder will be used.</small>
+                </div>
                 <div class="form-actions">
+                    <button type="button" class="clear-btn btn-secondary">Clear</button>
                     <button type="button" class="close-modal-btn btn-secondary">Cancel</button>
                     <button type="submit" class="btn-primary">Save Property</button>
                 </div>
@@ -104,6 +119,38 @@ document.addEventListener('DOMContentLoaded', () => {
         rentalUtils.openModal(modal);
 
         const form = modal.querySelector('#property-form');
+        const imageInput = form.querySelector('#property-image');
+        const imagePreview = form.querySelector('#image-preview');
+        const closeModalBtn = modal.querySelector('.close-modal-btn');
+        const clearBtn = modal.querySelector('.clear-btn');
+
+        // Image preview functionality
+        imageInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    imagePreview.innerHTML = `<img src="${e.target.result}" alt="Preview" class="preview-image">`;
+                };
+                reader.readAsDataURL(file);
+            } else {
+                imagePreview.innerHTML = `<div class="preview-placeholder"><i data-lucide="building"></i><span>No image selected</span></div>`;
+                rentalUtils.setupLucideIcons();
+            }
+        });
+
+        // Close modal on cancel button click
+        closeModalBtn.addEventListener('click', () => {
+            rentalUtils.closeModal(modal);
+        });
+
+        // Clear form on clear button click
+        clearBtn.addEventListener('click', () => {
+            form.reset();
+            imagePreview.innerHTML = `<div class="preview-placeholder"><i data-lucide="building"></i><span>No image selected</span></div>`;
+            rentalUtils.setupLucideIcons();
+        });
+
         form.addEventListener('submit', handleFormSubmit);
     };
 
@@ -113,12 +160,23 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!rentalUtils.validateForm(form)) return;
 
         const id = form.querySelector('#property-id').value;
+        const imageInput = form.querySelector('#property-image');
+        let imageData = null;
+
+        if (imageInput.files && imageInput.files[0]) {
+            const file = imageInput.files[0];
+            imageData = await rentalUtils.convertFileToBase64(file);
+        }
+
         const propertyData = {
             id: id || rentalUtils.generateId(),
             name: form.querySelector('#property-name').value,
             address: form.querySelector('#property-address').value,
             type: form.querySelector('#property-type').value,
-            rent: parseFloat(form.querySelector('#property-rent').value)
+            taxType: form.querySelector('#property-tax-type').value,
+            rent: parseFloat(form.querySelector('#property-rent').value),
+            units: parseInt(form.querySelector('#property-units').value) || 0,
+            image: imageData || null
         };
 
         if (id) {
