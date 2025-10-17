@@ -5,104 +5,65 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Payments - Rental System</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link rel="stylesheet" href="/Css/styles.css">
-    <link rel="stylesheet" href="/Css/sidebar.css">
-    <link rel="stylesheet" href="/Css/header.css">
-    <link rel="stylesheet" href="/Css/payments.css">
+    <link rel="stylesheet" href="../Css/styles.css">
+    <link rel="stylesheet" href="../Css/header.css">
+    <link rel="stylesheet" href="../Css/sidebar.css">
+    <link rel="stylesheet" href="../Css/payments.css">
 </head>
 <body>
+
     <div id="sidebar-container"></div>
     <div id="header-container"></div>
 
     <main id="main-content" class="main-content">
-
-        <!-- 2a. Payments View -->
-        <div id="payments-view" class="view-content active">
+        <div id="payments-view">
             <div class="page-header">
                 <div>
                     <h1>Payments</h1>
-                    <p>Track and manage rental payments</p>
+                    <p>Track and manage all incoming payments.</p>
                 </div>
-                <div class="action-buttons">
-                    <button class="btn-secondary">
-                        <i class="fa-solid fa-file-excel"></i>
-                        <span>Export Excel</span>
-                    </button>
-                    <button class="btn-secondary">
-                        <i class="fa-solid fa-file-pdf"></i>
-                        <span>Export PDF</span>
-                    </button>
-                    <button id="add-payment-btn" class="btn-primary">
-                        <i class="fa-solid fa-plus"></i>
-                        <span>Record Payment</span>
-                    </button>
-                </div>
+                <button id="add-payment-btn" class="btn-primary">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>Record Payment</span>
+                </button>
             </div>
 
             <!-- Stats Cards -->
             <div class="stats-grid">
-                <div class="data-card">
-                    <p>Total Collected</p>
-                    <h2 id="stat-total-collected">ETB 0</h2>
-                    <p>This month</p>
-                </div>
-                <div class="data-card">
-                    <p>Outstanding</p>
-                    <h2 id="stat-outstanding" class="text-red">ETB 0</h2>
-                    <p>3 tenants</p>
-                </div>
-                <div class="data-card">
-                    <p>Prepaid</p>
-                    <h2 id="stat-prepaid" class="text-green">ETB 0</h2>
-                    <p>5 tenants</p>
-                </div>
-                <div class="data-card">
-                    <p>This Month</p>
-                    <h2 id="stat-this-month">ETB 0</h2>
-                    <p>Expected</p>
-                </div>
+                <div class="data-card stat-card"><h3>Total Collected</h3><h2 id="stat-total-collected">ETB 0</h2></div>
+                <div class="data-card stat-card"><h3>This Month</h3><h2 id="stat-this-month">ETB 0</h2></div>
+                <div class="data-card stat-card"><h3>Outstanding</h3><h2 id="stat-outstanding">ETB 0</h2></div>
+                <div class="data-card stat-card"><h3>Overdue</h3><h2 id="stat-overdue">ETB 0</h2></div>
             </div>
 
-            <!-- Search Bar -->
-            <div class="search-container">
-                <i class="fa-solid fa-search"></i>
-                <input type="text" id="search-input" placeholder="Search by tenant name..." class="form-input">
+            <div class="data-card">
+                <div class="table-header">
+                    <input type="text" id="search-input" class="form-input" placeholder="Search by tenant or property...">
+                </div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Tenant</th>
+                                <th>Property / Unit</th>
+                                <th>Amount</th>
+                                <th>Payment Date</th>
+                                <th>Method</th>
+                                <th>Receipt</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="payments-table-body"></tbody>
+                    </table>
+                </div>
             </div>
-
-            <!-- Payments Table -->
-            <div class="data-card table-container">
-                <table class="data-table">
-                    <thead class="table-head">
-                        <tr>
-                            <th>TENANT</th>
-                            <th>PROPERTY</th>
-                            <th>AMOUNT (ETB)</th>
-                            <th>DATE</th>
-                            <th>METHOD</th>
-                            <th>RECEIPT</th>
-                            <th>STATUS</th>
-                            <th>ACTIONS</th>
-                        </tr>
-                    </thead>
-                    <tbody id="payments-table-body" class="table-body">
-                        <!-- Payment rows will be dynamically inserted here -->
-                    </tbody>
-                </table>
-            </div>
-            <div id="empty-state" class="empty-state hidden">
-                <i class="fa-solid fa-money-bill-wave"></i>
-                <h3>No payments found</h3>
-                <p>Get started by recording a new payment.</p>
-            </div>
+            <div id="empty-state" class="hidden empty-state"><i class="fa-solid fa-receipt"></i><h3>No Payments Found</h3><p>Get started by recording a new payment.</p></div>
         </div>
     </main>
-
     <div id="payment-modal"></div>
-
-    <script src="/Js/auth.js"></script>
-    <script src="/Js/api.js"></script>
-    <script src="/Js/shared.js"></script>
-    <script src="/Js/main.js"></script>
-    <script src="/Js/payments.js"></script>
+    <script src="../Js/auth.js"></script>
+    <script src="../Js/api.js"></script>
+    <script src="../Js/shared.js"></script>
+    <script src="../Js/payments.js"></script>
 </body>
 </html>

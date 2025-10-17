@@ -7,15 +7,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const TENANT_STORAGE_KEY = 'tenants';
     const PROPERTY_STORAGE_KEY = 'properties';
+    const UNIT_STORAGE_KEY = 'units';
     let tenants = [];
     let properties = [];
+    let units = [];
     
     const initialize = async () => {
         await window.rentalUtils.headerPromise; // Ensures shared components are loaded
         // Fetch data using the API layer
-        [tenants, properties] = await Promise.all([
+        [tenants, properties, units] = await Promise.all([
             api.get(TENANT_STORAGE_KEY),
-            api.get(PROPERTY_STORAGE_KEY)
+            api.get(PROPERTY_STORAGE_KEY),
+            api.get(UNIT_STORAGE_KEY)
         ]);
         renderTenants();
     };
@@ -34,7 +37,8 @@ document.addEventListener('DOMContentLoaded', () => {
             emptyState.classList.add('hidden');
             tenantList.classList.remove('hidden');
             filteredTenants.forEach(tenant => {
-                const property = properties.find(p => p.id === tenant.propertyId);
+                const unit = units.find(u => u.id === tenant.unitId);
+                const property = unit ? properties.find(p => p.id === unit.propertyId) : null;
                 const card = document.createElement('div');
                 card.className = 'data-card tenant-card';
                 card.innerHTML = `
@@ -55,7 +59,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="tenant-card-details">
                         <div>
                             <span>Property</span>
-                            <span>${property ? property.name : 'Unassigned'}</span>
+                            <span>${property ? property.name : 'N/A'}</span>
+                        </div>
+                        <div>
+                            <span>Unit</span>
+                            <span>${unit ? `Unit ${unit.unitNumber}` : 'Unassigned'}</span>
                         </div>
                         <div>
                             <span>Move-in Date</span>
@@ -74,7 +82,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const modal = tenantModalContainer.querySelector('.modal-overlay');
         modal.querySelector('#modal-title').textContent = tenant ? 'Edit Tenant' : 'Add New Tenant';
 
-        const propertyOptions = properties.map(p => `<option value="${p.id}" ${tenant && tenant.propertyId === p.id ? 'selected' : ''}>${p.name}</option>`).join('');
+        const assignedUnit = tenant ? units.find(u => u.id === tenant.unitId) : null;
+        const assignedPropertyId = assignedUnit ? assignedUnit.propertyId : null;
+
+        const propertyOptions = properties.map(p => `<option value="${p.id}" ${assignedPropertyId === p.id ? 'selected' : ''}>${p.name}</option>`).join('');
 
         modal.querySelector('#modal-body').innerHTML = `
             <form id="tenant-form">
@@ -95,10 +106,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="tenant-property" class="form-label">Assigned Property</label>
+                        <label for="tenant-property" class="form-label">Property</label>
                         <select id="tenant-property" class="form-input" required>
                             <option value="">Select a property</option>
                             ${propertyOptions}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="tenant-unit" class="form-label">Unit</label>
+                        <select id="tenant-unit" class="form-input" required>
+                            <option value="">Select a property first</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -113,6 +130,31 @@ document.addEventListener('DOMContentLoaded', () => {
             </form>
         `;
         rentalUtils.openModal(modal);
+
+        const propertySelect = modal.querySelector('#tenant-property');
+        const unitSelect = modal.querySelector('#tenant-unit');
+
+        const populateUnits = (propertyId) => {
+            unitSelect.innerHTML = '<option value="">Select a unit</option>';
+            if (!propertyId) return;
+
+            const availableUnits = units.filter(u => u.propertyId === propertyId && (!u.tenantId || u.tenantId === tenant?.id));
+            availableUnits.forEach(u => {
+                const option = document.createElement('option');
+                option.value = u.id;
+                option.textContent = `Unit ${u.unitNumber}`;
+                if (assignedUnit && assignedUnit.id === u.id) {
+                    option.selected = true;
+                }
+                unitSelect.appendChild(option);
+            });
+        };
+
+        propertySelect.addEventListener('change', () => populateUnits(propertySelect.value));
+        
+        // Initial population if editing
+        if (assignedPropertyId) populateUnits(assignedPropertyId);
+
         modal.querySelector('#tenant-form').addEventListener('submit', handleFormSubmit);
     };
 
@@ -122,22 +164,34 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!rentalUtils.validateForm(form)) return;
 
         const id = form.querySelector('#tenant-id').value;
+        const unitId = form.querySelector('#tenant-unit').value;
+        const oldTenantData = id ? tenants.find(t => t.id === id) : null;
+
         const tenantData = {
             id: id || rentalUtils.generateId(),
             name: form.querySelector('#tenant-name').value,
             email: form.querySelector('#tenant-email').value,
             phone: form.querySelector('#tenant-phone').value,
-            propertyId: form.querySelector('#tenant-property').value,
+            unitId: unitId,
             moveInDate: form.querySelector('#tenant-move-in').value,
         };
 
         if (id) {
             await api.update(TENANT_STORAGE_KEY, id, tenantData);
             tenants = tenants.map(t => t.id === id ? tenantData : t);
+            // If unit changed, update old and new units
+            if (oldTenantData && oldTenantData.unitId !== unitId) {
+                const oldUnit = units.find(u => u.id === oldTenantData.unitId);
+                if (oldUnit) await api.update(UNIT_STORAGE_KEY, oldUnit.id, { ...oldUnit, tenantId: null });
+            }
         } else {
             await api.create(TENANT_STORAGE_KEY, tenantData);
             tenants.push(tenantData);
         }
+        
+        // Update the new unit to be occupied
+        const newUnit = units.find(u => u.id === unitId);
+        if (newUnit) await api.update(UNIT_STORAGE_KEY, newUnit.id, { ...newUnit, tenantId: tenantData.id });
 
         renderTenants();
         rentalUtils.closeModal(form.closest('.modal-overlay'));
@@ -159,7 +213,13 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             if (rentalUtils.confirm('Are you sure you want to delete this tenant?')) {
                 api.delete(TENANT_STORAGE_KEY, id).then(() => {
+                    const deletedTenant = tenants.find(t => t.id === id);
                     tenants = tenants.filter(t => t.id !== id);
+                    // Make the unit vacant
+                    if (deletedTenant && deletedTenant.unitId) {
+                        const unit = units.find(u => u.id === deletedTenant.unitId);
+                        if (unit) api.update(UNIT_STORAGE_KEY, unit.id, { ...unit, tenantId: null });
+                    }
                     renderTenants();
                     rentalUtils.showNotification('Tenant deleted successfully!', 'error');
                 });

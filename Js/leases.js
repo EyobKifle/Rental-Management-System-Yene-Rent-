@@ -10,18 +10,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const LEASE_KEY = 'leases';
     const TENANT_KEY = 'tenants';
     const PROPERTY_KEY = 'properties';
+    const UNIT_KEY = 'units';
 
     // Data
     let leases = [];
     let tenants = [];
     let properties = [];
+    let units = [];
 
     const initialize = async () => {
         await window.rentalUtils.headerPromise; // Ensures shared components are loaded
-        [leases, tenants, properties] = await Promise.all([
+        [leases, tenants, properties, units] = await Promise.all([
             api.get(LEASE_KEY),
             api.get(TENANT_KEY),
-            api.get(PROPERTY_KEY)
+            api.get(PROPERTY_KEY),
+            api.get(UNIT_KEY)
         ]);
         renderLeases();
     };
@@ -45,10 +48,12 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const filteredLeases = leases.filter(lease => {
             const tenant = tenants.find(t => t.id === lease.tenantId);
-            const property = properties.find(p => p.id === lease.propertyId);
+            const unit = units.find(u => u.id === lease.unitId);
+            const property = unit ? properties.find(p => p.id === unit.propertyId) : null;
             const searchLower = filter.toLowerCase();
             return (tenant && tenant.name.toLowerCase().includes(searchLower)) ||
-                   (property && property.name.toLowerCase().includes(searchLower));
+                   (property && property.name.toLowerCase().includes(searchLower)) ||
+                   (unit && unit.unitNumber.toLowerCase().includes(searchLower));
         });
 
         if (filteredLeases.length === 0) {
@@ -59,22 +64,17 @@ document.addEventListener('DOMContentLoaded', () => {
             leasesTableBody.parentElement.classList.remove('hidden');
             filteredLeases.forEach(lease => {
                 const tenant = tenants.find(t => t.id === lease.tenantId);
-                const property = properties.find(p => p.id === lease.propertyId);
+                const unit = units.find(u => u.id === lease.unitId);
+                const property = unit ? properties.find(p => p.id === unit.propertyId) : null;
                 const status = getLeaseStatus(lease);
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${tenant?.name || 'N/A'}</td>
-                    <td>${property?.name || 'N/A'}</td>
+                    <td>${property?.name || 'N/A'} <span class="lease-property-unit">Unit ${unit?.unitNumber || 'N/A'}</span></td>
                     <td>${rentalUtils.formatDate(lease.startDate)}</td>
                     <td>${rentalUtils.formatDate(lease.endDate)}</td>
                     <td>${rentalUtils.formatCurrency(lease.rentAmount)}</td>
                     <td><span class="status-badge ${status.class}">${status.text}</span></td>
-                    <td>
-                        ${lease.leaseDocumentUrl ? 
-                            `<a href="${lease.leaseDocumentUrl}" target="_blank">View PDF</a>` : 
-                            '<span>-</span>'
-                        }
-                    </td>
                     <td>
                         <div class="action-dropdown">
                             <button type="button" class="action-dropdown-btn" data-id="${lease.id}"><i class="fa-solid fa-ellipsis-vertical"></i></button>
@@ -96,27 +96,43 @@ document.addEventListener('DOMContentLoaded', () => {
         leaseModalContainer.innerHTML = await response.text();
         const modal = leaseModalContainer.querySelector('.modal-overlay');
         modal.querySelector('#modal-title').textContent = isRenewal ? 'Renew Lease' : (lease && lease.id ? 'Edit Lease' : 'Add New Lease');
+        
+        // Tenants not already in an active lease (or the current tenant if editing)
+        const activeLeaseTenantIds = leases.filter(l => getLeaseStatus(l).text === 'Active' && l.id !== lease?.id).map(l => l.tenantId);
+        const availableTenants = tenants.filter(t => !activeLeaseTenantIds.includes(t.id) || t.id === lease?.tenantId);
+        const tenantOptions = availableTenants.map(t => `<option value="${t.id}" ${lease && lease.tenantId === t.id ? 'selected' : ''}>${t.name}</option>`).join('');
 
-        const tenantOptions = tenants.map(t => `<option value="${t.id}" ${lease && lease.tenantId === t.id ? 'selected' : ''}>${t.name}</option>`).join('');
-        const propertyOptions = properties.map(p => `<option value="${p.id}" ${lease && lease.propertyId === p.id ? 'selected' : ''}>${p.name}</option>`).join('');
+        const assignedUnit = lease ? units.find(u => u.id === lease.unitId) : null;
+        const assignedPropertyId = assignedUnit ? assignedUnit.propertyId : null;
+        const propertyOptions = properties.map(p => `<option value="${p.id}" ${assignedPropertyId === p.id ? 'selected' : ''}>${p.name}</option>`).join('');
 
         modal.querySelector('#modal-body').innerHTML = `
             <form id="lease-form">
                 <input type="hidden" id="lease-id" value="${lease ? lease.id : ''}">
-                <div class="form-group">
-                    <label for="lease-tenant" class="form-label">Tenant</label>
-                    <select id="lease-tenant" class="form-input" required>
-                        <option value="">Select a tenant</option>
-                        ${tenantOptions}
-                    </select>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="lease-tenant" class="form-label">Tenant</label>
+                        <select id="lease-tenant" class="form-input" required>
+                            <option value="">Select a tenant</option>
+                            ${tenantOptions}
+                        </select>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="lease-property" class="form-label">Property</label>
-                    <select id="lease-property" class="form-input" required>
-                        <option value="">Select a property</option>
-                        ${propertyOptions}
-                    </select>
-                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="lease-property" class="form-label">Property</label>
+                        <select id="lease-property" class="form-input" required>
+                            <option value="">Select a property</option>
+                            ${propertyOptions}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="lease-unit" class="form-label">Unit</label>
+                        <select id="lease-unit" class="form-input" required>
+                            <option value="">Select a property first</option>
+                        </select>
+                    </div>
+                </div>    
                 <div class="form-row">
                     <div class="form-group">
                         <label for="lease-start-date" class="form-label">Start Date</label>
@@ -144,6 +160,30 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             </form>
         `;
+
+        const propertySelect = modal.querySelector('#lease-property');
+        const unitSelect = modal.querySelector('#lease-unit');
+
+        const populateUnits = (propertyId) => {
+            unitSelect.innerHTML = '<option value="">Select a unit</option>';
+            if (!propertyId) return;
+
+            // Find units for the property that are not occupied by an active lease
+            const activeLeaseUnitIds = leases.filter(l => getLeaseStatus(l).text === 'Active' && l.id !== lease?.id).map(l => l.unitId);
+            const availableUnits = units.filter(u => u.propertyId === propertyId && !activeLeaseUnitIds.includes(u.id));
+            
+            availableUnits.forEach(u => {
+                const option = document.createElement('option');
+                option.value = u.id;
+                option.textContent = `Unit ${u.unitNumber}`;
+                if (assignedUnit && assignedUnit.id === u.id) option.selected = true;
+                unitSelect.appendChild(option);
+            });
+        };
+
+        propertySelect.addEventListener('change', () => populateUnits(propertySelect.value));
+        if (assignedPropertyId) populateUnits(assignedPropertyId);
+
         modal.querySelector('#lease-document').addEventListener('change', (e) => {
             modal.querySelector('#lease-document-info').textContent = e.target.files.length > 0 ? `New file: ${e.target.files[0].name}` : (lease && lease.leaseDocumentName ? `Current file: ${lease.leaseDocumentName}` : 'No file chosen');
         });
@@ -178,7 +218,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const leaseData = {
             id: id || rentalUtils.generateId(),
             tenantId: form.querySelector('#lease-tenant').value,
-            propertyId: form.querySelector('#lease-property').value,
+            unitId: form.querySelector('#lease-unit').value,
             startDate: form.querySelector('#lease-start-date').value,
             endDate: form.querySelector('#lease-end-date').value,
             rentAmount: parseFloat(form.querySelector('#lease-rent').value),
@@ -193,6 +233,13 @@ document.addEventListener('DOMContentLoaded', () => {
             await api.create(LEASE_KEY, leaseData);
             leases.push(leaseData);
         }
+
+        // Update tenant and unit records
+        const tenantToUpdate = tenants.find(t => t.id === leaseData.tenantId);
+        if (tenantToUpdate) await api.update(TENANT_KEY, tenantToUpdate.id, { ...tenantToUpdate, unitId: leaseData.unitId });
+
+        const unitToUpdate = units.find(u => u.id === leaseData.unitId);
+        if (unitToUpdate) await api.update(UNIT_KEY, unitToUpdate.id, { ...unitToUpdate, tenantId: leaseData.tenantId });
 
         renderLeases();
         rentalUtils.closeModal(form.closest('.modal-overlay'));

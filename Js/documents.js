@@ -26,23 +26,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const getFileIcon = (fileType) => {
         if (fileType.startsWith('image/')) return { icon: 'fa-solid fa-file-image', class: 'icon-image' };
         if (fileType === 'application/pdf') return { icon: 'fa-solid fa-file-pdf', class: 'icon-pdf' };
-        return { icon: 'fa-solid fa-file', class: '' };
+        if (fileType.includes('wordprocessingml')) return { icon: 'fa-solid fa-file-word', class: 'icon-doc' };
+        return { icon: 'fa-solid fa-file', class: 'icon-other' };
     };
 
     const renderDocuments = (filter = '') => {
         docList.innerHTML = '';
-        const filteredDocs = documents.filter(doc => doc.name.toLowerCase().includes(filter.toLowerCase()));
+        const searchLower = filter.toLowerCase();
+        const filteredDocs = documents.filter(doc => 
+            doc.name.toLowerCase().includes(searchLower) ||
+            doc.category.toLowerCase().includes(searchLower)
+        );
 
         if (filteredDocs.length === 0) {
             emptyState.classList.remove('hidden');
-            docList.classList.add('hidden');
+            docList.closest('.data-card').classList.add('hidden');
         } else {
             emptyState.classList.add('hidden');
-            docList.classList.remove('hidden');
+            docList.closest('.data-card').classList.remove('hidden');
             filteredDocs.forEach(doc => {
                 const card = document.createElement('div');
                 card.className = 'data-card document-card';
                 const { icon, class: iconClass } = getFileIcon(doc.type);
+                const linkedTo = doc.propertyId ? properties.find(p => p.id === doc.propertyId)?.name : (doc.tenantId ? tenants.find(t => t.id === doc.tenantId)?.name : 'General');
 
                 card.innerHTML = `
                     <div class="document-icon ${iconClass}">
@@ -50,14 +56,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                     <div class="document-info">
                         <h3>${doc.name}</h3>
-                        <p>${rentalUtils.formatFileSize(doc.size)}</p>
+                        <p>${rentalUtils.formatFileSize(doc.size)} &bull; ${linkedTo}</p>
                     </div>
                     <div class="document-actions">
                         <div class="action-dropdown">
-                            <button class="action-dropdown-btn" data-id="${doc.id}"><i class="fa-solid fa-ellipsis"></i></button>
+                            <button class="action-dropdown-btn" data-id="${doc.id}"><i class="fa-solid fa-ellipsis-vertical"></i></button>
                             <div id="dropdown-${doc.id}" class="dropdown-menu hidden">
-                                <a href="${doc.url}" target="_blank" class="dropdown-item">View</a>
-                                <a href="#" class="dropdown-item delete-btn" data-id="${doc.id}">Delete</a>
+                                <a href="${doc.url}" target="_blank" class="dropdown-item"><i class="fa-solid fa-eye"></i>View</a>
+                                <a href="#" class="dropdown-item delete-btn" data-id="${doc.id}"><i class="fa-solid fa-trash-can"></i>Delete</a>
                             </div>
                         </div>
                     </div>
@@ -75,6 +81,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const propertyOptions = properties.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
         const tenantOptions = tenants.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+        const categories = ['Lease Agreement', 'Tenant ID', 'Payment Receipt', 'Property Title', 'Other'];
+        const categoryOptions = categories.map(c => `<option value="${c}">${c}</option>`).join('');
 
         modal.querySelector('#modal-body').innerHTML = `
             <form id="document-form">
@@ -85,6 +93,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="form-group">
                     <label for="doc-name" class="form-label">Document Name (Optional)</label>
                     <input type="text" id="doc-name" class="form-input" placeholder="e.g., 'January Rent Receipt'">
+                </div>
+                <div class="form-group">
+                    <label for="doc-category" class="form-label">Category</label>
+                    <select id="doc-category" class="form-input" required>
+                        <option value="">Select a category</option>
+                        ${categoryOptions}
+                    </select>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
@@ -123,12 +138,13 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const fileUrl = await rentalUtils.readFileAsDataURL(file);
+        const fileUrl = await rentalUtils.convertFileToBase64(file);
 
         const docData = {
             id: rentalUtils.generateId(),
             name: form.querySelector('#doc-name').value || file.name,
             type: file.type,
+            category: form.querySelector('#doc-category').value,
             size: file.size,
             uploadDate: new Date().toISOString(),
             propertyId: form.querySelector('#doc-property').value || null,

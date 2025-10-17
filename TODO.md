@@ -1,65 +1,66 @@
 # Rental Management System Development Plan
 
 ## Completed Tasks
-- [x] Basic property management with CRUD, image previews, UI enhancements
-- [x] Added location icons, hover animations, modal close functionality
-- [x] Added tax type selection to property form (Withholding Tax, Property Tax, Annual Tax)
-- [x] Updated property data structure to include tax types
-- [x] Added Commercial property type option
+- [x] **Properties:** Basic property management with CRUD, image previews, UI enhancements, tax types.
+- [x] **Tenants:** Full CRUD functionality for tenant management.
+- [x] **Leases:** Full CRUD for lease agreements, including renewals.
+- [x] **Payments:** Payment recording and tracking.
+- [x] **Expenses:** Expense logging and management.
+- [x] **Units:** Created pages and logic for unit management per property.
 
 ## Pending Tasks
 
 ### 1. Update Properties Management
-- [ ] Add tax type selection to property form (Withholding Tax, Property Tax, Annual Tax)
-- [ ] Update property data structure to include tax types
-- [ ] Modify property rendering to show tax information
+- [x] Add tax type selection to property form (Withholding Tax, Property Tax, Annual Tax)
+- [x] Update property data structure to include tax types
+- [x] Modify property rendering to show tax information
 
 ### 2. Create Units Management
-- [ ] Create units.html page
-- [ ] Create units.js for unit CRUD within properties
-- [ ] Create units.css for styling
-- [ ] Add "View Units" option to property card dropdown
-- [ ] Implement navigation from property to units
+- [x] Create units.html page
+- [x] Create units.js for unit CRUD within properties
+- [x] Create units.css for styling
+- [x] Add "View Units" option to property card dropdown
+- [x] Implement navigation from property to units
 
 ### 3. Create Tenants Management
-- [ ] Create tenants.html page
-- [ ] Create tenants.js for tenant CRUD
-- [ ] Create tenants.css for styling
-- [ ] Link tenants to units
+- [x] Create tenants.html page
+- [x] Create tenants.js for tenant CRUD
+- [x] Create tenants.css for styling
+- [x] Link tenants to units
 
 ### 4. Create Leases Management
-- [ ] Create leases.html page
-- [ ] Create leases.js for lease CRUD
-- [ ] Create leases.css for styling
-- [ ] Link leases to tenants and units with dates/rent
+- [x] Create leases.html page
+- [x] Create leases.js for lease CRUD
+- [x] Create leases.css for styling
+- [x] Link leases to tenants and units with dates/rent
 
 ### 5. Create Payments Management
-- [ ] Create payments.html page
-- [ ] Create payments.js for payment tracking
-- [ ] Create payments.css for styling
-- [ ] Add receipt image upload functionality
-- [ ] Link payments to leases
+- [x] Create payments.html page
+- [x] Create payments.js for payment tracking
+- [x] Create payments.css for styling
+- [x] Add receipt image upload functionality
+- [x] Link payments to leases
 
 ### 6. Create Maintenance Management
-- [ ] Create maintenance.html page
-- [ ] Create maintenance.js for maintenance logging
-- [ ] Create maintenance.css for styling
-- [ ] Add before/after image upload functionality
-- [ ] Link maintenance to properties/units
+- [x] Create maintenance.html page
+- [x] Create maintenance.js for maintenance logging
+- [x] Create maintenance.css for styling
+- [x] Add before/after image upload functionality
+- [x] Link maintenance to properties/units
 
 ### 7. Create Documents Management
-- [ ] Create documents.html page
-- [ ] Create documents.js for document storage
-- [ ] Create documents.css for styling
-- [ ] Support uploads for agreements, leases, personal documents
-- [ ] Categorize by type and property
+- [x] Create documents.html page
+- [x] Create documents.js for document storage
+- [x] Create documents.css for styling
+- [x] Support uploads for agreements, leases, personal documents
+- [x] Categorize by type and property
 
 ### 8. Create Reports/Analytics
-- [ ] Create reports.html page
-- [ ] Create reports.js for analytics dashboard
-- [ ] Create reports.css for styling
-- [ ] Implement Ethiopian tax calculations (withholding, property, annual)
-- [ ] Show occupancy, revenue, tax summaries
+- [x] Create reports.html page
+- [x] Create reports.js for analytics dashboard
+- [x] Create reports.css for styling
+- [x] Implement Ethiopian tax calculations (withholding, property, annual)
+- [x] Show occupancy, revenue, tax summaries
 
 ### 9. Update Navigation and UI
 - [ ] Update sidebar/navigation to include all new sections
@@ -70,6 +71,6 @@
 ### 10. Testing and Polish
 - [ ] Test all CRUD operations
 - [ ] Test file uploads and previews
-- [ ] Test data relationships
-- [ ] Ensure Ethiopian tax logic is correct
+- [ ] Test data correctrelationships
+- [ ] Ensure Ethiopian tax logic is 
 - [ ] Polish UI/UX consistency

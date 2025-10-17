@@ -304,7 +304,7 @@ class RentalUtils {
                             isValid = false;
                         }
                         break;
-                    
+
                     case 'tel':
                         // A simple regex for phone numbers (allows digits, spaces, dashes, parens)
                         const phoneRegex = /^[0-9\s\-\(\)]+$/;
@@ -324,6 +324,19 @@ class RentalUtils {
                         if (max && parseFloat(input.value) > parseFloat(max)) {
                             this.showError(input, `Value cannot exceed ${max}.`);
                             isValid = false;
+                        }
+                        break;
+
+                    case 'date':
+                        // Basic date validation: ensure it's not in the past for future dates
+                        if (input.hasAttribute('data-future-only')) {
+                            const selectedDate = new Date(input.value);
+                            const today = new Date();
+                            today.setHours(0, 0, 0, 0);
+                            if (selectedDate < today) {
+                                this.showError(input, 'Date cannot be in the past.');
+                                isValid = false;
+                            }
                         }
                         break;
                 }
@@ -442,11 +455,15 @@ class RentalUtils {
     }
 
     /**
-     * Generates a simple unique ID.
+     * Generates a more robust unique ID using crypto API if available, fallback to timestamp + random.
      * @returns {string}
      */
     generateId() {
-        return Date.now().toString(36) + Math.random().toString(36).substr(2);
+        if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+            return crypto.randomUUID();
+        }
+        // Fallback for older browsers
+        return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
     }
 
     /**
@@ -464,19 +481,11 @@ class RentalUtils {
     }
 
     /**
-     * Converts a file to base64 string.
+     * Converts a file to a base64 Data URL string.
      * @param {File} file - The file to convert.
      * @returns {Promise<string>} A promise that resolves with the base64 string.
      */
-    convertFileToBase64(file) {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = (error) => reject(error);
-            reader.readAsDataURL(file);
-        });
-    }
-
+    // The 'convertFileToBase64' method was a duplicate of 'readFileAsDataURL' and has been removed.
 
     /**
      * Creates a debounced function that delays invoking func until after wait milliseconds.
@@ -503,6 +512,18 @@ class RentalUtils {
      */
     confirm(message) {
         return window.confirm(message);
+    }
+
+    /**
+     * Sets up Lucide icons by replacing data-lucide attributes with SVG elements.
+     * Assumes Lucide script is loaded (e.g., via CDN).
+     */
+    setupLucideIcons() {
+        if (typeof lucide !== 'undefined' && lucide.createIcons) {
+            lucide.createIcons();
+        } else {
+            console.warn('Lucide library not loaded. Icons may not render properly.');
+        }
     }
 }
 
