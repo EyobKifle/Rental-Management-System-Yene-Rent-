@@ -1,38 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Login - Rental System</title>
-    <link rel="stylesheet" href="/Css/login.css">
-</head> 
+    <link rel="stylesheet" href="/Css/login.css" />
+</head>
+
 <body class="login-page">
-
-    <div>
-        <div>
-            <h1>Rental System</h1>
-            <p>Sign in to manage your properties</p>
-        </div>
-
-        <div>
-            <form id="login-form">
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <h1>Rental System</h1>
+                <p>Sign in to manage your properties</p>
+            </div>
+            <form id="login-form" class="login-form">
                 <div class="form-group">
                     <label for="email" class="form-label">Email Address</label>
-                    <input type="email" id="email" class="form-input" required autocomplete="email" value="demo@user.com">
+                    <input type="email" id="email" class="form-input" placeholder="Enter your email" required
+                        autocomplete="email" value="demo@user.com" />
                 </div>
 
                 <div class="form-group">
                     <label for="password" class="form-label">Password</label>
-                    <input type="password" id="password" class="form-input" required autocomplete="current-password" value="password">
+                    <input type="password" id="password" class="form-input" placeholder="Enter your password" required
+                        autocomplete="current-password" value="password" />
                 </div>
-
-                <div>
-                    <button type="submit" class="btn-primary">Sign In</button>
-                </div>
+                <p class="forgot-password">
+                    <a href="#">Forgot your password?</a>
+                </p>
+                <button type="submit" class="btn-primary">Sign In</button>
             </form>
+
+
         </div>
     </div>
 
     <script src="../Js/auth.js"></script>
 </body>
+
 </html>
