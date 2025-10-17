@@ -4,107 +4,105 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Payments - Rental System</title>
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="/Css/styles.css">
+    <link rel="stylesheet" href="/Css/sidebar.css">
+    <link rel="stylesheet" href="/Css/header.css">
     <link rel="stylesheet" href="/Css/payments.css">
 </head>
-<body class="flex min-h-screen">
-
+<body>
     <div id="sidebar-container"></div>
+    <div id="header-container"></div>
 
-
-    <main id="main-content" class="main-content ml-[280px]">
-        <!-- Header Container -->
-        <div id="header-container"></div>
+    <main id="main-content" class="main-content">
 
         <!-- 2a. Payments View -->
         <div id="payments-view" class="view-content active">
-            <div class="flex justify-between items-center mb-6">
+            <div class="page-header">
                 <div>
-                    <h1 class="text-3xl font-bold text-gray-900">Payments</h1>
-                    <p class="text-gray-500">Track and manage rental payments</p>
+                    <h1>Payments</h1>
+                    <p>Track and manage rental payments</p>
                 </div>
-                <div class="flex space-x-3">
-                    <button class="flex items-center space-x-2 px-4 py-2 text-sm font-medium border border-gray-300 rounded-lg hover:bg-gray-50 transition">
-                        <i data-lucide="file-text" class="w-4 h-4"></i>
+                <div class="action-buttons">
+                    <button class="btn-secondary">
+                        <i class="fa-solid fa-file-excel"></i>
                         <span>Export Excel</span>
                     </button>
-                    <button class="flex items-center space-x-2 px-4 py-2 text-sm font-medium border border-gray-300 rounded-lg hover:bg-gray-50 transition">
-                        <i data-lucide="file-text" class="w-4 h-4"></i>
+                    <button class="btn-secondary">
+                        <i class="fa-solid fa-file-pdf"></i>
                         <span>Export PDF</span>
                     </button>
-                    <button id="add-payment-btn" class="btn-primary flex items-center space-x-2">
-                        <i data-lucide="plus" class="w-4 h-4"></i>
+                    <button id="add-payment-btn" class="btn-primary">
+                        <i class="fa-solid fa-plus"></i>
                         <span>Record Payment</span>
                     </button>
                 </div>
             </div>
 
             <!-- Stats Cards -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="stats-grid">
                 <div class="data-card">
-                    <p class="text-gray-500 text-sm">Total Collected</p>
-                    <h2 id="stat-total-collected" class="text-2xl font-bold text-gray-800 mt-1">ETB 0</h2>
-                    <p class="text-xs text-gray-500 mt-1">This month</p>
+                    <p>Total Collected</p>
+                    <h2 id="stat-total-collected">ETB 0</h2>
+                    <p>This month</p>
                 </div>
                 <div class="data-card">
-                    <p class="text-gray-500 text-sm">Outstanding</p>
-                    <h2 id="stat-outstanding" class="text-2xl font-bold text-red-500 mt-1">ETB 0</h2>
-                    <p class="text-xs text-gray-500 mt-1">3 tenants</p>
+                    <p>Outstanding</p>
+                    <h2 id="stat-outstanding" class="text-red">ETB 0</h2>
+                    <p>3 tenants</p>
                 </div>
                 <div class="data-card">
-                    <p class="text-gray-500 text-sm">Prepaid</p>
-                    <h2 id="stat-prepaid" class="text-2xl font-bold text-green-600 mt-1">ETB 0</h2>
-                    <p class="text-xs text-gray-500 mt-1">5 tenants</p>
+                    <p>Prepaid</p>
+                    <h2 id="stat-prepaid" class="text-green">ETB 0</h2>
+                    <p>5 tenants</p>
                 </div>
                 <div class="data-card">
-                    <p class="text-gray-500 text-sm">This Month</p>
-                    <h2 id="stat-this-month" class="text-2xl font-bold text-gray-800 mt-1">ETB 0</h2>
-                    <p class="text-xs text-gray-500 mt-1">Expected</p>
+                    <p>This Month</p>
+                    <h2 id="stat-this-month">ETB 0</h2>
+                    <p>Expected</p>
                 </div>
             </div>
 
             <!-- Search Bar -->
-            <div class="mb-6">
-                <div class="relative">
-                    <i data-lucide="search" class="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                    <input type="text" id="search-input" placeholder="Search by tenant name..." class="form-input w-full pl-10">
-                </div>
+            <div class="search-container">
+                <i class="fa-solid fa-search"></i>
+                <input type="text" id="search-input" placeholder="Search by tenant name..." class="form-input">
             </div>
 
             <!-- Payments Table -->
-            <div class="data-card overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-white">
+            <div class="data-card table-container">
+                <table class="data-table">
+                    <thead class="table-head">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">TENANT</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PROPERTY</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">AMOUNT (ETB)</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">DATE</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">METHOD</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">RECEIPT</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">STATUS</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ACTIONS</th>
+                            <th>TENANT</th>
+                            <th>PROPERTY</th>
+                            <th>AMOUNT (ETB)</th>
+                            <th>DATE</th>
+                            <th>METHOD</th>
+                            <th>RECEIPT</th>
+                            <th>STATUS</th>
+                            <th>ACTIONS</th>
                         </tr>
                     </thead>
-                    <tbody id="payments-table-body" class="bg-white divide-y divide-gray-200">
+                    <tbody id="payments-table-body" class="table-body">
                         <!-- Payment rows will be dynamically inserted here -->
                     </tbody>
                 </table>
-                <div id="empty-state" class="text-center py-16 border-2 border-dashed rounded-xl mt-8 hidden">
-                    <i data-lucide="banknote" class="mx-auto h-12 w-12 text-gray-400"></i>
-                    <h3 class="mt-2 text-sm font-semibold text-gray-900">No payments found</h3>
-                    <p class="mt-1 text-sm text-gray-500">Get started by recording a new payment.</p>
-                </div>
+            </div>
+            <div id="empty-state" class="empty-state hidden">
+                <i class="fa-solid fa-money-bill-wave"></i>
+                <h3>No payments found</h3>
+                <p>Get started by recording a new payment.</p>
             </div>
         </div>
     </main>
 
-    <div id="payment-modal" class="modal-overlay hidden"></div>
+    <div id="payment-modal"></div>
 
-    <script src="auth.js"></script>
-    <script src="api.js"></script>
-    <script src="shared.js"></script>
-    <script src="payments.js"></script>
+    <script src="/Js/auth.js"></script>
+    <script src="/Js/api.js"></script>
+    <script src="/Js/shared.js"></script>
+    <script src="/Js/main.js"></script>
+    <script src="/Js/payments.js"></script>
 </body>
 </html>

@@ -4,31 +4,62 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Utilities - Rental System</title>
-    <!-- Load Chart.js for Analytics -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <link rel="stylesheet" href="/Css/styles.css">
-    <link rel="stylesheet" href="/Css/sidebar.css">
-    <link rel="stylesheet" href="/Css/utilities.css">
+   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="../Css/styles.css">
+    <link rel="stylesheet" href="../Css/sidebar.css">
+    <link rel="stylesheet" href="../Css/header.css">
+    <link rel="stylesheet" href="../Css/utilities.css">
 </head>
 <body>
-
     <div id="sidebar-container"></div>
+    <div id="header-container"></div>
     <main id="main-content" class="main-content">
-        <!-- Header Container -->
-        <div id="header-container"></div>
-        <div id="utilities-view" class="view-content active">
-            <div>
+        <div id="utilities-view">
+            <div class="page-header">
                 <div>
                     <h1>Utilities</h1>
-                    <p>Track and manage utility bills</p>
+                    <p>Track and manage utility bills for all your properties.</p>
                 </div>
+                <button id="add-utility-btn" class="btn-primary">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>Add Utility Bill</span>
+                </button>
             </div>
-            <div class="data-card"><i data-lucide="zap-off"></i><h3>Feature Coming Soon</h3><p>Utility tracking will be available in a future update.</p></div>
+
+            <div class="data-card table-container">
+                <div class="table-header">
+                    <input type="text" id="search-input" class="form-input" placeholder="Search by type or property...">
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Type</th>
+                            <th>Property</th>
+                            <th>Amount</th>
+                            <th>Due Date</th>
+                            <th>Status</th>
+                            <th><span class="sr-only">Edit</span></th>
+                        </tr>
+                    </thead>
+                    <tbody id="utilities-table-body"></tbody>
+                </table>
+            </div>
+
+            <div id="empty-state" class="hidden empty-state">
+                <i class="fa-solid fa-lightbulb"></i>
+                <h3>No Utility Bills Found</h3>
+                <p>Get started by adding a new utility bill.</p>
+            </div>
         </div>
     </main>
 
-    <script src="/Js/auth.js"></script>
-    <script src="/Js/api.js"></script>
+    <div id="utility-modal"></div>
+
+    <script src="../Js/auth.js"></script>
+    <script src="../Js/api.js"></script>
+    <script src="../Js/shared.js"></script>
+    <script src="../Js/main.js"></script>
+    <script src="../Js/utilities.js"></script>
 </body>
 </html>

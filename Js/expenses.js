@@ -1,9 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
     // DOM Elements
-    const sidebarContainer = document.getElementById('sidebar-container');
     const addExpenseBtn = document.getElementById('add-expense-btn');
     const expenseModalContainer = document.getElementById('expense-modal');
-    const expensesTableBody = document.getElementById('expenses-table-body');
+    const expenseList = document.getElementById('expense-list');
     const emptyState = document.getElementById('empty-state');
     const searchInput = document.getElementById('search-input');
 
@@ -16,8 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let properties = [];
 
     const initialize = async () => {
-        // Wait for shared components like the sidebar to be ready
-        await window.rentalUtils.sidebarPromise;
+        await window.rentalUtils.headerPromise; // Ensures shared components are loaded
         [expenses, properties] = await Promise.all([
             api.get(EXPENSE_KEY),
             api.get(PROPERTY_KEY)
@@ -26,44 +24,46 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const renderExpenses = (filter = '') => {
-        expensesTableBody.innerHTML = '';
+        expenseList.innerHTML = '';
         
-        const filteredExpenses = expenses.filter(expense => 
-            expense.category.toLowerCase().includes(filter.toLowerCase()) ||
-            (expense.description && expense.description.toLowerCase().includes(filter.toLowerCase()))
-        );
+        const filteredExpenses = expenses.filter(expense => {
+            const property = properties.find(p => p.id === expense.propertyId);
+            const searchLower = filter.toLowerCase();
+            return expense.category.toLowerCase().includes(searchLower) ||
+                   (property && property.name.toLowerCase().includes(searchLower));
+        });
 
         if (filteredExpenses.length === 0) {
             emptyState.classList.remove('hidden');
-            expensesTableBody.parentElement.classList.add('hidden');
+            expenseList.parentElement.classList.add('hidden');
         } else {
             emptyState.classList.add('hidden');
-            expensesTableBody.parentElement.classList.remove('hidden');
+            expenseList.parentElement.classList.remove('hidden');
             filteredExpenses.forEach(expense => {
                 const property = properties.find(p => p.id === expense.propertyId);
-                const row = document.createElement('tr');
-                row.className = 'hover:bg-gray-50';
-                row.innerHTML = `
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${expense.category}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${rentalUtils.formatCurrency(expense.amount)}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${rentalUtils.formatDate(expense.date)}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${property?.name || 'General'}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 truncate max-w-xs">${expense.description || ''}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium relative">
-                        <div class="relative inline-block text-left">
-                            <button type="button" class="action-dropdown-btn text-gray-400 hover:text-gray-700" data-id="${expense.id}">
-                                <i data-lucide="more-horizontal" class="w-5 h-5"></i>
-                            </button>
+                const card = document.createElement('div');
+                card.className = 'expense-card';
+                card.innerHTML = `
+                    <div class="expense-card-header">
+                        <div>
+                            <h3>${expense.category}</h3>
+                            <span class="amount">${rentalUtils.formatCurrency(expense.amount)}</span>
+                        </div>
+                        <div class="action-dropdown">
+                            <button type="button" class="action-dropdown-btn" data-id="${expense.id}"><i class="fa-solid fa-ellipsis-vertical"></i></button>
                             <div id="dropdown-${expense.id}" class="dropdown-menu hidden">
-                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 edit-btn" data-id="${expense.id}">Edit</a>
-                                <a href="#" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50 delete-btn" data-id="${expense.id}">Delete</a>
+                                <a href="#" class="dropdown-item edit-btn" data-id="${expense.id}"><i class="fa-solid fa-pencil"></i>Edit</a>
+                                <a href="#" class="dropdown-item delete-btn" data-id="${expense.id}"><i class="fa-solid fa-trash-can"></i>Delete</a>
                             </div>
                         </div>
-                    </td>
+                    </div>
+                    <div class="expense-card-details">
+                        <div><span>Date</span><span>${rentalUtils.formatDate(expense.date)}</span></div>
+                        <div><span>Property</span><span>${property?.name || 'General'}</span></div>
+                    </div>
                 `;
-                expensesTableBody.appendChild(row);
+                expenseList.appendChild(card);
             });
-            rentalUtils.setupLucideIcons();
         }
     };
 
@@ -71,16 +71,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const response = await fetch('modal.html');
         expenseModalContainer.innerHTML = await response.text();
         const modal = expenseModalContainer.querySelector('.modal-overlay');
-        modal.querySelector('#modal-title').textContent = expense ? 'Edit Expense' : 'Add Expense';
+        modal.querySelector('#modal-title').textContent = expense ? 'Edit Expense' : 'Add New Expense';
 
         const propertyOptions = properties.map(p => `<option value="${p.id}" ${expense && expense.propertyId === p.id ? 'selected' : ''}>${p.name}</option>`).join('');
-        const categories = ['Maintenance', 'Utilities', 'Taxes', 'Insurance', 'Other'];
+        const categories = ['Maintenance', 'Utilities', 'Taxes', 'Insurance', 'Management Fees', 'Other'];
         const categoryOptions = categories.map(c => `<option value="${c}" ${expense && expense.category === c ? 'selected' : ''}>${c}</option>`).join('');
 
-        modal.querySelector('#modal-content').innerHTML = `
-            <form id="expense-form" class="space-y-4">
+        modal.querySelector('#modal-body').innerHTML = `
+            <form id="expense-form">
                 <input type="hidden" id="expense-id" value="${expense ? expense.id : ''}">
-                <div class="grid grid-cols-2 gap-4">
+                <div class="form-row">
                     <div class="form-group">
                         <label for="expense-category" class="form-label">Category</label>
                         <select id="expense-category" class="form-input" required>${categoryOptions}</select>
@@ -90,7 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <input type="number" id="expense-amount" class="form-input" value="${expense ? expense.amount : ''}" required>
                     </div>
                 </div>
-                <div class="grid grid-cols-2 gap-4">
+                <div class="form-row">
                     <div class="form-group">
                         <label for="expense-date" class="form-label">Date</label>
                         <input type="date" id="expense-date" class="form-input" value="${expense ? expense.date : ''}" required>
@@ -103,11 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         </select>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label for="expense-description" class="form-label">Description (Optional)</label>
-                    <textarea id="expense-description" class="form-input" rows="3">${expense ? expense.description : ''}</textarea>
-                </div>
-                <div class="flex justify-end space-x-3 pt-4">
+                <div class="form-actions">
                     <button type="button" class="close-modal-btn btn-secondary">Cancel</button>
                     <button type="submit" class="btn-primary">Save Expense</button>
                 </div>
@@ -129,7 +125,6 @@ document.addEventListener('DOMContentLoaded', () => {
             amount: parseFloat(form.querySelector('#expense-amount').value),
             date: form.querySelector('#expense-date').value,
             propertyId: form.querySelector('#expense-property').value,
-            description: form.querySelector('#expense-description').value,
         };
 
         if (id) {
@@ -145,7 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
         rentalUtils.showNotification(`Expense ${id ? 'updated' : 'added'} successfully!`);
     };
 
-    expensesTableBody.addEventListener('click', (e) => {
+    expenseList.addEventListener('click', (e) => {
         const id = e.target.closest('[data-id]')?.dataset.id;
         if (!id) return;
 
@@ -153,6 +148,10 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             const expenseToEdit = expenses.find(ex => ex.id === id);
             openExpenseModal(expenseToEdit);
+        } else if (e.target.closest('.action-dropdown-btn')) {
+            // Close all other dropdowns first
+            document.querySelectorAll('.dropdown-menu').forEach(menu => menu.classList.add('hidden'));
+            document.getElementById(`dropdown-${id}`).classList.toggle('hidden');
         } else if (e.target.closest('.delete-btn')) {
             e.preventDefault();
             if (rentalUtils.confirm('Are you sure you want to delete this expense?')) {

@@ -1,20 +1,27 @@
 // dashboard.js - Page-specific JavaScript for index.html (Dashboard)
 
 document.addEventListener('DOMContentLoaded', () => {
-    const loadDashboardStats = () => {
-        const properties = rentalUtils.loadData('properties') || [];
-        const tenants = rentalUtils.loadData('tenants') || [];
-        const payments = rentalUtils.loadData('payments') || []; // Assuming payments will be stored
+    const initialize = async () => {
+        await window.rentalUtils.headerPromise;
 
+        const [properties, tenants, payments, leases] = await Promise.all([
+            api.get('properties'),
+            api.get('tenants'),
+            api.get('payments'),
+            api.get('leases')
+        ]);
+
+        loadDashboardStats(properties, tenants, payments);
+        loadRecentActivity(tenants);
+        loadLeaseExpirations(leases, tenants, properties);
+    };
+
+    const loadDashboardStats = (properties, tenants, payments) => {
         const totalProperties = properties.length;
         const totalTenants = tenants.length;
-        
-        // Calculate monthly revenue from properties
         const monthlyRevenue = properties.reduce((sum, prop) => sum + (prop.rent || 0), 0);
-
-        // Placeholder for outstanding balance logic
-        const outstandingBalance = 0; 
-
+        const outstandingBalance = 0; // Placeholder
+        
         const statCards = document.querySelectorAll('#dashboard-view .data-card h2');
         if (statCards.length >= 4) {
             statCards[0].textContent = totalProperties;
@@ -24,20 +31,46 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    const loadRecentActivity = () => {
-        // This can be expanded to show recent property/tenant additions
-        const activityContainer = document.querySelector('#dashboard-view .space-y-4');
-        const tenants = rentalUtils.loadData('tenants') || [];
-        
-        if (tenants.length > 0) {
-            activityContainer.innerHTML = tenants.slice(-3).reverse().map(tenant => {
-                return `<div class="flex items-center space-x-3 text-sm"><p class="text-gray-600">New tenant added: <strong>${tenant.name}</strong></p><span class="text-xs text-gray-400 ml-auto whitespace-nowrap">${rentalUtils.formatDate(tenant.moveInDate)}</span></div>`;
+    const loadRecentActivity = (tenants) => {
+        const activityContainer = document.querySelector('#dashboard-view .activity-list');
+        if (!activityContainer) return;
+
+        const recentTenants = tenants.sort((a, b) => new Date(b.moveInDate) - new Date(a.moveInDate)).slice(0, 3);
+
+        if (recentTenants.length > 0) {
+            activityContainer.innerHTML = recentTenants.map(tenant => {
+                return `<div><p>New tenant added: <strong>${tenant.name}</strong></p><span>${rentalUtils.formatDate(tenant.moveInDate)}</span></div>`;
             }).join('');
         } else {
-            activityContainer.innerHTML = '<p class="text-sm text-gray-500">No recent activity.</p>';
+            activityContainer.innerHTML = '<p>No recent activity.</p>';
         }
     };
 
-    loadDashboardStats();
-    loadRecentActivity();
+    const loadLeaseExpirations = (leases, tenants, properties) => {
+        const widgetContainer = document.getElementById('lease-expirations-widget');
+        if (!widgetContainer) return;
+
+        const today = new Date();
+        const sixtyDaysFromNow = new Date();
+        sixtyDaysFromNow.setDate(today.getDate() + 60);
+
+        const expiringLeases = leases.filter(lease => {
+            const endDate = new Date(lease.endDate);
+            return endDate >= today && endDate <= sixtyDaysFromNow;
+        }).sort((a, b) => new Date(a.endDate) - new Date(b.endDate));
+
+        let content = '<h3>Upcoming Lease Expirations</h3>';
+        if (expiringLeases.length > 0) {
+            content += expiringLeases.map(lease => {
+                const tenant = tenants.find(t => t.id === lease.tenantId);
+                const property = properties.find(p => p.id === lease.propertyId);
+                return `<div class="lease-expiration-item"><div><p>${tenant?.name || 'N/A'}</p><p>${property?.name || 'N/A'}</p></div><span>${rentalUtils.formatDate(lease.endDate)}</span></div>`;
+            }).join('');
+        } else {
+            content += '<p>No leases are expiring in the next 60 days.</p>';
+        }
+        widgetContainer.innerHTML = content;
+    };
+
+    initialize();
 });

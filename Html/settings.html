@@ -8,139 +8,137 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="/Css/styles.css">
+    <link rel="stylesheet" href="/Css/header.css">
+    <link rel="stylesheet" href="/Css/sidebar.css">
     <link rel="stylesheet" href="/Css/settings.css">
 </head>
 <body>
 
     <div id="sidebar-container"></div>
-    <main id="main-content" class="main-content ml-[280px]">
+    <main id="main-content" class="main-content">
         <!-- Header Container -->
         <div id="header-container"></div>
-        <div id="settings-view" class="view-content active">
-            <h1 class="text-3xl font-bold text-gray-900 mb-6">Settings</h1>
-            <p class="text-gray-500 mb-6">Manage your account and application preferences</p>
-
-            <!-- Settings Tabs -->
-            <div class="border-b border-gray-200 mb-6">
-                <nav class="-mb-px flex space-x-8" aria-label="Tabs" role="tablist">
-                    <a href="#" id="profile-tab-link" class="setting-tab active-tab" data-tab="profile" role="tab" aria-controls="profile-tab-panel" aria-selected="true">Profile</a>
-                    <a href="#" id="preferences-tab-link" class="setting-tab" data-tab="preferences" role="tab" aria-controls="preferences-tab-panel" aria-selected="false">Preferences</a>
-                    <a href="#" id="security-tab-link" class="setting-tab" data-tab="security" role="tab" aria-controls="security-tab-panel" aria-selected="false">Security</a>
-                </nav>
+        <div id="settings-view">
+            <div class="page-header">
+                <h1>Settings</h1>
+                <p>Manage your account and application preferences</p>
+            </div>
+            <div class="settings-tabs">
+                <a href="#" id="profile-tab-link" class="setting-tab active-tab" data-tab="profile">Profile</a>
+                <a href="#" id="preferences-tab-link" class="setting-tab" data-tab="preferences">Preferences</a>
+                <a href="#" id="security-tab-link" class="setting-tab" data-tab="security">Security</a>
             </div>
 
             <!-- Profile Tab Content -->
             <div id="profile-tab-panel" class="setting-tab-content" role="tabpanel" aria-labelledby="profile-tab-link">
-                <div class="data-card mb-6">
-                    <h3 class="text-xl font-semibold mb-4">Profile Information</h3>
-                    <p class="text-sm text-gray-500 mb-6">Update your personal information and contact details</p>
-                    <div class="space-y-4">
-                        <label class="block">
-                            <span class="text-gray-700">Full Name</span>
-                            <input type="text" id="fullName" value="Abebe Bekele" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2.5">
+                <div class="data-card">
+                    <h3>Profile Information</h3>
+                    <p>Update your personal information and contact details</p>
+                    <label class="form-group">
+                        <span class="form-label" for="fullName">Full Name</span>
+                        <input type="text" id="fullName" value="Abebe Bekele" class="form-input">
+                    </label>
+                    <div class="form-row">
+                        <label class="form-group">
+                            <span class="form-label" for="email">Email</span>
+                            <input type="email" id="email" value="abebe.bekele@email.com" class="form-input">
                         </label>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <label class="block">
-                                <span class="text-gray-700">Email</span>
-                                <input type="email" id="email" value="abebe.bekele@email.com" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2.5">
-                            </label>
-                            <label class="block">
-                                <span class="text-gray-700">Phone Number</span>
-                                <input type="text" id="phone" value="+251 911 234567" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2.5">
-                            </label>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <label class="block">
-                                <span class="text-gray-700">TIN (Tax Identification Number)</span>
-                                <input type="text" id="tin" value="1234567890" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2.5">
-                            </label>
-                            <label class="block">
-                                <span class="text-gray-700">Role</span>
-                                <input type="text" id="role" value="Owner" disabled class="mt-1 block w-full rounded-md border-gray-200 bg-gray-50 shadow-sm p-2.5">
-                            </label>
-                        </div>
-                        <div class="flex justify-end pt-4">
-                            <button class="px-6 py-2 text-sm font-medium bg-gray-900 text-white rounded-lg hover:bg-gray-700 transition">Save Changes</button>
-                        </div>
+                        <label class="form-group">
+                            <span class="form-label" for="phone">Phone Number</span>
+                            <input type="text" id="phone" value="+251 911 234567" class="form-input">
+                        </label>
+                    </div>
+                    <div class="form-row">
+                        <label class="form-group">
+                            <span class="form-label" for="tin">TIN (Tax Identification Number)</span>
+                            <input type="text" id="tin" value="1234567890" class="form-input">
+                        </label>
+                        <label class="form-group">
+                            <span class="form-label" for="role">Role</span>
+                            <input type="text" id="role" value="Owner" disabled class="form-input disabled">
+                        </label>
+                    </div>
+                    <div class="form-actions">
+                        <button class="btn-primary">Save Changes</button>
                     </div>
                 </div>
             </div>
 
             <!-- Preferences Tab Content -->
             <div id="preferences-tab-panel" class="setting-tab-content hidden" role="tabpanel" aria-labelledby="preferences-tab-link">
-                 <div class="data-card mb-6">
-                    <h3 class="text-xl font-semibold mb-4">Language & Regional</h3>
-                    <p class="text-sm text-gray-500 mb-6">Set your language and currency preferences</p>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <label class="block">
-                            <span class="text-gray-700">Language</span>
-                            <select class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2.5">
+                 <div class="data-card">
+                    <h3>Language & Regional</h3>
+                    <p>Set your language and currency preferences</p>
+                    <div class="form-row">
+                        <label class="form-group">
+                            <span class="form-label">Language</span>
+                            <select class="form-input">
                                 <option>English</option>
                                 <option>Amharic</option>
                             </select>
                         </label>
-                        <label class="block">
-                            <span class="text-gray-700">Currency</span>
-                            <select class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2.5">
+                        <label class="form-group">
+                            <span class="form-label">Currency</span>
+                            <select class="form-input">
                                 <option>ETB (Ethiopian Birr)</option>
                                 <option>USD</option>
                             </select>
                         </label>
-                        <label class="block">
-                            <span class="text-gray-700">Default VAT (%)</span>
-                            <select class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2.5">
+                        <label class="form-group">
+                            <span class="form-label">Default VAT (%)</span>
+                            <select class="form-input">
                                 <option>15%</option>
                                 <option>0%</option>
                             </select>
                         </label>
                     </div>
-                    <div class="flex justify-end pt-6">
-                        <button class="px-6 py-2 text-sm font-medium border border-gray-300 rounded-lg hover:bg-gray-50 transition">Save Preferences</button>
+                    <div class="form-actions">
+                        <button class="btn-secondary">Save Preferences</button>
                     </div>
                 </div>
 
                  <div class="data-card">
-                    <h3 class="text-xl font-semibold mb-4">Notifications</h3>
-                    <p class="text-sm text-gray-500 mb-6">Manage how you receive alerts and notifications</p>
-                    <div class="space-y-4">
-                        <div class="flex items-center justify-between border-b pb-3">
+                    <h3>Notifications</h3>
+                    <p>Manage how you receive alerts and notifications</p>
+                    <div class="notification-list">
+                        <div class="notification-item">
                             <div>
-                                <p class="font-medium">Email Notifications</p>
-                                <p class="text-sm text-gray-500">Receive notifications via email</p>
+                                <p>Email Notifications</p>
+                                <p>Receive notifications via email</p>
                             </div>
-                            <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" value="" class="sr-only peer" checked>
-                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-gray-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gray-900"></div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
                             </label>
                         </div>
-                         <div class="flex items-center justify-between border-b pb-3">
+                         <div class="notification-item">
                             <div>
-                                <p class="font-medium">SMS Notifications</p>
-                                <p class="text-sm text-gray-500">Receive notifications via SMS</p>
+                                <p>SMS Notifications</p>
+                                <p>Receive notifications via SMS</p>
                             </div>
-                            <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" value="" class="sr-only peer">
-                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-gray-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gray-900"></div>
+                            <label class="toggle-switch">
+                                <input type="checkbox">
+                                <span class="toggle-slider"></span>
                             </label>
                         </div>
-                         <div class="flex items-center justify-between border-b pb-3">
+                         <div class="notification-item">
                             <div>
-                                <p class="font-medium">Rent Due Alerts</p>
-                                <p class="text-sm text-gray-500">Get notified when rent is due</p>
+                                <p>Rent Due Alerts</p>
+                                <p>Get notified when rent is due</p>
                             </div>
-                            <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" value="" class="sr-only peer" checked>
-                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-gray-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gray-900"></div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
                             </label>
                         </div>
-                         <div class="flex items-center justify-between">
+                         <div class="notification-item">
                             <div>
-                                <p class="font-medium">Tax Due Alerts</p>
-                                <p class="text-sm text-gray-500">Get notified when taxes are due</p>
+                                <p>Tax Due Alerts</p>
+                                <p>Get notified when taxes are due</p>
                             </div>
-                            <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" value="" class="sr-only peer" checked>
-                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-gray-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gray-900"></div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
                             </label>
                         </div>
                     </div>
@@ -148,40 +146,38 @@
             </div>
 
             <!-- Security Tab Content -->
-            <div id="security-tab-panel" class="setting-tab-content hidden" role="tabpanel" aria-labelledby="security-tab-link">
-                <div class="data-card mb-6">
-                    <h3 class="text-xl font-semibold mb-4">Change Password</h3>
-                    <p class="text-sm text-gray-500 mb-6">Update your password to keep your account secure</p>
-                    <div class="space-y-4">
-                        <label class="block">
-                            <span class="text-gray-700">Current Password</span>
-                            <input type="password" id="current-password" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2.5">
-                        </label>
-                        <label class="block">
-                            <span class="text-gray-700">New Password</span>
-                            <input type="password" id="new-password" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2.5">
-                        </label>
-                        <label class="block">
-                            <span class="text-gray-700">Confirm New Password</span>
-                            <input type="password" id="confirm-password" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2.5">
-                        </label>
-                        <div class="flex justify-end pt-4">
-                            <button class="px-6 py-2 text-sm font-medium border border-gray-300 rounded-lg hover:bg-gray-50 transition">Update Password</button>
-                        </div>
+            <div id="security-tab-panel" class="setting-tab-content hidden">
+                <div class="data-card">
+                    <h3>Change Password</h3>
+                    <p>Update your password to keep your account secure</p>
+                    <label class="form-group">
+                        <span class="form-label" for="current-password">Current Password</span>
+                        <input type="password" id="current-password" class="form-input">
+                    </label>
+                    <label class="form-group">
+                        <span class="form-label" for="new-password">New Password</span>
+                        <input type="password" id="new-password" class="form-input">
+                    </label>
+                    <label class="form-group">
+                        <span class="form-label" for="confirm-password">Confirm New Password</span>
+                        <input type="password" id="confirm-password" class="form-input">
+                    </label>
+                    <div class="form-actions">
+                        <button class="btn-secondary">Update Password</button>
                     </div>
                 </div>
 
                 <div class="data-card">
-                    <h3 class="text-xl font-semibold mb-4">Two-Factor Authentication</h3>
-                    <p class="text-sm text-gray-500 mb-6">Add an extra layer of security to your account</p>
-                    <div class="flex items-center justify-between">
+                    <h3>Two-Factor Authentication</h3>
+                    <p>Add an extra layer of security to your account</p>
+                    <div class="notification-item">
                         <div>
-                            <p class="font-medium">Enable MFA</p>
-                            <p class="text-sm text-gray-500">Require a verification code when signing in</p>
+                            <p>Enable MFA</p>
+                            <p>Require a verification code when signing in</p>
                         </div>
-                        <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" value="" class="sr-only peer">
-                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-gray-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gray-900"></div>
+                        <label class="toggle-switch">
+                            <input type="checkbox">
+                            <span class="toggle-slider"></span>
                         </label>
                     </div>
                 </div>

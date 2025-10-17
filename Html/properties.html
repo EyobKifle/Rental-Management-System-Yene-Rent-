@@ -4,12 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Properties - Rental System</title>
-    <!-- Load Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/Css/styles.css">
-    <link rel="stylesheet" href="/Css/sidebar.css">
-    <link rel="stylesheet" href="/Css/properties.css">
+    <link rel="stylesheet" href="../Css/styles.css">
+    <link rel="stylesheet" href="../Css/sidebar.css">
+    <link rel="stylesheet" href="../Css/header.css">
+    <link rel="stylesheet" href="../Css/properties.css">
 </head>
 <body>
 
@@ -17,31 +18,32 @@
     <div id="sidebar-container"></div>
 
     <!-- 2. Main Content Area -->
+    <div id="header-container"></div>
     <main id="main-content" class="main-content">
         <!-- Header Container -->
-        <div id="header-container"></div>
-        <div id="properties-view" class="view-content active">
+        <div id="properties-view">
+            <div class="page-header">
+                <div>
+                    <h1>Properties</h1>
+                    <p>View and manage all your properties</p>
+                </div>
                 <button id="add-property-btn" class="btn-primary">
-                    <i data-lucide="plus"></i>
+                    <i class="fa-solid fa-plus"></i>
                     <span>Add Property</span>
                 </button>
             </div>
 
-            <!-- Search and Filter Bar -->
-            <div>
-                <div>
-                    <i data-lucide="search"></i>
-                    <input type="text" id="search-input" placeholder="Search by name or address..." class="form-input">
-                </div>
+            <div class="search-container">
+                <i class="fa-solid fa-search"></i>
+                <input type="text" id="search-input" placeholder="Search by name or address..." class="form-input">
             </div>
 
-            <!-- Property List -->
             <div id="property-list">
                 <!-- Property cards will be dynamically inserted here -->
             </div>
 
-            <div id="empty-state">
-                <i data-lucide="building-2"></i>
+            <div id="empty-state" class="empty-state">
+                <i class="fa-solid fa-building"></i>
                 <h3>No properties found</h3>
                 <p>Get started by adding a new property.</p>
             </div>
@@ -49,11 +51,12 @@
     </main>
 
     <!-- Add/Edit Property Modal -->
-    <div id="property-modal" class="modal-overlay"></div>
+    <div id="property-modal"></div>
 
-    <script src="/Js/auth.js"></script>
-    <script src="/Js/api.js"></script>
-    <script src="/Js/shared.js"></script>
-    <script src="/Js/properties.js"></script>
+    <script src="../Js/auth.js"></script>
+    <script src="../Js/api.js"></script>
+    <script src="../Js/shared.js"></script>
+    <script src="../Js/main.js"></script>
+    <script src="../Js/properties.js"></script>
 </body>
 </html>
