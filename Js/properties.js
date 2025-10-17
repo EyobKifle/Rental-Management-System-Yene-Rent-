@@ -3,15 +3,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const propertyModalContainer = document.getElementById('property-modal');
     const propertyList = document.getElementById('property-list');
     const emptyState = document.getElementById('empty-state');
-    const sidebarContainer = document.getElementById('sidebar-container');
     const searchInput = document.getElementById('search-input');
 
     const STORAGE_KEY = 'properties';
     let properties = [];
 
     const initialize = async () => {
-        // Wait for shared components to load before fetching page-specific data
-        await window.rentalUtils.sidebarPromise;
+        await window.rentalUtils.headerPromise;
         properties = await api.get(STORAGE_KEY);
         renderProperties();
     };
@@ -34,31 +32,29 @@ document.addEventListener('DOMContentLoaded', () => {
             propertyList.classList.remove('hidden');
             filteredProperties.forEach(prop => {
                 const card = document.createElement('div');
-                card.className = 'data-card';
+                card.className = 'data-card property-card';
                 card.innerHTML = `
-                    <div class="flex justify-between items-start">
+                    <div class="property-card-header">
                         <div>
-                            <h3 class="text-lg font-bold text-gray-800">${prop.name}</h3>
-                            <p class="text-sm text-gray-500">${prop.address}</p>
+                            <h3>${prop.name}</h3>
+                            <p>${prop.address}</p>
                         </div>
-                        <div class="relative">
-                            <button class="action-dropdown-btn text-gray-400 hover:text-gray-700" data-id="${prop.id}">
-                                <i data-lucide="more-horizontal" class="w-5 h-5"></i>
-                            </button>
-                            <div id="dropdown-${prop.id}" class="dropdown-menu hidden absolute w-40 mt-2 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 edit-btn" data-id="${prop.id}">Edit</a>
-                                <a href="#" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50 delete-btn" data-id="${prop.id}">Delete</a>
+                        <div class="action-dropdown">
+                            <button class="action-dropdown-btn" data-id="${prop.id}"><i data-lucide="more-horizontal"></i></button>
+                            <div id="dropdown-${prop.id}" class="dropdown-menu hidden">
+                                <a href="#" class="dropdown-item edit-btn" data-id="${prop.id}">Edit</a>
+                                <a href="#" class="dropdown-item delete-btn" data-id="${prop.id}">Delete</a>
                             </div>
                         </div>
                     </div>
-                    <div class="mt-4 pt-4 border-t border-gray-200">
-                        <div class="flex justify-between text-sm">
-                            <span class="text-gray-600">Type</span>
-                            <span class="font-medium">${prop.type}</span>
+                    <div class="property-card-details">
+                        <div>
+                            <span>Type</span>
+                            <span>${prop.type}</span>
                         </div>
-                        <div class="flex justify-between text-sm mt-2">
-                            <span class="text-gray-600">Rent</span>
-                            <span class="font-medium">${rentalUtils.formatCurrency(prop.rent)}</span>
+                        <div>
+                            <span>Rent</span>
+                            <span>${rentalUtils.formatCurrency(prop.rent)}</span>
                         </div>
                     </div>
                 `;
@@ -72,12 +68,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const response = await fetch('modal.html');
         propertyModalContainer.innerHTML = await response.text();
         const modal = propertyModalContainer.querySelector('.modal-overlay');
-        const modalTitle = modal.querySelector('#modal-title');
-        const modalContent = modal.querySelector('#modal-content');
+        modal.querySelector('#modal-title').textContent = property ? 'Edit Property' : 'Add New Property';
 
-        modalTitle.textContent = property ? 'Edit Property' : 'Add New Property';
-        modalContent.innerHTML = `
-            <form id="property-form" class="space-y-4">
+        modal.querySelector('#modal-body').innerHTML = `
+            <form id="property-form">
                 <input type="hidden" id="property-id" value="${property ? property.id : ''}">
                 <div class="form-group">
                     <label for="property-name" class="form-label">Property Name</label>
@@ -87,7 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <label for="property-address" class="form-label">Address</label>
                     <input type="text" id="property-address" class="form-input" value="${property ? property.address : ''}" required>
                 </div>
-                <div class="grid grid-cols-2 gap-4">
+                <div class="form-row">
                     <div class="form-group">
                         <label for="property-type" class="form-label">Type</label>
                         <select id="property-type" class="form-input" required>
@@ -101,7 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <input type="number" id="property-rent" class="form-input" value="${property ? property.rent : ''}" required>
                     </div>
                 </div>
-                <div class="flex justify-end space-x-3 pt-4">
+                <div class="form-actions">
                     <button type="button" class="close-modal-btn btn-secondary">Cancel</button>
                     <button type="submit" class="btn-primary">Save Property</button>
                 </div>
@@ -143,7 +137,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Event Delegation for actions
     propertyList.addEventListener('click', (e) => {
-        const target = e.target.closest('a, button');
+        const target = e.target;
         const id = target.closest('[data-id]')?.dataset.id;
 
         if (target.closest('.action-dropdown-btn')) {
@@ -153,13 +147,15 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             const propertyToEdit = properties.find(p => p.id === id);
             openPropertyModal(propertyToEdit);
-        } else if (target.closest('.delete-btn') && rentalUtils.confirm('Are you sure you want to delete this property?')) {
+        } else if (target.closest('.delete-btn')) {
             e.preventDefault();
+            if (rentalUtils.confirm('Are you sure you want to delete this property?')) {
             api.delete(STORAGE_KEY, id).then(() => {
                 properties = properties.filter(p => p.id !== id);
                 renderProperties();
                 rentalUtils.showNotification('Property deleted successfully!', 'error');
             });
+            }
         }
     });
 

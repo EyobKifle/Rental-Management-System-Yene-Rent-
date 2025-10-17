@@ -1,183 +1,47 @@
-/* -------------------------------------------
-   1. DESIGN SYSTEM (CSS Custom Properties/Tokens)
-   ------------------------------------------- */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
-
-:root {
-    /* Colors */
-    --color-primary: #111827;
-    --color-primary-hover: #374151;
-    --color-secondary: #6b7280;
-    --color-accent: #059669; /* Green/Success */
-    --color-error: #dc2626;
-    --color-background: #f7f9fb;
-    --color-surface: #ffffff;
-    --color-surface-hover: #f9fafb;
-    --color-border: #e5e7eb;
-    --color-text-primary: #111827;
-    --color-text-secondary: #6b7280;
-    --color-text-muted: #9ca3af;
-
-    /* Typography */
-    --font-family: 'Inter', sans-serif;
-    --font-size-xs: 0.75rem;
-    --font-size-sm: 0.875rem;
-    --font-size-base: 1rem;
-    --font-size-lg: 1.125rem;
-    --font-size-xl: 1.25rem;
-    --font-size-2xl: 1.5rem;
-    --font-size-3xl: 1.875rem;
-
-    /* Spacing */
-    --spacing-sm: 0.5rem;
-    --spacing-md: 1rem;
-    --spacing-lg: 1.5rem;
-    --spacing-xl: 2rem;
-    --spacing-2xl: 2.5rem;
-
-    /* Border Radius */
-    --radius-md: 0.5rem;
-    --radius-lg: 0.75rem; /* Used for data-card */
-
-    /* Shadows */
-    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-}
-
-/* -------------------------------------------
-   2. GLOBAL BASE & COMPONENT STYLES
-   ------------------------------------------- */
-
-/* Base reset */
-* {
-    box-sizing: border-box;
-}
-
-body {
-    font-family: var(--font-family);
-    color: var(--color-text-primary);
-    line-height: 1.5;
-    margin: 0;
-    padding: 0;
-}
-
-/* Card Styling (Used for the login box) */
-.data-card {
-    background-color: var(--color-surface);
-    border-radius: var(--radius-lg);
-    padding: var(--spacing-lg);
-    box-shadow: var(--shadow-md);
-    border: 1px solid #f3f4f6;
-}
-
-/* Button Styles */
-.btn-primary {
-    background-color: var(--color-primary);
-    color: white;
-    padding: 0.5rem 1rem;
-    border-radius: var(--radius-md);
-    transition: background-color 0.2s ease;
-    font-weight: 500;
-    font-size: var(--font-size-sm);
-    border: none;
-    cursor: pointer;
-}
-.btn-primary:hover {
-    background-color: var(--color-primary-hover);
-}
-
-/* Form Group & Input Styles */
-.form-input {
-    width: 100%;
-    padding: 0.5rem 0.75rem;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
-    /* Use Inter font explicitly for input fields */
-    font-family: var(--font-family);
-}
-.form-input:focus {
-    outline: none;
-    border-color: var(--color-text-secondary);
-    box-shadow: 0 0 0 2px rgba(107, 114, 128, 0.5);
-}
-.form-label {
-    display: block;
-    font-size: var(--font-size-sm);
-    font-weight: 500;
-    color: var(--color-text-secondary);
-    margin-bottom: 0.25rem;
-}
-.form-group {
-    margin-bottom: var(--spacing-md); /* 1rem */
-}
-
-/* -------------------------------------------
-   3. LOGIN PAGE LAYOUT & SPECIFIC OVERRIDES
-   ------------------------------------------- */
-
-/* Base container for the login screen: Centers the content on the page */
 .login-page {
-    /* Use design token for background color */
-    background-color: var(--color-background);
-
-    /* Center content vertically and horizontally */
+    background-color: var(--gray-50);
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    
-    /* Ensure no margin/padding interference */
     margin: 0;
-    padding: var(--spacing-lg); /* Add padding for mobile view safety */
+    padding: 1.5rem;
     font-family: var(--font-family);
 }
 
-/* Override for the sign-in button to ensure full width and centering text */
+.login-container {
+    width: 100%;
+    max-width: 28rem;
+}
+
+.login-card {
+    padding: 2rem;
+    box-shadow: var(--shadow-lg);
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.login-header h1 {
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: var(--gray-800);
+}
+
+.login-header p {
+    color: var(--gray-500);
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
 #login-form .btn-primary {
     display: flex;
     justify-content: center;
+    width: 100%;
 }
-
-/* Specific styling for the login card and its shadow */
-.login-page .data-card {
-    /* Use a slightly larger shadow for emphasis on this focused screen */
-    box-shadow: var(--shadow-lg); 
-}
-
-/* Typography styles matching tokens for the title and description */
-.text-3xl.font-bold {
-    color: var(--color-text-primary);
-    font-size: var(--font-size-3xl);
-    font-weight: 700;
-}
-
-.text-gray-500 {
-    color: var(--color-text-secondary);
-    font-size: var(--font-size-base);
-}
-
-/* -------------------------------------------
-   4. UTILITY CLASSES (Mimicking Tailwind)
-   ------------------------------------------- */
-
-/* Flexbox & Layout */
-.flex { display: flex; }
-.justify-center { justify-content: center; }
-.items-center { align-items: center; }
-.w-full { width: 100%; }
-.max-w-md { max-width: 28rem; } /* 448px, slightly larger than default 24rem for better form feel */
-.min-h-screen { min-height: 100vh; }
-
-/* Spacing & Borders */
-.p-8 { padding: 2rem; }
-.mb-8 { margin-bottom: 2rem; }
-.space-y-6 > * + * { margin-top: 1.5rem; }
-
-/* Typography */
-.text-center { text-align: center; }
-.text-gray-800 { color: #1f2937; } /* Close to primary text */
-
-/* Utility for element visibility (used for titles/text) */
-.font-bold { font-weight: 700; }

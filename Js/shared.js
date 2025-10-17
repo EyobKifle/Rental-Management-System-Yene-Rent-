@@ -18,11 +18,20 @@ class RentalUtils {
      */
     init() {
         this.headerPromise = this.loadComponent('#header-container', 'header.html').then(headerContainer => {
-            if (headerContainer) this.setPageTitle();
+            if (headerContainer) {
+                this.setPageTitle();
+                this.setupUserAvatar();
+            }
             return headerContainer;
         });
-        this.sidebarPromise = this.loadComponent('#sidebar-container', 'header.html').then(() => {
+        this.sidebarPromise = this.loadComponent('#sidebar-container', 'sidebar.html').then(() => {
             this.setupNavigation();
+        });
+        // Wait for both header and sidebar to load before setting up interactions
+        Promise.all([this.headerPromise, this.sidebarPromise]).then(([headerContainer]) => {
+            if (headerContainer) {
+                this.setupHeaderInteractions(headerContainer);
+            }
         });
         this.setupGlobalEventListeners(); // This now includes modal handlers
     }
@@ -40,9 +49,8 @@ class RentalUtils {
                     return null;
                 }
                 let htmlContent = await response.text();
-                if (filePath.endsWith('header.html')) htmlContent = this.extractComponentHtml(htmlContent, selector);
-                container.insertAdjacentHTML('afterbegin', htmlContent);
-                this.setupLucideIcons(); // Re-run to render icons in loaded components
+                if (filePath.endsWith('header.html') || filePath.endsWith('sidebar.html')) htmlContent = this.extractComponentHtml(htmlContent, selector);
+                container.innerHTML = htmlContent;
                 return container;
             } catch (error) {
                 console.error(`Error loading component from ${filePath}:`, error);
@@ -62,7 +70,7 @@ class RentalUtils {
      * @returns {string} The extracted HTML for the component.
      */
     extractComponentHtml(html, selector) {
-        const parser = new DOMParser();
+        const parser = new DOMParser(); 
         const doc = parser.parseFromString(html, 'text/html');
         if (selector === '#sidebar-container') {
             return doc.querySelector('.sidebar')?.outerHTML || '';
@@ -77,6 +85,71 @@ class RentalUtils {
         const pageTitleEl = document.getElementById('page-title');
         const pageTitle = document.title.split(' - ')[0];
         if (pageTitleEl && pageTitle) pageTitleEl.textContent = pageTitle;
+    }
+
+    /**
+     * Sets up the user avatar in the header.
+     * Displays the user's image or their first initial as a fallback.
+     */
+    setupUserAvatar() {
+        const avatarContainer = document.getElementById('user-avatar-container');
+        if (!avatarContainer) return;
+
+        try {
+            const user = JSON.parse(sessionStorage.getItem('currentUser'));
+            if (user?.avatarUrl) {
+                avatarContainer.innerHTML = `<img src="${user.avatarUrl}" alt="${user.name}">`;
+            } else if (user?.name) {
+                const initial = user.name.charAt(0).toUpperCase();
+                avatarContainer.textContent = initial;
+            } else {
+                avatarContainer.textContent = 'U'; // Default fallback
+            }
+        } catch (e) {
+            console.error("Could not parse user from sessionStorage", e);
+            avatarContainer.textContent = 'U'; // Default fallback on error
+        }
+    }
+
+    /**
+     * Sets up interactive elements within the header, like dropdowns and the sidebar toggle.
+     * @param {HTMLElement} headerContainer - The container element for the header.
+     */
+    setupHeaderInteractions(headerContainer) {
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggle = headerContainer.querySelector('#sidebar-toggle');
+        const userMenuButton = headerContainer.querySelector('#user-menu-button');
+        const userMenuDropdown = headerContainer.querySelector('#user-menu-dropdown');
+        const languageMenuButton = headerContainer.querySelector('#language-menu-button');
+        const languageMenuDropdown = headerContainer.querySelector('#language-menu-dropdown');
+
+        if (sidebarToggle && sidebar) {
+            sidebarToggle.addEventListener('click', () => {
+                if (window.innerWidth <= 1024) {
+                    // Mobile: toggle 'open' class on sidebar
+                    sidebar.classList.toggle('open');
+                } else {
+                    // Desktop: toggle 'sidebar-collapsed' on body
+                    document.body.classList.toggle('sidebar-collapsed');
+                }
+            });
+        }
+
+        const setupDropdown = (button, dropdown) => {
+            if (button && dropdown) {
+                button.addEventListener('click', (e) => {
+                    e.stopPropagation(); // Prevent the global click listener from closing it immediately
+                    // Close other dropdowns
+                    document.querySelectorAll('.dropdown-menu').forEach(d => {
+                        if (d !== dropdown) d.classList.add('hidden');
+                    });
+                    dropdown.classList.toggle('hidden');
+                });
+            }
+        };
+
+        setupDropdown(userMenuButton, userMenuDropdown);
+        setupDropdown(languageMenuButton, languageMenuDropdown);
     }
 
     /**
@@ -102,17 +175,27 @@ class RentalUtils {
             // Close all open dropdowns if click is outside
             const dropdownBtn = event.target.closest('.action-dropdown-btn');
             const openDropdowns = document.querySelectorAll('.dropdown-menu:not(.hidden)');
-            
+
+            // If the click is not on a dropdown button, close all open dropdowns.
             if (!dropdownBtn) {
                 openDropdowns.forEach(dropdown => {
                     dropdown.classList.add('hidden');
                 });
             }
 
+            // This logic seems outdated, the new dropdown logic handles this better.
             // Close user menu if click is outside
             const userMenu = document.getElementById('user-menu');
-            if (userMenu && !userMenu.classList.contains('hidden') && !event.target.closest('#user-menu-button') && !userMenu.contains(event.target)) {
-                userMenu.classList.add('hidden');
+            if (userMenu && userMenu.classList.contains('active') && !event.target.closest('.user-menu-container')) {
+                userMenu.classList.remove('active');
+            }
+
+            // Close sidebar on mobile if click is outside
+            const sidebar = document.getElementById('sidebar');
+            const sidebarToggle = document.getElementById('sidebar-toggle');
+            if (sidebar && window.innerWidth <= 1024 && sidebar.classList.contains('open') &&
+                !sidebar.contains(event.target) && !sidebarToggle.contains(event.target)) {
+                sidebar.classList.remove('open');
             }
 
             // Modal closing logic
@@ -125,11 +208,17 @@ class RentalUtils {
             }
         });
 
-        // ESC key to close modals
+        // ESC key to close modals and sidebar on mobile
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 const openModal = document.querySelector('.modal-overlay:not(.hidden)');
                 if (openModal) this.closeModal(openModal);
+
+                // Close sidebar on mobile
+                const sidebar = document.getElementById('sidebar');
+                if (sidebar && window.innerWidth <= 1024 && sidebar.classList.contains('open')) {
+                    sidebar.classList.remove('open');
+                }
             }
         });
     }
@@ -149,7 +238,6 @@ class RentalUtils {
     openModal(modal) {
         modal.classList.remove('hidden');
         document.body.style.overflow = 'hidden';
-        this.setupLucideIcons(); // Ensure icons in modals are rendered
     }
 
     /**
@@ -162,29 +250,59 @@ class RentalUtils {
     }
 
     /**
-     * Initializes Lucide icons on the page.
-     */
-    setupLucideIcons() {
-        if (typeof lucide !== 'undefined') {
-            lucide.createIcons();
-        }
-    }
-
-    /**
      * Validates a form's required fields.
      * @param {HTMLFormElement} form - The form to validate.
      * @returns {boolean} - True if the form is valid, false otherwise.
      */
     validateForm(form) {
-        const inputs = form.querySelectorAll('input[required], select[required], textarea[required]');
+        const inputs = form.querySelectorAll('[required]');
         let isValid = true;
 
         inputs.forEach(input => {
+            this.clearError(input); // Clear previous errors before validating
+            let hasError = false;
+
+            // Rule 1: Check if the field is empty
             if (!input.value.trim()) {
                 this.showError(input, 'This field is required');
                 isValid = false;
-            } else {
-                this.clearError(input);
+                hasError = true;
+            }
+
+            // Rule 2: Check for specific types if the field is not empty
+            if (!hasError) {
+                switch (input.type) {
+                    case 'email':
+                        // A simple regex to check for a valid email format
+                        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                        if (!emailRegex.test(input.value)) {
+                            this.showError(input, 'Please enter a valid email address.');
+                            isValid = false;
+                        }
+                        break;
+                    
+                    case 'tel':
+                        // A simple regex for phone numbers (allows digits, spaces, dashes, parens)
+                        const phoneRegex = /^[0-9\s\-\(\)]+$/;
+                        if (!phoneRegex.test(input.value)) {
+                            this.showError(input, 'Please enter a valid phone number.');
+                            isValid = false;
+                        }
+                        break;
+
+                    case 'number':
+                        const min = input.getAttribute('min');
+                        const max = input.getAttribute('max');
+                        if (min && parseFloat(input.value) < parseFloat(min)) {
+                            this.showError(input, `Value must be at least ${min}.`);
+                            isValid = false;
+                        }
+                        if (max && parseFloat(input.value) > parseFloat(max)) {
+                            this.showError(input, `Value cannot exceed ${max}.`);
+                            isValid = false;
+                        }
+                        break;
+                }
             }
         });
 
@@ -200,15 +318,19 @@ class RentalUtils {
         // Remove existing error
         this.clearError(input);
 
-        // Add error class
-        input.classList.add('border-red-500');
+        // Add error class to the input
+        input.classList.add('input-error');
 
         // Create error message
         const errorDiv = document.createElement('div');
-        errorDiv.className = 'text-red-500 text-xs mt-1 error-message';
+        errorDiv.className = 'error-message';
         errorDiv.textContent = message;
 
-        input.parentNode.appendChild(errorDiv);
+        // Insert the error message after the input field
+        if (input.parentNode) {
+            // Using insertAdjacentElement is safer if other elements are siblings
+            input.parentNode.insertBefore(errorDiv, input.nextSibling);
+        }
     }
 
     /**
@@ -216,7 +338,7 @@ class RentalUtils {
      * @param {HTMLElement} input - The input element to clear.
      */
     clearError(input) {
-        input.classList.remove('border-red-500');
+        input.classList.remove('input-error');
         const errorMsg = input.parentNode.querySelector('.error-message');
         if (errorMsg) errorMsg.remove();
     }
@@ -234,11 +356,7 @@ class RentalUtils {
 
         // Create notification
         const notification = document.createElement('div');
-        notification.className = `notification fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg ${
-            type === 'success' ? 'bg-green-500' :
-            type === 'error' ? 'bg-red-500' :
-            type === 'warning' ? 'bg-yellow-500' : 'bg-blue-500'
-        } text-white`;
+        notification.className = `notification notification-${type} notification-base`;
         notification.textContent = message;
 
         document.body.appendChild(notification);
@@ -255,13 +373,18 @@ class RentalUtils {
      * Formats a number as a currency string.
      * @param {number} amount - The amount to format.
      * @param {string} [currency='ETB'] - The currency code.
+     * @param {boolean} [compact=false] - If true, uses compact notation (e.g., 'K' for thousands).
      * @returns {string} - The formatted currency string.
      */
-    formatCurrency(amount, currency = 'ETB') {
-        return new Intl.NumberFormat('en-US', {
+    formatCurrency(amount, currency = 'ETB', compact = false) {
+        const options = {
             style: 'currency',
             currency: currency,
             minimumFractionDigits: 0
+        };
+        if (compact) options.notation = 'compact';
+        return new Intl.NumberFormat('en-US', {
+            ...options
         }).format(amount || 0);
     }
 
@@ -301,6 +424,21 @@ class RentalUtils {
     generateId() {
         return Date.now().toString(36) + Math.random().toString(36).substr(2);
     }
+
+    /**
+     * Reads a file and returns its content as a Data URL.
+     * @param {File} file - The file to read.
+     * @returns {Promise<string>} A promise that resolves with the Data URL.
+     */
+    readFileAsDataURL(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = (error) => reject(error);
+            reader.readAsDataURL(file);
+        });
+    }
+
 
     /**
      * Creates a debounced function that delays invoking func until after wait milliseconds.

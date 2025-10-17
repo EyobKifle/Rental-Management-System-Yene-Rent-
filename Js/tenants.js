@@ -36,36 +36,35 @@ document.addEventListener('DOMContentLoaded', () => {
             filteredTenants.forEach(tenant => {
                 const property = properties.find(p => p.id === tenant.propertyId);
                 const card = document.createElement('div');
-                card.className = 'data-card';
+                card.className = 'data-card tenant-card';
                 card.innerHTML = `
-                    <div class="flex justify-between items-start">
+                    <div class="tenant-card-header">
                         <div>
-                            <h3 class="text-lg font-bold text-gray-800">${tenant.name}</h3>
-                            <p class="text-sm text-gray-500">${tenant.email}</p>
-                            <p class="text-sm text-gray-500">${tenant.phone}</p>
+                            <h3>${tenant.name}</h3>
+                            <p>${tenant.email}</p>
+                            <p>${tenant.phone}</p>
                         </div>
-                        <div class="relative">
-                            <button class="action-dropdown-btn text-gray-400 hover:text-gray-700" data-id="${tenant.id}"><i data-lucide="more-horizontal" class="w-5 h-5"></i></button>
+                        <div class="action-dropdown">
+                            <button class="action-dropdown-btn" data-id="${tenant.id}"><i class="fa-solid fa-ellipsis-vertical"></i></button>
                             <div id="dropdown-${tenant.id}" class="dropdown-menu hidden">
-                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 edit-btn" data-id="${tenant.id}">Edit</a>
-                                <a href="#" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50 delete-btn" data-id="${tenant.id}">Delete</a>
+                                <a href="#" class="dropdown-item edit-btn" data-id="${tenant.id}"><i class="fa-solid fa-pencil"></i>Edit</a>
+                                <a href="#" class="dropdown-item delete-btn" data-id="${tenant.id}"><i class="fa-solid fa-trash-can"></i>Delete</a>
                             </div>
                         </div>
                     </div>
-                    <div class="mt-4 pt-4 border-t border-gray-200">
-                        <div class="flex justify-between text-sm">
-                            <span class="text-gray-600">Property</span>
-                            <span class="font-medium">${property ? property.name : 'Unassigned'}</span>
+                    <div class="tenant-card-details">
+                        <div>
+                            <span>Property</span>
+                            <span>${property ? property.name : 'Unassigned'}</span>
                         </div>
-                        <div class="flex justify-between text-sm mt-2">
-                            <span class="text-gray-600">Move-in Date</span>
-                            <span class="font-medium">${rentalUtils.formatDate(tenant.moveInDate)}</span>
+                        <div>
+                            <span>Move-in Date</span>
+                            <span>${rentalUtils.formatDate(tenant.moveInDate)}</span>
                         </div>
                     </div>
                 `;
                 tenantList.appendChild(card);
             });
-            rentalUtils.setupLucideIcons();
         }
     };
 
@@ -77,14 +76,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const propertyOptions = properties.map(p => `<option value="${p.id}" ${tenant && tenant.propertyId === p.id ? 'selected' : ''}>${p.name}</option>`).join('');
 
-        modal.querySelector('#modal-content').innerHTML = `
-            <form id="tenant-form" class="space-y-4">
+        modal.querySelector('#modal-body').innerHTML = `
+            <form id="tenant-form">
                 <input type="hidden" id="tenant-id" value="${tenant ? tenant.id : ''}">
                 <div class="form-group">
                     <label for="tenant-name" class="form-label">Full Name</label>
                     <input type="text" id="tenant-name" class="form-input" value="${tenant ? tenant.name : ''}" required>
                 </div>
-                <div class="grid grid-cols-2 gap-4">
+                <div class="form-row">
                     <div class="form-group">
                         <label for="tenant-email" class="form-label">Email</label>
                         <input type="email" id="tenant-email" class="form-input" value="${tenant ? tenant.email : ''}" required>
@@ -94,7 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <input type="tel" id="tenant-phone" class="form-input" value="${tenant ? tenant.phone : ''}" required>
                     </div>
                 </div>
-                <div class="grid grid-cols-2 gap-4">
+                <div class="form-row">
                     <div class="form-group">
                         <label for="tenant-property" class="form-label">Assigned Property</label>
                         <select id="tenant-property" class="form-input" required>
@@ -107,7 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <input type="date" id="tenant-move-in" class="form-input" value="${tenant ? tenant.moveInDate : ''}" required>
                     </div>
                 </div>
-                <div class="flex justify-end space-x-3 pt-4">
+                <div class="form-actions">
                     <button type="button" class="close-modal-btn btn-secondary">Cancel</button>
                     <button type="submit" class="btn-primary">Save Tenant</button>
                 </div>

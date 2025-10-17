@@ -4,74 +4,57 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rental System Dashboard</title>
-    <!-- Load Chart.js for Analytics -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
-    <!-- Load Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Custom Styles -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="/Css/styles.css">
     <link rel="stylesheet" href="/Css/sidebar.css">
+    <link rel="stylesheet" href="/Css/header.css">
     <link rel="stylesheet" href="/Css/dashboard.css">
 </head>
-<body class="flex min-h-screen">
+<body class="app-layout">
 
-    <!-- 1. Sidebar Navigation -->
+    <div id="header-container"></div>
     <div id="sidebar-container"></div>
+    <main id="main-content" class="main-content">
+        <div id="dashboard-view">
+            <div class="page-header">
+                <h1>Dashboard</h1>
+                <p>Welcome back, here's your rental overview.</p>
+            </div>
 
-    <!-- 2. Main Content Area -->
-    <main id="main-content" class="main-content ml-[280px]">
-        <!-- Header Container -->
-        <div id="header-container"></div>
-        <!-- Dashboard View -->
-        <div id="dashboard-view" class="view-content active">
-            <h1 class="text-3xl font-bold text-gray-900 mb-2">Dashboard</h1>
-            <p class="text-gray-500 mb-8">Welcome back, here's your rental overview.</p>
-
-            <!-- Overview Stats -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="stats-grid">
                 <div class="data-card">
-                    <p class="text-gray-500 text-sm">Total Properties</p>
-                    <h2 class="text-2xl font-bold text-gray-800 mt-1">0</h2>
+                    <p>Total Properties</p>
+                    <h2>0</h2>
                 </div>
                 <div class="data-card">
-                    <p class="text-gray-500 text-sm">Active Tenants</p>
-                    <h2 class="text-2xl font-bold text-gray-800 mt-1">0</h2>
+                    <p>Active Tenants</p>
+                    <h2>0</h2>
                 </div>
                 <div class="data-card">
-                    <p class="text-gray-500 text-sm">Monthly Revenue</p>
-                    <h2 class="text-2xl font-bold text-green-600 mt-1">ETB 0</h2>
+                    <p>Monthly Revenue</p>
+                    <h2 class="text-green">ETB 0</h2>
                 </div>
                 <div class="data-card">
-                    <p class="text-gray-500 text-sm">Outstanding Balance</p>
-                    <h2 class="text-2xl font-bold text-red-500 mt-1">ETB 0</h2>
+                    <p>Outstanding Balance</p>
+                    <h2 class="text-red">ETB 0</h2>
                 </div>
             </div>
 
-            <!-- Recent Activity & Quick Actions -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div class="data-card lg:col-span-2">
-                    <h3 class="text-xl font-semibold mb-4">Recent Activity</h3>
-                    <div class="space-y-4">
-                        <!-- Activity items will be dynamically added here -->
-                        <p class="text-sm text-gray-500">No recent activity.</p>
+            <div class="activity-grid">
+                <div class="data-card activity-card">
+                    <h3>Recent Activity</h3>
+                    <div class="activity-list">
+                        <p>No recent activity.</p>
                     </div>
                 </div>
 
-                <div class="data-card">
-                    <h3 class="text-xl font-semibold mb-4">Quick Actions</h3>
-                    <div class="space-y-3">
-                        <a href="properties.html#add" class="flex items-center space-x-2 px-4 py-2 text-sm font-medium bg-gray-900 text-white rounded-lg hover:bg-gray-700 transition w-full justify-center">
-                            <i data-lucide="plus" class="w-4 h-4"></i>
-                            <span>Add Property</span>
-                        </a>
-                        <a href="tenants.html#add" class="flex items-center space-x-2 px-4 py-2 text-sm font-medium bg-gray-900 text-white rounded-lg hover:bg-gray-700 transition w-full justify-center">
-                            <i data-lucide="user-plus" class="w-4 h-4"></i>
-                            <span>Add Tenant</span>
-                        </a>
-                        <a href="payments.html#record" class="flex items-center space-x-2 px-4 py-2 text-sm font-medium bg-gray-900 text-white rounded-lg hover:bg-gray-700 transition w-full justify-center">
-                            <i data-lucide="banknote" class="w-4 h-4"></i>
-                            <span>Record Payment</span>
-                        </a>
+                <div class="data-card quick-actions-card">
+                    <h3>Quick Actions</h3>
+                    <div class="quick-actions">
+                        <a href="properties.html#add" class="action-link"><i class="fa-solid fa-plus"></i><span>Add Property</span></a>
+                        <a href="tenants.html#add" class="action-link"><i class="fa-solid fa-user-plus"></i><span>Add Tenant</span></a>
+                        <a href="payments.html#record" class="action-link"><i class="fa-solid fa-money-bill-wave"></i><span>Record Payment</span></a>
                     </div>
                 </div>
             </div>
@@ -79,8 +62,9 @@
     </main>
 
 </body>
-<script src="/Js/auth.js"></script>
-<script src="/Js/api.js"></script>
-<script src="/Js/shared.js"></script>
-<script src="/dashboard.js"></script>
+<script src="/Js/auth.js"></script> 
+<script src="/Js/api.js"></script> 
+<script src="/Js/shared.js"></script> 
+<script src="/Js/main.js"></script> 
+<script src="/Js/dashboard.js"></script> 
 </html>

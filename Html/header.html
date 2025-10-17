@@ -1,61 +1,40 @@
-<!-- Header Component -->
-<header class="header fixed top-0 left-[var(--sidebar-width)] right-0 z-50 bg-white shadow-sm flex items-center justify-between px-4 py-3 transition-all">
-  <!-- Left: Hamburger -->
-  <div class="flex items-center space-x-3">
-    <button id="sidebar-toggle" class="p-2 hover:bg-gray-100 rounded-lg">
-      <i class="fa-solid fa-bars text-gray-700 text-xl"></i>
+<header class="header">
+  <div class="header-left">
+    <button id="sidebar-toggle" class="header-icon-btn">
+      <i class="fa-solid fa-bars"></i>
     </button>
   </div>
 
-  <!-- Center: Title -->
-  <h1 id="page-title" class="text-lg font-bold text-gray-800 text-center flex-1">
-    Rental Management
-  </h1>
+  <div class="header-center">
+    <h1 id="page-title">Rental Management</h1>
+  </div>
 
-  <!-- Right: Notifications + User -->
-  <div class="flex items-center space-x-4">
-    <button class="relative hover:bg-gray-100 p-2 rounded-lg">
-      <i class="fa-solid fa-bell text-gray-700 text-lg"></i>
-      <span class="absolute top-1 right-1 block w-2 h-2 bg-red-500 rounded-full"></span>
+  <div class="header-right">
+    <div class="language-menu menu-container">
+      <button id="language-menu-button" class="header-icon-btn">
+        <i class="fa-solid fa-globe"></i>
+      </button>
+      <div id="language-menu-dropdown" class="dropdown-menu hidden">
+        <a href="#" class="dropdown-item">English</a>
+        <a href="#" class="dropdown-item">Amharic</a>
+      </div>
+    </div>
+
+    <button class="header-icon-btn notification-btn">
+      <i class="fa-solid fa-bell"></i>
+      <span class="notification-badge"></span>
     </button>
 
-    <!-- User Profile -->
-    <div class="relative">
-      <button id="user-menu-button" class="flex items-center space-x-2 cursor-pointer p-2 hover:bg-gray-100 rounded-lg">
-        <img src="https://i.pravatar.cc/40" alt="User" class="w-8 h-8 rounded-full object-cover">
-        <div class="hidden sm:block text-left">
-          <p class="font-semibold text-sm">Abebe Bekele</p>
-          <p class="text-xs text-gray-500">Owner</p>
-        </div>
+    <div class="user-menu menu-container">
+      <button id="user-menu-button" class="header-icon-btn">
+        <div id="user-avatar-container" class="user-avatar"></div>
       </button>
-      <!-- User Dropdown -->
-      <div id="user-menu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
-        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">My Profile</a>
-        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Settings</a>
-        <div class="border-t border-gray-100 my-1"></div>
-        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Log Out</a>
+      <div id="user-menu-dropdown" class="dropdown-menu hidden">
+        <a href="#" class="dropdown-item">My Profile</a>
+        <a href="settings.html" class="dropdown-item">Settings</a>
+        <div class="dropdown-divider"></div>
+        <a href="#" class="dropdown-item">Log Out</a>
       </div>
     </div>
   </div>
 </header>
-
-<!-- Sidebar Component -->
-<aside id="sidebar" class="sidebar fixed top-0 left-0 h-full bg-white shadow-lg border-r border-gray-200 z-40">
-  <div class="p-4 border-b border-gray-100">
-    <h1 class="text-xl font-bold text-gray-800">Rental System</h1>
-  </div>
-  <nav class="p-4 space-y-2">
-    <a href="index.html" class="nav-link active"><i class="fa-solid fa-gauge"></i>Dashboard</a>
-    <a href="properties.html" class="nav-link"><i class="fa-solid fa-building"></i>Properties</a>
-    <a href="tenants.html" class="nav-link"><i class="fa-solid fa-users"></i>Tenants</a>
-    <a href="leases.html" class="nav-link"><i class="fa-solid fa-file-contract"></i>Leases</a>
-    <a href="payments.html" class="nav-link"><i class="fa-solid fa-credit-card"></i>Payments</a>
-    <a href="utilities.html" class="nav-link"><i class="fa-solid fa-bolt"></i>Utilities</a>
-    <a href="expenses.html" class="nav-link"><i class="fa-solid fa-wallet"></i>Expenses</a>
-    <a href="documents.html" class="nav-link"><i class="fa-solid fa-folder"></i>Documents</a>
-    <a href="analytics.html" class="nav-link"><i class="fa-solid fa-chart-line"></i>Analytics</a>
-  </nav>
-  <div class="p-4 border-t border-gray-100">
-    <a href="settings.html" class="nav-link"><i class="fa-solid fa-gear"></i>Settings</a>
-  </div>
-</aside>

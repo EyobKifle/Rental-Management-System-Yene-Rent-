@@ -4,23 +4,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const initialize = async () => {
         await window.rentalUtils.headerPromise; // Ensure header/sidebar are loaded
-        const payments = await api.get('payments');
-        const expenses = [
-            { category: 'Maintenance', amount: 4200, date: '2024-04-15' },
-            { category: 'Utilities', amount: 1500, date: '2024-04-20' },
-            { category: 'Maintenance', amount: 2800, date: '2024-05-10' },
-            { category: 'Taxes', amount: 12000, date: '2024-05-25' },
-        ];
+        const [payments, expenses] = await Promise.all([
+            api.get('payments'),
+            api.get('expenses')
+        ]);
 
         const totalRevenue = payments.reduce((sum, p) => sum + p.amount, 0);
         const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
         const netProfit = totalRevenue - totalExpenses;
 
+        const { incomeByMethod, expenseByCategory } = aggregateData(payments, expenses);
+
         updateStatCards(totalRevenue, totalExpenses, netProfit);
         renderProfitLossChart(payments, expenses);
-        renderIncomeOverviewChart(payments);
-        renderExpenseBreakdownChart(expenses);
-        updateFinancialSummary(payments, expenses, totalRevenue, totalExpenses, netProfit);
+        renderIncomeOverviewChart(incomeByMethod);
+        renderExpenseBreakdownChart(expenseByCategory);
+        updateFinancialSummary(incomeByMethod, expenseByCategory, totalRevenue, totalExpenses, netProfit);
     };
 
     /**
@@ -39,10 +38,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const ctx = document.getElementById('profitLossChart').getContext('2d');
         if (profitLossChartInstance) profitLossChartInstance.destroy();
 
-        // Simple monthly data for the last 6 months (in a real app, this would be more robust)
-        const labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
-        const incomeData = [15000, 18000, 22000, 25000, 24000, 28000];
-        const expenseData = [8000, 9000, 8500, 10000, 11000, 9500];
+        const { labels, monthlyIncome } = getMonthlyData(payments);
+        const { monthlyExpenses } = getMonthlyData(expenses);
+
+        const incomeData = labels.map(label => monthlyIncome[label] || 0);
+        const expenseData = labels.map(label => monthlyExpenses[label] || 0);
         const profitData = incomeData.map((income, i) => income - expenseData[i]);
 
         profitLossChartInstance = new Chart(ctx, {
@@ -50,23 +50,28 @@ document.addEventListener('DOMContentLoaded', () => {
             data: {
                 labels,
                 datasets: [
-                    { label: 'Income', data: incomeData, borderColor: '#10b981', tension: 0.1, fill: false },
-                    { label: 'Expenses', data: expenseData, borderColor: '#ef4444', tension: 0.1, fill: false },
-                    { label: 'Profit', data: profitData, borderColor: '#3b82f6', tension: 0.1, fill: false, borderDash: [5, 5] }
+                    { label: 'Income', data: incomeData, borderColor: 'var(--success-color)', tension: 0.1, fill: false },
+                    { label: 'Expenses', data: expenseData, borderColor: 'var(--danger-color)', tension: 0.1, fill: false },
+                    { label: 'Profit', data: profitData, borderColor: 'var(--primary-color)', tension: 0.1, fill: false, borderDash: [5, 5] }
                 ]
             },
-            options: { responsive: true, maintainAspectRatio: false }
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        ticks: {
+                            callback: (value) => rentalUtils.formatCurrency(value, 'ETB', true)
+                        }
+                    }
+                }
+            }
         });
     };
 
-    const renderIncomeOverviewChart = (payments) => {
+    const renderIncomeOverviewChart = (incomeByMethod) => {
         const ctx = document.getElementById('incomeOverviewChart').getContext('2d');
         if (incomeOverviewChartInstance) incomeOverviewChartInstance.destroy();
-
-        const incomeByMethod = payments.reduce((acc, p) => {
-            acc[p.method] = (acc[p.method] || 0) + p.amount;
-            return acc;
-        }, {});
 
         incomeOverviewChartInstance = new Chart(ctx, {
             type: 'doughnut',
@@ -74,21 +79,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 labels: Object.keys(incomeByMethod),
                 datasets: [{
                     data: Object.values(incomeByMethod),
-                    backgroundColor: ['#1d4ed8', '#16a34a', '#f97316'],
+                    backgroundColor: ['#1d4ed8', 'var(--success-color)', 'var(--warning-color)', '#8b5cf6'],
                 }]
             },
-            options: { responsive: true, maintainAspectRatio: false }
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false,
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: (context) => `${context.label}: ${rentalUtils.formatCurrency(context.raw)}`
+                        }
+                    }
+                }
+            }
         });
     };
 
-    const renderExpenseBreakdownChart = (expenses) => {
+    const renderExpenseBreakdownChart = (expenseByCategory) => {
         const ctx = document.getElementById('expenseBreakdownChart').getContext('2d');
         if (expenseBreakdownChartInstance) expenseBreakdownChartInstance.destroy();
-
-        const expenseByCategory = expenses.reduce((acc, e) => {
-            acc[e.category] = (acc[e.category] || 0) + e.amount;
-            return acc;
-        }, {});
 
         expenseBreakdownChartInstance = new Chart(ctx, {
             type: 'pie',
@@ -96,17 +106,41 @@ document.addEventListener('DOMContentLoaded', () => {
                 labels: Object.keys(expenseByCategory),
                 datasets: [{
                     data: Object.values(expenseByCategory),
-                    backgroundColor: ['#ef4444', '#f59e0b', '#8b5cf6', '#3b82f6'],
+                    backgroundColor: ['var(--danger-color)', 'var(--warning-color)', '#8b5cf6', '#3b82f6', 'var(--success-color)', 'var(--secondary-color)'],
                 }]
             },
-            options: { responsive: true, maintainAspectRatio: false }
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false,
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: (context) => `${context.label}: ${rentalUtils.formatCurrency(context.raw)}`
+                        }
+                    }
+                }
+            }
         });
     };
 
-    const updateFinancialSummary = (payments, expenses, totalRevenue, totalExpenses, netProfit) => {
+    const updateFinancialSummary = (incomeByMethod, expenseByCategory, totalRevenue, totalExpenses, netProfit) => {
         const incomeSourcesContainer = document.getElementById('summary-income-sources');
         const expenseCategoriesContainer = document.getElementById('summary-expense-categories');
 
+        incomeSourcesContainer.innerHTML = Object.entries(incomeByMethod).map(([method, amount]) => 
+            `<div><span>${method}</span><span>${rentalUtils.formatCurrency(amount)}</span></div>`
+        ).join('');
+
+        expenseCategoriesContainer.innerHTML = Object.entries(expenseByCategory).map(([category, amount]) => 
+            `<div><span>${category}</span><span>${rentalUtils.formatCurrency(amount)}</span></div>`
+        ).join('');
+
+        document.getElementById('summary-total-income').textContent = rentalUtils.formatCurrency(totalRevenue);
+        document.getElementById('summary-total-expenses').textContent = rentalUtils.formatCurrency(totalExpenses);
+        document.getElementById('summary-net-profit').textContent = rentalUtils.formatCurrency(netProfit);
+    };
+
+    const aggregateData = (payments, expenses) => {
         const incomeByMethod = payments.reduce((acc, p) => {
             acc[p.method] = (acc[p.method] || 0) + p.amount;
             return acc;
@@ -117,17 +151,38 @@ document.addEventListener('DOMContentLoaded', () => {
             return acc;
         }, {});
 
-        incomeSourcesContainer.innerHTML = Object.entries(incomeByMethod).map(([method, amount]) => 
-            `<div class="flex justify-between text-sm py-1"><span class="text-gray-600">${method}</span><span class="font-medium">${rentalUtils.formatCurrency(amount)}</span></div>`
-        ).join('');
+        return { incomeByMethod, expenseByCategory };
+    };
 
-        expenseCategoriesContainer.innerHTML = Object.entries(expenseByCategory).map(([category, amount]) => 
-            `<div class="flex justify-between text-sm py-1"><span class="text-gray-600">${category}</span><span class="font-medium">${rentalUtils.formatCurrency(amount)}</span></div>`
-        ).join('');
+    const getLastSixMonths = () => {
+        const months = [];
+        const date = new Date();
+        for (let i = 0; i < 6; i++) {
+            months.push(new Date(date.getFullYear(), date.getMonth() - i, 1));
+        }
+        return months.reverse();
+    };
 
-        document.getElementById('summary-total-income').textContent = rentalUtils.formatCurrency(totalRevenue);
-        document.getElementById('summary-total-expenses').textContent = rentalUtils.formatCurrency(totalExpenses);
-        document.getElementById('summary-net-profit').textContent = rentalUtils.formatCurrency(netProfit);
+    const getMonthlyData = (data, type = 'income') => {
+        const sixMonths = getLastSixMonths();
+        const labels = sixMonths.map(d => d.toLocaleString('default', { month: 'short' }));
+        
+        const monthlyTotals = data.reduce((acc, item) => {
+            const itemDate = new Date(item.date);
+            const monthYear = `${itemDate.getFullYear()}-${itemDate.getMonth()}`;
+            acc[monthYear] = (acc[monthYear] || 0) + item.amount;
+            return acc;
+        }, {});
+
+        const result = {};
+        sixMonths.forEach(date => {
+            const monthLabel = date.toLocaleString('default', { month: 'short' });
+            const monthYearKey = `${date.getFullYear()}-${date.getMonth()}`;
+            result[monthLabel] = monthlyTotals[monthYearKey] || 0;
+        });
+
+        const key = type === 'expense' ? 'monthlyExpenses' : 'monthlyIncome';
+        return { labels, [key]: result };
     };
 
     initialize();

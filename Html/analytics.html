@@ -5,98 +5,90 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Analytics - Rental System</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="/Css/styles.css">
+    <link rel="stylesheet" href="/Css/header.css">
     <link rel="stylesheet" href="/Css/sidebar.css">
     <link rel="stylesheet" href="/Css/analytics.css">
 </head>
 <body>
-
     <div id="sidebar-container"></div>
-
+    <div id="header-container"></div>
     <main id="main-content" class="main-content">
-        <!-- Header Container -->
-        <div id="header-container"></div>
 
-        <div id="analytics-view" class="view-content active">
-            <h1>Analytics</h1>
-            <p>Detailed financial insights and reports</p>
+        <div id="analytics-view">
+            <div class="page-header">
+                <h1>Analytics</h1>
+                <p>Detailed financial insights and reports</p>
+            </div>
 
-            <!-- Top Financial Cards -->
-            <div>
+            <div class="stats-grid">
                 <div class="data-card">
                     <p>Total Revenue</p>
-                    <h2 id="stat-total-revenue">ETB 0</h2>
+                    <h2 id="stat-total-revenue" class="text-green">ETB 0</h2>
                 </div>
                 <div class="data-card">
                     <p>Total Expenses</p>
-                    <h2 id="stat-total-expenses">ETB 0</h2>
+                    <h2 id="stat-total-expenses" class="text-red">ETB 0</h2>
                 </div>
                 <div class="data-card">
                     <p>Net Profit</p>
-                    <h2 id="stat-net-profit">ETB 0</h2>
+                    <h2 id="stat-net-profit" class="text-gray-800">ETB 0</h2>
                 </div>
             </div>
 
-            <!-- Profit & Loss Trend -->
-            <div class="data-card">
-                <h3>Profit & Loss Trend</h3>
-                <canvas id="profitLossChart"></canvas>
-            </div>
-
-            <!-- Income Overview and Expense Breakdown -->
-            <div>
-                <div class="data-card">
-                    <h3>Income Overview</h3>
-                    <canvas id="incomeOverviewChart"></canvas>
+            <div class="analytics-main-grid">
+                <div class="data-card chart-container-large">
+                    <h3>Profit & Loss Trend</h3>
+                    <canvas id="profitLossChart"></canvas>
                 </div>
-                <div class="data-card">
-                    <h3>Expense Breakdown</h3>
-                    <canvas id="expenseBreakdownChart"></canvas>
-                </div>
-            </div>
 
-            <!-- Financial Summary Table -->
-             <div class="data-card">
-                <h3>Financial Summary</h3>
-                <div>
-                    <!-- Income Section -->
-                    <div>
-                        <h4>Income Sources</h4>
-                        <div id="summary-income-sources">
-                            <!-- Dynamic content here -->
-                        </div>
-                        <div>
-                            <span>Total Income</span>
-                            <span id="summary-total-income">ETB 0</span>
+                <div class="analytics-sidebar">
+                    <div class="data-card">
+                        <h3>Financial Summary</h3>
+                        <div class="financial-summary">
+                            <section>
+                                <h4>Income Sources</h4>
+                                <div id="summary-income-sources"></div>
+                                <div class="summary-total">
+                                    <span>Total Income</span>
+                                    <span id="summary-total-income"></span>
+                                </div>
+                            </section>
+                            <section>
+                                <h4>Expense Categories</h4>
+                                <div id="summary-expense-categories"></div>
+                                <div class="summary-total">
+                                    <span>Total Expenses</span>
+                                    <span id="summary-total-expenses"></span>
+                                </div>
+                            </section>
+                            <div class="summary-net-profit">
+                                <span>Net Profit</span>
+                                <span id="summary-net-profit"></span>
+                            </div>
                         </div>
                     </div>
-
-                    <!-- Expense Section -->
-                    <div>
-                        <h4>Expense Categories</h4>
-                        <div id="summary-expense-categories">
-                            <!-- Dynamic content here -->
+                    <div class="small-charts-grid">
+                        <div class="data-card chart-container-small">
+                            <h3>Income Overview</h3>
+                            <canvas id="incomeOverviewChart"></canvas>
                         </div>
-                        <div>
-                            <span>Total Expenses</span>
-                            <span id="summary-total-expenses">ETB 0</span>
+                        <div class="data-card chart-container-small">
+                            <h3>Expense Breakdown</h3>
+                            <canvas id="expenseBreakdownChart"></canvas>
                         </div>
-                    </div>
-
-                    <!-- Net Profit -->
-                    <div>
-                        <span>Net Profit</span>
-                        <span id="summary-net-profit">ETB 0</span>
                     </div>
                 </div>
             </div>
+
         </div>
     </main>
 
     <script src="/Js/auth.js"></script>
     <script src="/Js/api.js"></script>
     <script src="/Js/shared.js"></script>
+    <script src="/Js/main.js"></script>
     <script src="/Js/analytics.js"></script>
 </body>
 </html>

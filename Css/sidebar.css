@@ -1,92 +1,78 @@
-/* =========================================== */
-/* 1. Sidebar Component Styling
-/* =========================================== */
-
+/* === Sidebar Styles === */
 .sidebar {
     width: var(--sidebar-width);
-    background-color: var(--color-surface);
-    border-right: 1px solid var(--color-border);
+    height: calc(100vh - var(--header-height)); /* Full height minus header */
+    position: fixed;
+    top: var(--header-height); /* Positioned below the header */
+    left: 0;
+    background-color: var(--primary-color);
+    color: var(--gray-300);
+    padding: 1.5rem 1rem;
+    display: flex; 
+    flex-direction: column;
     transition: transform 0.3s ease-in-out;
-    transform: translateX(0);
+    z-index: 999;
 }
 
-.sidebar .nav-link {
+.sidebar-header {
     display: flex;
     align-items: center;
-    padding: 0.75rem 1rem; /* 12px 16px */
-    margin-bottom: 0.25rem; /* 4px */
+    gap: 0.75rem;
+    padding: 0 0.5rem 1.5rem;
+    border-bottom: 1px solid var(--gray-700);
+    margin-bottom: 1rem;
+}
+
+.sidebar-header .logo-icon {
+    color: var(--accent-color);
+}
+
+.sidebar-header h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #fff;
+}
+
+.sidebar-nav {
+    flex-grow: 1;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
     border-radius: var(--radius-md);
-    font-size: var(--font-size-sm);
-    font-weight: 500;
-    color: var(--color-text-secondary);
     text-decoration: none;
-    transition: background-color 0.2s ease, color 0.2s ease;
+    color: var(--gray-300);
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+    transition: background-color 0.2s, color 0.2s;
 }
 
-.sidebar .nav-link i {
-    margin-right: 0.75rem; /* 12px */
-    width: 1.25rem; /* 20px */
-    height: 1.25rem; /* 20px */
+.nav-link:hover {
+    background-color: var(--gray-700);
+    color: #fff;
 }
 
-.sidebar .nav-link:hover {
-    background-color: var(--color-surface-hover);
-    color: var(--color-text-primary);
+.nav-link.active {
+    background-color: var(--accent-color);
+    color: #fff;
 }
 
-/* Active link state */
-.sidebar .nav-link.active {
-    background-color: var(--color-primary);
-    color: white;
-    box-shadow: var(--shadow-sm);
-}
+/* --- Sidebar Collapsed State --- */
 
-/* =========================================== */
-/* 2. Main Content & Header Integration
-/* =========================================== */
-
-.main-content {
-    width: calc(100% - var(--sidebar-width));
-    transition: margin-left 0.3s ease-in-out;
-    margin-left: var(--sidebar-width); /* Default state */
-}
-
-#sidebar-toggle {
-    transition: background-color 0.2s ease;
-}
-
-
-/* =========================================== */
-/* 3. Collapsed State (Toggled via JS)
-/* =========================================== */
-
-/* When the body has this class, the sidebar is hidden */
+/* When sidebar is collapsed, move it off-screen */
 .sidebar-collapsed .sidebar {
-    transform: translateX(-100%);
+    transform: translateX(calc(-1 * var(--sidebar-width)));
 }
 
+/* When sidebar is collapsed, remove the left margin from main content */
 .sidebar-collapsed .main-content {
     margin-left: 0;
-    width: 100%;
 }
 
-/* =========================================== */
-/* 4. Responsive Design (for smaller screens)
-/* =========================================== */
-
-@media (max-width: 768px) {
-    .sidebar {
-        /* On mobile, the sidebar is hidden by default */
-        transform: translateX(-100%);
-    }
-
-    .main-content {
-        margin-left: 0;
-        width: 100%;
-    }
-
-    /* When toggled on mobile, it slides in over the content */
-    .sidebar-toggled-on-mobile .sidebar {
-        transform: translateX(0);
-    }
+.sidebar-collapsed #sidebar-toggle {
+    transform: rotate(180deg);
+    transition: transform 0.3s ease-in-out;
 }

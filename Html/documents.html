@@ -4,62 +4,51 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Documents - Rental System</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <link rel="stylesheet" href="/Css/styles.css">
-    <link rel="stylesheet" href="/Css/sidebar.css">
-    <link rel="stylesheet" href="/Css/documents.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="../Css/styles.css">
+    <link rel="stylesheet" href="../Css/sidebar.css">
+    <link rel="stylesheet" href="../Css/header.css">
+    <link rel="stylesheet" href="../Css/documents.css">
 </head>
 <body>
-
     <div id="sidebar-container"></div>
-
+    <div id="header-container"></div>
     <main id="main-content" class="main-content">
-        <!-- Header Container -->
-        <div id="header-container"></div>
-        <div id="documents-view" class="view-content active">
-            <div>
+        <div id="documents-view">
+            <div class="page-header">
                 <div>
                     <h1>Documents</h1>
-                    <p>Manage all your important files and documents</p>
+                    <p>Store and manage important files and documents.</p>
                 </div>
-                <button id="upload-doc-btn" class="btn-primary">
-                    <i data-lucide="upload-cloud"></i>
+                <button id="upload-document-btn" class="btn-primary">
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
                     <span>Upload Document</span>
                 </button>
             </div>
 
-            <div>
-                <div><i data-lucide="search"></i><input type="text" id="search-input" placeholder="Search by title or file name..." class="form-input"></div>
+            <div class="search-container">
+                <i class="fa-solid fa-search"></i>
+                <input type="text" id="search-input" placeholder="Search documents..." class="form-input">
             </div>
 
-            <div class="data-card">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Title</th>
-                            <th>File Name</th>
-                            <th>Size</th>
-                            <th>Associated With</th>
-                            <th>Upload Date</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="documents-table-body">
-                        <!-- Document rows will be dynamically inserted here -->
-                    </tbody>
-                </table>
-                <div id="empty-state"><i data-lucide="folder-open"></i><h3>No documents found</h3><p>Get started by uploading a new document.</p></div>
+            <div id="document-list">
+                <!-- Document cards will be dynamically inserted here -->
+            </div>
+
+            <div id="empty-state" class="empty-state hidden">
+                <i class="fa-solid fa-folder-open"></i>
+                <h3>No Documents Found</h3>
+                <p>Get started by uploading a new document.</p>
             </div>
         </div>
     </main>
 
-    <!-- Add/Edit Document Modal -->
-    <div id="document-modal" class="modal-overlay"></div>
+    <div id="document-modal"></div>
 
-    <script src="/Js/auth.js"></script>
-    <script src="/Js/api.js"></script>
-    <script src="/Js/shared.js"></script>
-    <script src="/Js/documents.js"></script>
+    <script src="../Js/auth.js"></script>
+    <script src="../Js/api.js"></script>
+    <script src="../Js/shared.js"></script>
+    <script src="../Js/main.js"></script>
+    <script src="../Js/documents.js"></script>
 </body>
 </html>
