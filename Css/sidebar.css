@@ -72,7 +72,4 @@
     margin-left: 0;
 }
 
-.sidebar-collapsed #sidebar-toggle {
-    transform: rotate(180deg);
-    transition: transform 0.3s ease-in-out;
-}
+
