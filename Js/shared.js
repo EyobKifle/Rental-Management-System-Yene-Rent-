@@ -123,7 +123,30 @@ class RentalUtils {
         const languageMenuButton = headerContainer.querySelector('#language-menu-button');
         const languageMenuDropdown = headerContainer.querySelector('#language-menu-dropdown');
 
+        // Function to update toggle icon based on sidebar state
+        const updateToggleIcon = () => {
+            const icon = sidebarToggle.querySelector('i');
+            if (window.innerWidth <= 1024) {
+                // Mobile: check if sidebar has 'open' class
+                if (sidebar.classList.contains('open')) {
+                    icon.className = 'fa-solid fa-times';
+                } else {
+                    icon.className = 'fa-solid fa-bars';
+                }
+            } else {
+                // Desktop: check if body has 'sidebar-collapsed'
+                if (document.body.classList.contains('sidebar-collapsed')) {
+                    icon.className = 'fa-solid fa-bars';
+                } else {
+                    icon.className = 'fa-solid fa-times';
+                }
+            }
+        };
+
         if (sidebarToggle && sidebar) {
+            // Initialize icon
+            updateToggleIcon();
+
             sidebarToggle.addEventListener('click', () => {
                 if (window.innerWidth <= 1024) {
                     // Mobile: toggle 'open' class on sidebar
@@ -132,6 +155,8 @@ class RentalUtils {
                     // Desktop: toggle 'sidebar-collapsed' on body
                     document.body.classList.toggle('sidebar-collapsed');
                 }
+                // Update icon after toggle
+                updateToggleIcon();
             });
         }
 
@@ -208,7 +233,6 @@ class RentalUtils {
             }
         });
 
-        // ESC key to close modals and sidebar on mobile
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 const openModal = document.querySelector('.modal-overlay:not(.hidden)');
