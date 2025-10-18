@@ -34,17 +34,24 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const loadRecentActivity = (tenants) => {
-        const activityContainer = document.querySelector('#dashboard-view .activity-list');
-        if (!activityContainer) return;
+        const activityTableBody = document.getElementById('recent-activity-body');
+        if (!activityTableBody) return;
 
         const recentTenants = tenants.sort((a, b) => new Date(b.moveInDate) - new Date(a.moveInDate)).slice(0, 3);
 
         if (recentTenants.length > 0) {
-            activityContainer.innerHTML = recentTenants.map(tenant => {
-                return `<div><p>New tenant added: <strong>${tenant.name}</strong></p><span>${rentalUtils.formatDate(tenant.moveInDate)}</span></div>`;
+            activityTableBody.innerHTML = recentTenants.map(tenant => {
+                return `
+                    <tr>
+                        <td>New Tenant Added</td>
+                        <td>${tenant.name}</td>
+                        <td>${rentalUtils.formatDate(tenant.moveInDate)}</td>
+                    </tr>
+                `;
             }).join('');
         } else {
-            activityContainer.innerHTML = '<p>No recent activity.</p>';
+            const colSpan = activityTableBody.previousElementSibling.firstElementChild.children.length;
+            activityTableBody.innerHTML = `<tr><td colspan="${colSpan}" class="text-center p-4">No recent activity.</td></tr>`;
         }
     };
 

@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const TENANT_KEY = 'tenants';
     const PROPERTY_KEY = 'properties';
     const UNIT_KEY = 'units';
+    const DOCUMENT_KEY = 'documents';
 
     // Data
     let leases = [];
@@ -18,13 +19,15 @@ document.addEventListener('DOMContentLoaded', () => {
     let properties = [];
     let units = [];
 
+
     const initialize = async () => {
         await window.rentalUtils.headerPromise; // Ensures shared components are loaded
-        [leases, tenants, properties, units] = await Promise.all([
+        [leases, tenants, properties, units, documents] = await Promise.all([
             api.get(LEASE_KEY),
             api.get(TENANT_KEY),
             api.get(PROPERTY_KEY),
-            api.get(UNIT_KEY)
+            api.get(UNIT_KEY),
+            api.get(DOCUMENT_KEY)
         ]);
         renderLeases();
     };
@@ -71,14 +74,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 row.innerHTML = `
                     <td>${tenant?.name || 'N/A'}</td>
                     <td>${property?.name || 'N/A'} <span class="lease-property-unit">Unit ${unit?.unitNumber || 'N/A'}</span></td>
-                    <td>${rentalUtils.formatDate(lease.startDate)}</td>
-                    <td>${rentalUtils.formatDate(lease.endDate)}</td>
+                    <td>${rentalUtils.formatDate(lease.startDate)} - ${rentalUtils.formatDate(lease.endDate)}</td>
+                    <td>${lease.withholdingAmount ? rentalUtils.formatCurrency(lease.withholdingAmount) : 'None'}</td>
                     <td>${rentalUtils.formatCurrency(lease.rentAmount)}</td>
                     <td><span class="status-badge ${status.class}">${status.text}</span></td>
                     <td>
                         <div class="action-dropdown">
                             <button type="button" class="action-dropdown-btn" data-id="${lease.id}"><i class="fa-solid fa-ellipsis-vertical"></i></button>
                             <div id="dropdown-${lease.id}" class="dropdown-menu hidden">
+                                <a href="#" class="dropdown-item view-details-btn" data-id="${lease.id}"><i class="fa-solid fa-eye"></i>View Details</a>
                                 <a href="#" class="dropdown-item edit-btn" data-id="${lease.id}"><i class="fa-solid fa-pencil"></i>Edit</a>
                                 <a href="#" class="dropdown-item renew-btn" data-id="${lease.id}"><i class="fa-solid fa-rotate"></i>Renew</a>
                                 <a href="#" class="dropdown-item delete-btn" data-id="${lease.id}"><i class="fa-solid fa-trash-can"></i>Delete</a>
@@ -92,10 +96,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const openLeaseModal = async (lease = null, isRenewal = false) => {
-        const response = await fetch('modal.html');
-        leaseModalContainer.innerHTML = await response.text();
-        const modal = leaseModalContainer.querySelector('.modal-overlay');
-        modal.querySelector('#modal-title').textContent = isRenewal ? 'Renew Lease' : (lease && lease.id ? 'Edit Lease' : 'Add New Lease');
         
         // Tenants not already in an active lease (or the current tenant if editing)
         const activeLeaseTenantIds = leases.filter(l => getLeaseStatus(l).text === 'Active' && l.id !== lease?.id).map(l => l.tenantId);
@@ -106,7 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const assignedPropertyId = assignedUnit ? assignedUnit.propertyId : null;
         const propertyOptions = properties.map(p => `<option value="${p.id}" ${assignedPropertyId === p.id ? 'selected' : ''}>${p.name}</option>`).join('');
 
-        modal.querySelector('#modal-body').innerHTML = `
+        const bodyHtml = `
             <form id="lease-form">
                 <input type="hidden" id="lease-id" value="${lease ? lease.id : ''}">
                 <div class="form-row">
@@ -143,15 +143,26 @@ document.addEventListener('DOMContentLoaded', () => {
                         <input type="date" id="lease-end-date" class="form-input" value="${lease ? lease.endDate : ''}" required>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label for="lease-rent" class="form-label">Monthly Rent (ETB)</label>
-                    <input type="number" id="lease-rent" class="form-input" value="${lease ? lease.rentAmount : ''}" required>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="lease-rent" class="form-label">Monthly Rent (ETB)</label>
+                        <input type="number" id="lease-rent" class="form-input" value="${lease?.rentAmount || ''}" required min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="lease-withholding" class="form-label">Withholding Amount (Optional)</label>
+                        <input type="number" id="lease-withholding" class="form-input" value="${lease?.withholdingAmount || ''}" min="0">
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="lease-document" class="form-label">Lease Agreement (PDF)</label>
-                    <input type="file" id="lease-document" class="form-input" accept=".pdf">
-                    <div id="lease-document-info">
-                        ${lease && lease.leaseDocumentName ? `Current file: ${lease.leaseDocumentName}` : ''}
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="lease-agreement-file" class="form-label">Lease Agreement</label>
+                        <input type="file" id="lease-agreement-file" class="form-input" accept="image/*,.pdf">
+                        <small class="form-hint" id="lease-agreement-info">${lease?.leaseAgreementName || 'Upload PDF or image'}</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="withholding-receipt-file" class="form-label">Withholding Receipt</label>
+                        <input type="file" id="withholding-receipt-file" class="form-input" accept="image/*,.pdf">
+                        <small class="form-hint" id="withholding-receipt-info">${lease?.withholdingReceiptName || 'Upload PDF or image'}</small>
                     </div>
                 </div>
                 <div class="form-actions">
@@ -160,6 +171,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             </form>
         `;
+
+        const title = isRenewal ? 'Renew Lease' : (lease && lease.id ? 'Edit Lease' : 'Add New Lease');
+        const modalHtml = `
+            <div class="modal-overlay hidden">
+                <div class="modal-content-wrapper" style="max-width: 700px;">
+                    <div class="modal-header">
+                        <h2 id="modal-title">${title}</h2>
+                        <button class="close-modal-btn">&times;</button>
+                    </div>
+                    <div id="modal-body">${bodyHtml}</div>
+                </div>
+            </div>`;
+        leaseModalContainer.innerHTML = modalHtml;
+        const modal = leaseModalContainer.querySelector('.modal-overlay');
 
         const propertySelect = modal.querySelector('#lease-property');
         const unitSelect = modal.querySelector('#lease-unit');
@@ -184,12 +209,80 @@ document.addEventListener('DOMContentLoaded', () => {
         propertySelect.addEventListener('change', () => populateUnits(propertySelect.value));
         if (assignedPropertyId) populateUnits(assignedPropertyId);
 
-        modal.querySelector('#lease-document').addEventListener('change', (e) => {
-            modal.querySelector('#lease-document-info').textContent = e.target.files.length > 0 ? `New file: ${e.target.files[0].name}` : (lease && lease.leaseDocumentName ? `Current file: ${lease.leaseDocumentName}` : 'No file chosen');
-        });
         rentalUtils.openModal(modal);
         modal.querySelector('#lease-form').addEventListener('submit', handleFormSubmit);
     };
+
+    const openLeaseDetailsModal = (lease) => {
+        const tenant = tenants.find(t => t.id === lease.tenantId);
+        const unit = units.find(u => u.id === lease.unitId);
+        const property = unit ? properties.find(p => p.id === unit.propertyId) : null;
+
+        const renderDocPreview = (url, name) => {
+            if (!url) return '<p class="text-sm text-gray-500">Not provided</p>';
+            return `<a href="${url}" target="_blank" class="document-preview-sm">
+                        <i class="fa-solid fa-file-lines fa-2x"></i>
+                        <p class="text-sm">${name || 'View File'}</p>
+                    </a>`;
+        };
+
+        const bodyHtml = `
+            <div class="lease-details-grid">
+                <div class="detail-section">
+                    <h4>Lease & Property</h4>
+                    <div class="detail-item"><span>Tenant</span><span>${tenant?.name || 'N/A'}</span></div>
+                    <div class="detail-item"><span>Property</span><span>${property?.name || 'N/A'}</span></div>
+                    <div class="detail-item"><span>Unit</span><span>${unit?.unitNumber || 'N/A'}</span></div>
+                    <div class="detail-item"><span>Period</span><span>${rentalUtils.formatDate(lease.startDate)} to ${rentalUtils.formatDate(lease.endDate)}</span></div>
+                    <div class="detail-item"><span>Status</span><span><span class="status-badge ${getLeaseStatus(lease).class}">${getLeaseStatus(lease).text}</span></span></div>
+                </div>
+                <div class="detail-section">
+                    <h4>Financials</h4>
+                    <div class="detail-item"><span>Monthly Rent</span><span>${rentalUtils.formatCurrency(lease.rentAmount)}</span></div>
+                    <div class="detail-item"><span>Withholding</span><span>${lease.withholdingAmount ? rentalUtils.formatCurrency(lease.withholdingAmount) : 'N/A'}</span></div>
+                </div>
+                <div class="detail-section">
+                    <h4>Documents</h4>
+                    <div class="detail-item">
+                        <span>Lease Agreement</span>
+                        <span>${renderDocPreview(lease.leaseAgreementUrl, lease.leaseAgreementName)}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span>Withholding Receipt</span>
+                        <span>${renderDocPreview(lease.withholdingReceiptUrl, lease.withholdingReceiptName)}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="close-modal-btn btn-secondary">Close</button>
+            </div>
+        `;
+
+        const title = `Lease Details: ${tenant?.name || 'N/A'}`;
+        const modalHtml = `
+            <div class="modal-overlay hidden">
+                <div class="modal-content-wrapper" style="max-width: 800px;">
+                    <div class="modal-header">
+                        <h2 id="modal-title">${title}</h2>
+                        <button class="close-modal-btn">&times;</button>
+                    </div>
+                    <div id="modal-body">${bodyHtml}</div>
+                </div>
+            </div>`;
+        
+        const modalContainer = document.getElementById('lease-details-modal');
+        modalContainer.innerHTML = modalHtml;
+        const modal = modalContainer.querySelector('.modal-overlay');
+        rentalUtils.openModal(modal);
+    };
+
+    const uploadFile = async (fileInput) => {
+        const file = fileInput.files[0];
+        if (!file) return null;
+        const url = await rentalUtils.readFileAsDataURL(file);
+        return { url, name: file.name };
+    };
+
 
     const handleFormSubmit = async (e) => {
         e.preventDefault();
@@ -198,21 +291,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const leaseId = form.querySelector('#lease-id').value;
         const existingLease = leases.find(l => l.id === leaseId);
-
-        let leaseDocumentUrl = existingLease ? existingLease.leaseDocumentUrl : null;
-        let leaseDocumentName = existingLease ? existingLease.leaseDocumentName : null;
-
-        const fileInput = form.querySelector('#lease-document');
-        const file = fileInput.files[0];
-
-        if (file) {
-            if (file.type !== 'application/pdf') {
-                rentalUtils.showNotification('Please upload a valid PDF file.', 'error');
-                return;
-            }
-            leaseDocumentUrl = await rentalUtils.readFileAsDataURL(file);
-            leaseDocumentName = file.name;
-        }
+        
+        const leaseAgreement = await uploadFile(form.querySelector('#lease-agreement-file'));
+        const withholdingReceipt = await uploadFile(form.querySelector('#withholding-receipt-file'));
 
         const id = form.querySelector('#lease-id').value;
         const leaseData = {
@@ -223,8 +304,11 @@ document.addEventListener('DOMContentLoaded', () => {
             startDate: form.querySelector('#lease-start-date').value,
             endDate: form.querySelector('#lease-end-date').value,
             rentAmount: parseFloat(form.querySelector('#lease-rent').value),
-            leaseDocumentUrl: leaseDocumentUrl,
-            leaseDocumentName: leaseDocumentName
+            withholdingAmount: parseFloat(form.querySelector('#lease-withholding').value) || null,
+            leaseAgreementUrl: leaseAgreement?.url || existingLease?.leaseAgreementUrl || null,
+            leaseAgreementName: leaseAgreement?.name || existingLease?.leaseAgreementName || null,
+            withholdingReceiptUrl: withholdingReceipt?.url || existingLease?.withholdingReceiptUrl || null,
+            withholdingReceiptName: withholdingReceipt?.name || existingLease?.withholdingReceiptName || null,
         };
 
         if (leaseId) {
@@ -256,7 +340,11 @@ document.addEventListener('DOMContentLoaded', () => {
             document.querySelectorAll('.dropdown-menu').forEach(menu => menu.classList.add('hidden'));
             // Then toggle the clicked one
             document.getElementById(`dropdown-${id}`).classList.toggle('hidden');
-        } else if (e.target.closest('.edit-btn')) {
+        } else if (e.target.closest('.view-details-btn')) {
+            e.preventDefault();
+            const leaseToView = leases.find(l => l.id === id);
+            openLeaseDetailsModal(leaseToView);
+        }else if (e.target.closest('.edit-btn')) {
             e.preventDefault();
             const leaseToEdit = leases.find(l => l.id === id);
             openLeaseModal(leaseToEdit);

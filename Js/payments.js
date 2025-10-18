@@ -110,10 +110,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const openPaymentModal = async (payment = null) => {
-        const response = await fetch('modal.html');
-        paymentModalContainer.innerHTML = await response.text();
-        const modal = paymentModalContainer.querySelector('.modal-overlay');
-        modal.querySelector('#modal-title').textContent = payment ? 'Edit Payment' : 'Record Payment';
 
         const activeLeases = leases.filter(l => new Date(l.endDate) >= new Date());
         const leaseOptions = activeLeases.map(lease => {
@@ -125,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     </option>`;
         }).join('');
 
-        modal.querySelector('#modal-body').innerHTML = `
+        const bodyHtml = `
             <form id="payment-form">
                 <input type="hidden" id="payment-id" value="${payment ? payment.id : ''}">
                 <div class="form-group">
@@ -174,6 +170,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             </form>
         `;
+
+        const title = payment ? 'Edit Payment' : 'Record Payment';
+        const modalHtml = `
+            <div class="modal-overlay hidden">
+                <div class="modal-content-wrapper" style="max-width: 700px;">
+                    <div class="modal-header">
+                        <h2 id="modal-title">${title}</h2>
+                        <button class="close-modal-btn">&times;</button>
+                    </div>
+                    <div id="modal-body">${bodyHtml}</div>
+                </div>
+            </div>`;
+        paymentModalContainer.innerHTML = modalHtml;
+        const modal = paymentModalContainer.querySelector('.modal-overlay');
         rentalUtils.openModal(modal);
         modal.querySelector('#payment-form').addEventListener('submit', handleFormSubmit);
     };
