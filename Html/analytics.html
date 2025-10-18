@@ -3,6 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://unpkg.com/lucide@latest/dist/lucide.min.js"></script>
     <title>Analytics - Rental System</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
     <link
@@ -28,8 +29,8 @@
           <p>Detailed financial insights and reports</p>
         </div>
         <div class="reports-header">
-            <button id="export-income-statement" class="btn-secondary"><i class="fa-solid fa-file-lines"></i> Income Statement</button>
-            <button id="export-tax-report" class="btn-secondary"><i class="fa-solid fa-landmark"></i> Tax Calculation Report</button>
+            <button id="export-income-statement" class="btn-secondary"><i data-lucide="file-text"></i> Income Statement</button>
+            <button id="export-tax-report" class="btn-secondary"><i data-lucide="landmark"></i> Tax Calculation Report</button>
         </div>
 
         <div class="stats-grid">
@@ -57,7 +58,7 @@
             <canvas id="profitLossChart"></canvas>
           </div>
 
-          <div class="small-charts-grid">
+              <div class="small-charts-grid">
             <div class="data-card chart-container-small">
               <h3>Income Overview</h3>
               <canvas id="incomeOverviewChart"></canvas>

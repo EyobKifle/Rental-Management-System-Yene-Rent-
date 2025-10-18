@@ -224,12 +224,12 @@ class RentalUtils {
             }
 
             // Modal closing logic
-            if (event.target.classList.contains('modal-overlay')) {
-                this.closeModal(event.target);
-            }
-            if (event.target.closest('.close-modal-btn')) {
-                const modal = event.target.closest('.modal-overlay');
-                if (modal) this.closeModal(modal);
+            const modalOverlay = event.target.closest('.modal-overlay');
+            if (modalOverlay) {
+                // Close if clicking the overlay itself or a button with .close-modal-btn
+                if (event.target === modalOverlay || event.target.closest('.close-modal-btn')) {
+                    this.closeModal(modalOverlay);
+                }
             }
         });
 
@@ -514,6 +514,44 @@ class RentalUtils {
         return window.confirm(message);
     }
 
+    /**
+     * A robust, centralized function to create and open any modal.
+     * It fetches the modal template, injects content, and handles all event listeners.
+     * @param {object} options - The options for creating the modal.
+     * @param {string} options.modalId - The ID of the modal container element in the HTML.
+     * @param {string} options.title - The title to display in the modal header.
+     * @param {string} options.bodyHtml - The HTML content for the modal body.
+     * @param {string} options.formId - The ID of the form inside the modal body.
+     * @param {function} options.onSubmit - The callback function to execute when the form is submitted.
+     * @param {function} [options.onOpen] - An optional callback to run after the modal is open (e.g., for populating selects).
+     */
+    async createAndOpenModal({ modalId, title, bodyHtml, formId, onSubmit, onOpen }) {
+        const modalContainer = document.getElementById(modalId);
+        if (!modalContainer) {
+            console.error(`Modal container #${modalId} not found.`);
+            return;
+        }
+
+        // Fetch the generic modal structure
+        const response = await fetch('modal.html');
+        if (!response.ok) {
+            console.error('Failed to fetch modal.html');
+            return;
+        }
+        modalContainer.innerHTML = await response.text();
+
+        const modal = modalContainer.querySelector('.modal-overlay');
+        modal.querySelector('#modal-title').textContent = title;
+        modal.querySelector('#modal-body').innerHTML = bodyHtml;
+
+        this.openModal(modal);
+
+        // Attach the submit listener to the form
+        const form = modal.querySelector(`#${formId}`);
+        if (form && onSubmit) form.addEventListener('submit', onSubmit);
+
+        if (onOpen) onOpen(modal);
+    }
     /**
      * Sets up Lucide icons by replacing data-lucide attributes with SVG elements.
      * Assumes Lucide script is loaded (e.g., via CDN).

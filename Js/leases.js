@@ -216,8 +216,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const id = form.querySelector('#lease-id').value;
         const leaseData = {
-            id: id || rentalUtils.generateId(),
+            id: leaseId || rentalUtils.generateId(),
             tenantId: form.querySelector('#lease-tenant').value,
+            propertyId: form.querySelector('#lease-property').value,
             unitId: form.querySelector('#lease-unit').value,
             startDate: form.querySelector('#lease-start-date').value,
             endDate: form.querySelector('#lease-end-date').value,
@@ -226,9 +227,9 @@ document.addEventListener('DOMContentLoaded', () => {
             leaseDocumentName: leaseDocumentName
         };
 
-        if (id) {
-            await api.update(LEASE_KEY, id, leaseData);
-            leases = leases.map(l => l.id === id ? leaseData : l);
+        if (leaseId) {
+            await api.update(LEASE_KEY, leaseId, leaseData);
+            leases = leases.map(l => l.id === leaseId ? leaseData : l);
         } else {
             await api.create(LEASE_KEY, leaseData);
             leases.push(leaseData);
@@ -243,7 +244,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         renderLeases();
         rentalUtils.closeModal(form.closest('.modal-overlay'));
-        rentalUtils.showNotification(`Lease ${id ? 'updated' : 'created'} successfully!`);
+        rentalUtils.showNotification(`Lease ${leaseId ? 'updated' : 'created'} successfully!`);
     };
 
     leasesTableBody.addEventListener('click', (e) => {

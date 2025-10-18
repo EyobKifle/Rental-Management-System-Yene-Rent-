@@ -38,7 +38,7 @@
                 <button class="tab-btn" data-tab="documents">Documents</button>
             </div>
 
-            <div id="tenant-tab" class="tab-content active">
+            <div id="tenant" class="tab-content active">
                 <div class="data-card">
                     <h3 class="data-card-header">Assign or Update Tenant</h3>
                     <form id="tenant-form">
@@ -58,39 +58,16 @@
                                 <label for="tenant-email" class="form-label">Email (Optional)</label>
                                 <input type="email" id="tenant-email" class="form-input">
                             </div>
-                            <div class="form-group">
-                                <label for="tenant-tin" class="form-label">TIN Number (Optional)</label>
-                                <input type="text" id="tenant-tin" class="form-input">
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="lease-start" class="form-label">Lease Start Date</label>
-                                <input type="date" id="lease-start" class="form-input" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="lease-end" class="form-label">Lease End Date</label>
-                                <input type="date" id="lease-end" class="form-input" required>
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="tenant-deposit" class="form-label">Security Deposit (ETB)</label>
-                                <input type="number" id="tenant-deposit" class="form-input" min="0" value="0">
-                            </div>
-                            <div class="form-group">
-                                <label for="tenant-rent" class="form-label">Monthly Rent (ETB)</label>
-                                <input type="number" id="tenant-rent" class="form-input" required>
-                            </div>
                         </div>
                         <div class="form-actions">
                             <button type="submit" class="btn-primary">Save Tenant Information</button>
+                            <p class="form-hint">Note: Lease details (start/end dates, rent amount) are managed on the <a href="leases.html">Leases page</a>.</p>
                         </div>
                     </form>
                 </div>
             </div>
 
-            <div id="payments-tab" class="tab-content">
+            <div id="payments" class="tab-content">
                 <div class="data-card">
                     <div class="data-card-header">
                         <h3>Payment History</h3>
@@ -104,9 +81,9 @@
                             <thead>
                                 <tr>
                                     <th>Date</th>
-                                    <th>Type</th>
+                                    <th>Payment Type</th>
                                     <th>Amount</th>
-                                    <th>Status</th>
+                                    <th>Method</th>
                                 </tr>
                             </thead>
                             <tbody id="payments-tbody">
@@ -122,7 +99,7 @@
                 </div>
             </div>
 
-            <div id="documents-tab" class="tab-content">
+            <div id="documents" class="tab-content">
                 <div class="data-card">
                     <div class="data-card-header">
                         <h3>Documents & Receipts</h3>

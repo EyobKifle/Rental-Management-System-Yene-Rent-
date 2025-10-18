@@ -13,10 +13,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const urlParams = new URLSearchParams(window.location.search);
     const unitId = urlParams.get('unitId');
 
+    let allData = {};
     let currentUnit = null;
     let currentTenant = null;
     let payments = [];
-    let documents = [];
+    let unitDocuments = [];
 
     const initialize = async () => {
         await window.rentalUtils.headerPromise;
@@ -26,43 +27,40 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Load unit details
-        currentUnit = await api.getById('units', unitId);
+        // Load all necessary data at once
+        const [units, properties, tenants, allPayments, allDocuments, leases] = await Promise.all([
+            api.get('units'),
+            api.get('properties'),
+            api.get('tenants'),
+            api.get('payments'),
+            api.get('documents'),
+            api.get('leases')
+        ]);
+
+        allData = { units, properties, tenants, payments: allPayments, documents: allDocuments, leases };
+
+        currentUnit = allData.units.find(u => u.id === unitId);
         if (!currentUnit) {
             rentalUtils.showNotification('Unit not found!', 'error');
             window.location.href = 'units.html';
             return;
         }
 
-        // Load property for context
-        const property = await api.getById('properties', currentUnit.propertyId);
-        if (property) {
-            currentUnit.propertyName = property.name;
-        }
-
-        // Load tenant if assigned
-        if (currentUnit.tenantId) {
-            currentTenant = await api.getById('tenants', currentUnit.tenantId);
-        }
+        currentUnit.propertyName = allData.properties.find(p => p.id === currentUnit.propertyId)?.name;
+        currentTenant = allData.tenants.find(t => t.id === currentUnit.tenantId);
 
         // Load payments and documents for this unit
-        payments = await api.get('payments');
-        payments = payments.filter(p => p.unitId === unitId);
-
-        documents = await api.get('documents');
-        documents = documents.filter(d => d.unitId === unitId);
+        const unitLeaseIds = allData.leases.filter(l => l.unitId === unitId).map(l => l.id);
+        payments = allData.payments.filter(p => unitLeaseIds.includes(p.leaseId));
+        unitDocuments = allData.documents.filter(d => d.unitId === unitId || (currentTenant && d.tenantId === currentTenant.id));
 
         populateTenantForm();
         renderPayments();
         renderDocuments();
         populateSummaryCard();
         updatePageTitle();
-        handleTabNavigation(); // Initialize tab state from URL
-    };
-
-    const updatePageTitle = () => {
-        document.getElementById('unit-title').textContent = `Unit ${currentUnit.unitNumber} Details`;
-        document.getElementById('unit-subtitle').textContent = `Manage tenant information, payments, and documents`;
+        handleTabNavigation();
+        rentalUtils.setupLucideIcons();
     };
 
     const populateSummaryCard = () => {
@@ -73,29 +71,22 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('summary-status').innerHTML = `<span class="status-badge ${statusClass}">${status}</span>`;
     };
 
+    const updatePageTitle = () => {
+        document.getElementById('unit-title').textContent = `Unit ${currentUnit.unitNumber} Details`;
+        document.getElementById('unit-subtitle').textContent = `Manage tenant information, payments, and documents for ${currentUnit.propertyName}`;
+    };
+
     const populateTenantForm = () => {
         if (currentTenant) {
             document.getElementById('tenant-id').value = currentTenant.id;
             document.getElementById('tenant-name').value = currentTenant.name || '';
             document.getElementById('tenant-phone').value = currentTenant.phone || '';
             document.getElementById('tenant-email').value = currentTenant.email || '';
-            document.getElementById('tenant-tin').value = currentTenant.tin || '';
-            document.getElementById('lease-start').value = currentTenant.leaseStart || '';
-            document.getElementById('lease-end').value = currentTenant.leaseEnd || '';
-            document.getElementById('tenant-deposit').value = currentTenant.deposit || 0;
-            document.getElementById('tenant-rent').value = currentTenant.rent || currentUnit.rent || '';
         } else {
-            document.getElementById('tenant-id').value = '';
-            document.getElementById('tenant-name').value = '';
-            document.getElementById('tenant-phone').value = '';
-            document.getElementById('tenant-email').value = '';
-            document.getElementById('tenant-tin').value = '';
-            document.getElementById('lease-start').value = '';
-            document.getElementById('lease-end').value = '';
-            document.getElementById('tenant-deposit').value = 0;
-            document.getElementById('tenant-rent').value = currentUnit.rent || '';
+            tenantForm.reset();
         }
     };
+
 
     const renderPayments = () => {
         paymentsTbody.innerHTML = '';
@@ -113,7 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <td>${rentalUtils.formatDate(payment.date)}</td>
                     <td>${payment.type}</td>
                     <td>${rentalUtils.formatCurrency(payment.amount)}</td>
-                    <td><span class="status-badge status-${payment.status}">${payment.status}</span></td>
+                    <td>${payment.method}</td>
                 `;
                 paymentsTbody.appendChild(row);
             });
@@ -123,14 +114,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const renderDocuments = () => {
         documentsTbody.innerHTML = '';
 
-        if (documents.length === 0) {
+        if (unitDocuments.length === 0) {
             documentsEmptyState.classList.remove('hidden');
             document.getElementById('documents-table-container').classList.add('hidden');
         } else {
             documentsEmptyState.classList.add('hidden');
             document.getElementById('documents-table-container').classList.remove('hidden');
 
-            documents.forEach(doc => {
+            unitDocuments.forEach(doc => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${doc.name}</td>
@@ -138,47 +129,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     <td>${rentalUtils.formatDate(doc.date)}</td>
                     <td>
                         <button class="btn-icon view-doc-btn" data-id="${doc.id}" title="View">
-                            <i class="fa-solid fa-eye"></i>
+                            <i data-lucide="eye"></i>
                         </button>
                         <button class="btn-icon edit-doc-btn" data-id="${doc.id}" title="Edit">
-                            <i class="fa-solid fa-pencil"></i>
+                            <i data-lucide="pencil"></i>
                         </button>
                         <button class="btn-icon delete-doc-btn" data-id="${doc.id}" title="Delete">
-                            <i class="fa-solid fa-trash"></i>
+                            <i data-lucide="trash"></i>
                         </button>
                     </td>
                 `;
                 documentsTbody.appendChild(row);
             });
         }
-    };
-
-    /**
-     * Creates and opens a modal with the specified content.
-     * @param {object} options - The options for creating the modal.
-     * @param {string} options.modalId - The ID of the modal container element.
-     * @param {string} options.title - The title to display in the modal header.
-     * @param {string} options.bodyHtml - The HTML content for the modal body.
-     * @param {function} [options.onOpen] - A callback function to execute after the modal is opened.
-     */
-    const createAndOpenModal = async ({ modalId, title, bodyHtml, onOpen }) => {
-        const modalContainer = document.getElementById(modalId);
-        if (!modalContainer) {
-            console.error(`Modal container #${modalId} not found.`);
-            return;
-        }
-
-        const response = await fetch('modal.html');
-        modalContainer.innerHTML = await response.text();
-
-        const modal = modalContainer.querySelector('.modal-overlay');
-        modal.querySelector('#modal-title').textContent = title;
-        modal.querySelector('#modal-body').innerHTML = bodyHtml;
-
-        rentalUtils.openModal(modal);
-
-        // Execute the onOpen callback to attach specific event listeners
-        if (onOpen) onOpen(modal);
     };
 
     const openPaymentModal = async (payment = null) => {
@@ -203,16 +166,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="payment-amount" class="form-label">Amount (ETB)</label>
-                        <input type="number" id="payment-amount" class="form-input" value="${payment ? payment.amount : ''}" min="0" step="0.01" required>
+                        <label for="payment-method" class="form-label">Payment Method</label>
+                        <select id="payment-method" class="form-input" required>
+                            <option value="Bank Transfer" ${payment && payment.method === 'Bank Transfer' ? 'selected' : ''}>Bank Transfer</option>
+                            <option value="Cash" ${payment && payment.method === 'Cash' ? 'selected' : ''}>Cash</option>
+                            <option value="CBE Birr" ${payment && payment.method === 'CBE Birr' ? 'selected' : ''}>CBE Birr</option>
+                        </select>
                     </div>
                     <div class="form-group">
-                        <label for="payment-status" class="form-label">Status</label>
-                        <select id="payment-status" class="form-input" required>
-                            <option value="paid" ${payment && payment.status === 'paid' ? 'selected' : ''}>Paid</option>
-                            <option value="pending" ${payment && payment.status === 'pending' ? 'selected' : ''}>Pending</option>
-                            <option value="overdue" ${payment && payment.status === 'overdue' ? 'selected' : ''}>Overdue</option>
-                        </select>
+                        <label for="payment-amount" class="form-label">Amount (ETB)</label>
+                        <input type="number" id="payment-amount" class="form-input" value="${payment ? payment.amount : ''}" min="0" step="0.01" required>
                     </div>
                 </div>
                 <div class="form-actions">
@@ -221,13 +184,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             </form>`;
 
-        await createAndOpenModal({
+        await rentalUtils.createAndOpenModal({
             modalId: 'payment-modal',
             title: title,
             bodyHtml: bodyHtml,
-            onOpen: (modal) => {
-                modal.querySelector('#payment-form').addEventListener('submit', handlePaymentFormSubmit);
-            }
+            formId: 'payment-form',
+            onSubmit: handlePaymentFormSubmit
         });
     };
 
@@ -237,13 +199,18 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!rentalUtils.validateForm(form)) return;
 
         const id = form.querySelector('#payment-id').value;
+        const activeLease = allData.leases.find(l => l.unitId === unitId && getLeaseStatus(l).text === 'Active');
+        if (!activeLease) {
+            rentalUtils.showNotification('Cannot record payment: No active lease for this unit.', 'error');
+            return;
+        }
         const paymentData = {
             id: id || rentalUtils.generateId(),
-            unitId: unitId,
+            leaseId: activeLease.id,
             date: form.querySelector('#payment-date').value,
             type: form.querySelector('#payment-type').value,
             amount: parseFloat(form.querySelector('#payment-amount').value),
-            status: form.querySelector('#payment-status').value
+            method: form.querySelector('#payment-method').value
         };
 
         if (id) {
@@ -271,12 +238,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="document-type" class="form-label">Document Type</label>
-                        <select id="document-type" class="form-input" required>
-                            <option value="Receipt" ${document && document.type === 'Receipt' ? 'selected' : ''}>Receipt</option>
-                            <option value="Contract" ${document && document.type === 'Contract' ? 'selected' : ''}>Contract</option>
-                            <option value="Invoice" ${document && document.type === 'Invoice' ? 'selected' : ''}>Invoice</option>
-                            <option value="Other" ${document && document.type === 'Other' ? 'selected' : ''}>Other</option>
+                        <label for="document-category" class="form-label">Category</label>
+                        <select id="document-category" class="form-input" required>
+                            <option value="Lease Agreement" ${document && document.category === 'Lease Agreement' ? 'selected' : ''}>Lease Agreement</option>
+                            <option value="Tenant ID" ${document && document.category === 'Tenant ID' ? 'selected' : ''}>Tenant ID</option>
+                            <option value="Payment Receipt" ${document && document.category === 'Payment Receipt' ? 'selected' : ''}>Payment Receipt</option>
+                            <option value="Other" ${document && document.category === 'Other' ? 'selected' : ''}>Other</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -295,13 +262,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             </form>`;
 
-        await createAndOpenModal({
+        await rentalUtils.createAndOpenModal({
             modalId: 'document-modal',
             title: title,
             bodyHtml: bodyHtml,
-            onOpen: (modal) => {
-                modal.querySelector('#document-form').addEventListener('submit', handleDocumentFormSubmit);
-            }
+            formId: 'document-form',
+            onSubmit: handleDocumentFormSubmit
         });
     };
 
@@ -321,28 +287,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const documentData = {
             id: id || rentalUtils.generateId(),
-            unitId: unitId,
+            unitId: unitId, // Link to unit
+            propertyId: currentUnit.propertyId, // Link to property
+            tenantId: currentTenant ? currentTenant.id : null, // Link to tenant
             name: form.querySelector('#document-name').value,
-            type: form.querySelector('#document-type').value,
+            category: form.querySelector('#document-category').value,
             date: form.querySelector('#document-date').value,
-            file: fileData || null,
+            url: fileData || (document ? document.url : null),
             fileName: fileInput.files && fileInput.files[0] ? fileInput.files[0].name : null
         };
 
         if (id) {
             await api.update('documents', id, documentData);
-            documents = documents.map(d => d.id === id ? documentData : d);
+            unitDocuments = unitDocuments.map(d => d.id === id ? documentData : d);
         } else {
             await api.create('documents', documentData);
-            documents.push(documentData);
+            unitDocuments.push(documentData);
         }
         renderDocuments();
         rentalUtils.closeModal(form.closest('.modal-overlay'));
         rentalUtils.showNotification(`Document ${id ? 'updated' : 'uploaded'} successfully!`);
     };
 
-    const viewDocument = async (docId) => {
-        const doc = documents.find(d => d.id === docId);
+    const viewDocument = async(docId) => {
+        const doc = unitDocuments.find(d => d.id === docId);
         if (!doc) return;
 
         const title = doc.name;
@@ -350,37 +318,37 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="document-view">
                 <div class="document-info">
                     <p><strong>Type:</strong> ${doc.type}</p>
-                    <p><strong>Date:</strong> ${rentalUtils.formatDate(doc.date)}</p>
+                    <p><strong>Date:</strong> ${rentalUtils.formatDate(doc.uploadDate || doc.date)}</p>
                     ${doc.fileName ? `<p><strong>File:</strong> ${doc.fileName}</p>` : ''}
                 </div>
-                ${doc.file ? `<div class="document-preview">
+                ${doc.url ? `<div class="document-preview">
                     ${doc.fileName && doc.fileName.toLowerCase().endsWith('.pdf') ?
-                        `<iframe src="${doc.file}" width="100%" height="500px"></iframe>` :
-                        `<img src="${doc.file}" alt="${doc.name}" style="max-width: 100%; max-height: 500px;">`
+                        `<iframe src="${doc.url}" width="100%" height="500px"></iframe>` :
+                        `<img src="${doc.url}" alt="${doc.name}" style="max-width: 100%; max-height: 500px;">`
                     }
                 </div>` : '<p>No file attached</p>'}
             </div>
             <div class="form-actions">
-                <button type="button" class="close-modal-btn btn-secondary">Close</button>
+                <button type="button" class="btn-secondary close-modal-btn">Close</button>
             </div>
         `;
 
-        await createAndOpenModal({
+        await rentalUtils.createAndOpenModal({
             modalId: 'document-view-modal',
             title: title,
             bodyHtml: bodyHtml
-            // No onOpen needed as there are no forms to submit
         });
     };
 
     const switchTab = (tabId) => {
-        // Deactivate all tabs and content
-        tabBtns.forEach(b => b.classList.remove('active'));
-        tabContents.forEach(c => c.classList.remove('active'));
-
-        // Activate the selected tab and content
-        const activeBtn = document.querySelector(`.tab-btn[data-tab="${tabId}"]`);
-        const activeContent = document.getElementById(`${tabId}-tab`);
+        tabContents.forEach(content => {
+            content.classList.remove('active');
+        });
+        tabBtns.forEach(btn => {
+            btn.classList.remove('active');
+        });
+        const activeContent = document.getElementById(tabId);
+        const activeBtn = document.querySelector(`[data-tab="${tabId}"]`);
 
         if (activeBtn) activeBtn.classList.add('active');
         if (activeContent) activeContent.classList.add('active');
@@ -406,53 +374,66 @@ document.addEventListener('DOMContentLoaded', () => {
             window.location.hash = 'tenant'; // Set default hash
         }
     };
+
+    const getLeaseStatus = (lease) => {
+        const today = new Date().setHours(0, 0, 0, 0);
+        const startDate = new Date(lease.startDate).setHours(0, 0, 0, 0);
+        const endDate = new Date(lease.endDate).setHours(0, 0, 0, 0);
+
+        if (today > endDate) return { text: 'Expired' };
+        if (today >= startDate && today <= endDate) return { text: 'Active' };
+        return { text: 'Upcoming' };
+    };
+
     // Tenant form submit
     tenantForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         if (!rentalUtils.validateForm(tenantForm)) return;
 
+        const tenantId = document.getElementById('tenant-id').value;
+        const isNewTenant = !tenantId;
+
         const tenantData = {
-            id: document.getElementById('tenant-id').value || rentalUtils.generateId(),
+            id: tenantId || rentalUtils.generateId(),
             name: document.getElementById('tenant-name').value,
             phone: document.getElementById('tenant-phone').value,
             email: document.getElementById('tenant-email').value,
-            tin: document.getElementById('tenant-tin').value,
-            leaseStart: document.getElementById('lease-start').value,
-            leaseEnd: document.getElementById('lease-end').value,
-            deposit: parseFloat(document.getElementById('tenant-deposit').value),
-            rent: parseFloat(document.getElementById('tenant-rent').value),
             unitId: unitId
         };
 
-        if (tenantData.id) {
-            await api.update('tenants', tenantData.id, tenantData);
-            currentTenant = tenantData;
-        } else {
+        if (isNewTenant) {
+            // This flow is simplified. A new tenant should ideally be created via the Tenants or Leases page.
+            // Here, we create the tenant and assign them to the unit.
             await api.create('tenants', tenantData);
+            allData.tenants.push(tenantData);
             currentTenant = tenantData;
-            // Update unit with tenant ID
+            await api.update('units', unitId, { tenantId: tenantData.id });
             currentUnit.tenantId = tenantData.id;
-            await api.update('units', unitId, currentUnit);
-            populateSummaryCard(); // Refresh summary card
+        } else {
+            await api.update('tenants', tenantData.id, tenantData);
+            allData.tenants = allData.tenants.map(t => t.id === tenantData.id ? tenantData : t);
+            currentTenant = tenantData;
         }
 
+        populateSummaryCard();
+        // No modal to close here as this form is inline on the page, not in a modal.
         rentalUtils.showNotification('Tenant information saved successfully!');
     });
 
     // Documents table event delegation
     documentsTbody.addEventListener('click', (e) => {
         const target = e.target;
-        const id = target.closest('button')?.dataset.id;
+        const id = target.closest('[data-id]')?.dataset.id;
 
         if (target.closest('.view-doc-btn')) {
             viewDocument(id);
         } else if (target.closest('.edit-doc-btn')) {
-            const docToEdit = documents.find(d => d.id === id);
+            const docToEdit = unitDocuments.find(d => d.id === id);
             openDocumentModal(docToEdit);
         } else if (target.closest('.delete-doc-btn')) {
             if (rentalUtils.confirm('Are you sure you want to delete this document?')) {
                 api.delete('documents', id).then(() => {
-                    documents = documents.filter(d => d.id !== id);
+                    unitDocuments = unitDocuments.filter(d => d.id !== id);
                     renderDocuments();
                     rentalUtils.showNotification('Document deleted successfully!', 'error');
                 });

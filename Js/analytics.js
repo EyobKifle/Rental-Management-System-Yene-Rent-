@@ -22,6 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
         allData = { payments, expenses, properties, leases };
 
         processAndRenderAnalytics();
+        rentalUtils.setupLucideIcons();
     };
 
     const processAndRenderAnalytics = () => {
@@ -129,30 +130,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const renderProfitLossChart = (data) => {
         const ctx = document.getElementById('profitLossChart').getContext('2d');
-        renderChart(ctx, 'line', {
+        renderChart(ctx, 'bar', {
             labels: data.labels,
             datasets: [
-                { label: 'Revenue', data: data.revenues, borderColor: 'rgba(75, 192, 192, 1)', backgroundColor: 'rgba(75, 192, 192, 0.2)', fill: true, tension: 0.1 },
-                { label: 'Expenses', data: data.expenses, borderColor: 'rgba(255, 99, 132, 1)', backgroundColor: 'rgba(255, 99, 132, 0.2)', fill: true, tension: 0.1 }
+                { label: 'Revenue', data: data.revenues, backgroundColor: 'rgba(75, 192, 192, 0.5)' },
+                { label: 'Expenses', data: data.expenses, backgroundColor: 'rgba(255, 99, 132, 0.5)' }
             ]
         });
     };
 
     const renderIncomeOverviewChart = (data) => {
         const ctx = document.getElementById('incomeOverviewChart').getContext('2d');
-        renderChart(ctx, 'doughnut', {
-            labels: Object.keys(data),
+        renderChart(ctx, 'line', {
+            labels: Object.values(data).map(d => d.name),
             datasets: [{
                 label: 'Income by Property',
-                data: Object.values(data),
-                backgroundColor: ['#36A2EB', '#FF6384', '#FFCE56', '#4BC0C0', '#9966FF'],
+                data: Object.values(data).map(d => d.totalIncome),
+                borderColor: 'rgba(54, 162, 235, 1)',
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                fill: true,
+                tension: 0.1
             }]
         });
     };
 
     const renderExpenseBreakdownChart = (data) => {
         const ctx = document.getElementById('expenseBreakdownChart').getContext('2d');
-        renderChart(ctx, 'pie', {
+        renderChart(ctx, 'doughnut', {
             labels: Object.keys(data),
             datasets: [{
                 label: 'Expenses by Category',

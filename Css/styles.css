@@ -136,6 +136,14 @@ a:hover {
   margin-bottom: 1rem;
 }
 
+.form-actions {
+  display: flex;
+  justify-content: flex-end; /* Pushes buttons to the right */
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--gray-200);
+}
 .form-hint {
   display: block;
   font-size: 0.75rem;
