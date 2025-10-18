@@ -53,33 +53,27 @@ document.addEventListener('DOMContentLoaded', () => {
                     </td>
                     <td>
                         <div class="action-dropdown">
-                            <button type="button" class="action-dropdown-btn" data-id="${util.id}"><i data-lucide="more-horizontal"></i></button>
+                            <button type="button" class="action-dropdown-btn" data-id="${util.id}"><i class="fa-solid fa-ellipsis-vertical"></i></button>
                             <div id="dropdown-${util.id}" class="dropdown-menu hidden">
-                                <a href="#" class="dropdown-item edit-btn" data-id="${util.id}">Edit</a>
-                                <a href="#" class="dropdown-item delete-btn" data-id="${util.id}">Delete</a>
+                                <a href="#" class="dropdown-item edit-btn" data-id="${util.id}"><i class="fa-solid fa-pencil"></i>Edit</a>
+                                <a href="#" class="dropdown-item delete-btn" data-id="${util.id}"><i class="fa-solid fa-trash-can"></i>Delete</a>
                             </div>
                         </div>
                     </td>
                 `;
                 utilitiesTableBody.appendChild(row);
             });
-            rentalUtils.setupLucideIcons();
         }
     };
 
     const openUtilityModal = async (utility = null) => {
-        const response = await fetch('modal.html');
-        utilityModalContainer.innerHTML = await response.text();
-        const modal = utilityModalContainer.querySelector('.modal-overlay');
-        modal.querySelector('#modal-title').textContent = utility ? 'Edit Utility Bill' : 'Add New Utility Bill';
-
         const propertyOptions = properties.map(p => `<option value="${p.id}" ${utility && utility.propertyId === p.id ? 'selected' : ''}>${p.name}</option>`).join('');
         const types = ['Electricity', 'Water', 'Gas', 'Internet', 'Trash'];
         const typeOptions = types.map(t => `<option value="${t}" ${utility && utility.type === t ? 'selected' : ''}>${t}</option>`).join('');
         const statuses = ['Unpaid', 'Paid'];
         const statusOptions = statuses.map(s => `<option value="${s}" ${utility && utility.status === s ? 'selected' : ''}>${s}</option>`).join('');
 
-        modal.querySelector('#modal-body').innerHTML = `
+        const bodyHtml = `
             <form id="utility-form">
                 <input type="hidden" id="utility-id" value="${utility ? utility.id : ''}">
                 <div class="form-row">
@@ -115,7 +109,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             </form>
         `;
+
+        const title = utility ? 'Edit Utility Bill' : 'Add New Utility Bill';
+        const modalHtml = `
+            <div class="modal-overlay hidden">
+                <div class="modal-content-wrapper" style="max-width: 700px;">
+                    <div class="modal-header">
+                        <h2 id="modal-title">${title}</h2>
+                        <button class="close-modal-btn">&times;</button>
+                    </div>
+                    <div id="modal-body">${bodyHtml}</div>
+                </div>
+            </div>`;
+        utilityModalContainer.innerHTML = modalHtml;
+        const modal = utilityModalContainer.querySelector('.modal-overlay');
         rentalUtils.openModal(modal);
+
         modal.querySelector('#utility-form').addEventListener('submit', handleFormSubmit);
     };
 
@@ -151,7 +160,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const id = e.target.closest('[data-id]')?.dataset.id;
         if (!id) return;
 
-        if (e.target.closest('.edit-btn')) {
+        if (e.target.closest('.action-dropdown-btn')) {
+            // Close all other dropdowns first
+            document.querySelectorAll('.dropdown-menu').forEach(menu => menu.classList.add('hidden'));
+            document.getElementById(`dropdown-${id}`).classList.toggle('hidden');
+        } else if (e.target.closest('.edit-btn')) {
             e.preventDefault();
             const utilityToEdit = utilities.find(util => util.id === id);
             openUtilityModal(utilityToEdit);

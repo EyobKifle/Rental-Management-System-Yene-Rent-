@@ -17,6 +17,7 @@
   --gray-700: #374151;
   --gray-800: #1f2937;
   --gray-900: #111827;
+  --border-color: var(--gray-200);
 
   --font-family: 'Inter', sans-serif;
   --header-height: 65px;
@@ -329,4 +330,46 @@ tbody tr:hover {
 
 .notification-error {
     background-color: var(--danger-color);
+}
+
+/* =========================================
+   Action Dropdown (for tables)
+   ========================================= */
+.action-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.action-dropdown-btn {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gray-500);
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+}
+
+.action-dropdown-btn:hover {
+    background-color: var(--gray-100);
+    color: var(--gray-700);
+}
+
+.action-dropdown .dropdown-menu {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 4px);
+    z-index: 10;
+    background-color: white;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--gray-200);
+    min-width: 160px;
+    padding: 0.5rem 0;
+    overflow: hidden;
 }

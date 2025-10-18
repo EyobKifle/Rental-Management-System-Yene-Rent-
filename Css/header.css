@@ -106,20 +106,6 @@
     object-fit: cover;
 }
 
-.dropdown-menu {
-    right: 0; /* Align dropdown to the right */
-    position: absolute;
-    top: calc(100% + 0.5rem); /* Position below the button with a small gap */
-    background-color: #fff;
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-lg);
-    border: 1px solid var(--gray-200);
-    min-width: 180px;
-    z-index: 1010;
-    padding: 0.5rem 0;
-    overflow: hidden;
-}
-
 .dropdown-item {
     display: flex;
     align-items: center;

@@ -8,27 +8,49 @@ document.addEventListener('DOMContentLoaded', () => {
     const TENANT_STORAGE_KEY = 'tenants';
     const PROPERTY_STORAGE_KEY = 'properties';
     const UNIT_STORAGE_KEY = 'units';
+    const LEASE_STORAGE_KEY = 'leases';
     let tenants = [];
     let properties = [];
     let units = [];
+    let leases = [];
     
     const initialize = async () => {
         await window.rentalUtils.headerPromise; // Ensures shared components are loaded
         // Fetch data using the API layer
-        [tenants, properties, units] = await Promise.all([
+        [tenants, properties, units, leases] = await Promise.all([
             api.get(TENANT_STORAGE_KEY),
             api.get(PROPERTY_STORAGE_KEY),
-            api.get(UNIT_STORAGE_KEY)
+            api.get(UNIT_STORAGE_KEY),
+            api.get(LEASE_STORAGE_KEY)
         ]);
         renderTenants();
     };
 
+    const getLeaseStatus = (lease) => {
+        if (!lease) return { text: 'No Lease', class: 'status-expired' };
+        const today = new Date().setHours(0, 0, 0, 0);
+        const startDate = new Date(lease.startDate).setHours(0, 0, 0, 0);
+        const endDate = new Date(lease.endDate).setHours(0, 0, 0, 0);
+
+        if (today > endDate) {
+            return { text: 'Expired', class: 'status-expired' };
+        }
+        if (today >= startDate && today <= endDate) {
+            return { text: 'Active', class: 'status-active' };
+        }
+        return { text: 'Upcoming', class: 'status-upcoming' };
+    };
+
     const renderTenants = (filter = '') => {
         tenantList.innerHTML = '';
-        const filteredTenants = tenants.filter(t => 
-            t.name.toLowerCase().includes(filter.toLowerCase()) ||
-            t.email.toLowerCase().includes(filter.toLowerCase())
-        );
+        const searchLower = filter.toLowerCase();
+        const filteredTenants = tenants.filter(t => {
+            const unit = units.find(u => u.id === t.unitId);
+            const property = unit ? properties.find(p => p.id === unit.propertyId) : null;
+            return t.name.toLowerCase().includes(searchLower) ||
+                   t.email.toLowerCase().includes(searchLower) ||
+                   (property && property.name.toLowerCase().includes(searchLower));
+        });
 
         if (filteredTenants.length === 0) {
             emptyState.classList.remove('hidden');
@@ -39,15 +61,19 @@ document.addEventListener('DOMContentLoaded', () => {
             filteredTenants.forEach(tenant => {
                 const unit = units.find(u => u.id === tenant.unitId);
                 const property = unit ? properties.find(p => p.id === unit.propertyId) : null;
-                const card = document.createElement('div');
-                card.className = 'data-card tenant-card';
-                card.innerHTML = `
-                    <div class="tenant-card-header">
-                        <div>
-                            <h3>${tenant.name}</h3>
-                            <p>${tenant.email}</p>
-                            <p>${tenant.phone}</p>
-                        </div>
+                const lease = leases.find(l => l.tenantId === tenant.id && getLeaseStatus(l).text === 'Active') || leases.find(l => l.tenantId === tenant.id);
+                const status = getLeaseStatus(lease);
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${tenant.name}</td>
+                    <td>
+                        ${tenant.email}<br>
+                        <span class="text-sm text-gray-500">${tenant.phone}</span>
+                    </td>
+                    <td>${property?.name || 'N/A'} <span class="lease-property-unit">Unit ${unit?.unitNumber || 'N/A'}</span></td>
+                    <td>${lease ? `${rentalUtils.formatDate(lease.startDate)} - ${rentalUtils.formatDate(lease.endDate)}` : 'N/A'}</td>
+                    <td><span class="status-badge ${status.class}">${status.text}</span></td>
+                    <td>
                         <div class="action-dropdown">
                             <button class="action-dropdown-btn" data-id="${tenant.id}"><i class="fa-solid fa-ellipsis-vertical"></i></button>
                             <div id="dropdown-${tenant.id}" class="dropdown-menu hidden">
@@ -55,39 +81,20 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <a href="#" class="dropdown-item delete-btn" data-id="${tenant.id}"><i class="fa-solid fa-trash-can"></i>Delete</a>
                             </div>
                         </div>
-                    </div>
-                    <div class="tenant-card-details">
-                        <div>
-                            <span>Property</span>
-                            <span>${property ? property.name : 'N/A'}</span>
-                        </div>
-                        <div>
-                            <span>Unit</span>
-                            <span>${unit ? `Unit ${unit.unitNumber}` : 'Unassigned'}</span>
-                        </div>
-                        <div>
-                            <span>Move-in Date</span>
-                            <span>${rentalUtils.formatDate(tenant.moveInDate)}</span>
-                        </div>
-                    </div>
+                    </td>
                 `;
-                tenantList.appendChild(card);
+                tenantList.appendChild(row);
             });
         }
     };
 
     const openTenantModal = async (tenant = null) => {
-        const response = await fetch('modal.html');
-        tenantModalContainer.innerHTML = await response.text();
-        const modal = tenantModalContainer.querySelector('.modal-overlay');
-        modal.querySelector('#modal-title').textContent = tenant ? 'Edit Tenant' : 'Add New Tenant';
-
         const assignedUnit = tenant ? units.find(u => u.id === tenant.unitId) : null;
         const assignedPropertyId = assignedUnit ? assignedUnit.propertyId : null;
 
         const propertyOptions = properties.map(p => `<option value="${p.id}" ${assignedPropertyId === p.id ? 'selected' : ''}>${p.name}</option>`).join('');
 
-        modal.querySelector('#modal-body').innerHTML = `
+        const bodyHtml = `
             <form id="tenant-form">
                 <input type="hidden" id="tenant-id" value="${tenant ? tenant.id : ''}">
                 <div class="form-group">
@@ -129,6 +136,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             </form>
         `;
+
+        const title = tenant ? 'Edit Tenant' : 'Add New Tenant';
+        const modalHtml = `
+            <div class="modal-overlay hidden">
+                <div class="modal-content-wrapper" style="max-width: 700px;">
+                    <div class="modal-header">
+                        <h2 id="modal-title">${title}</h2>
+                        <button class="close-modal-btn">&times;</button>
+                    </div>
+                    <div id="modal-body">${bodyHtml}</div>
+                </div>
+            </div>`;
+        tenantModalContainer.innerHTML = modalHtml;
+        const modal = tenantModalContainer.querySelector('.modal-overlay');
         rentalUtils.openModal(modal);
 
         const propertySelect = modal.querySelector('#tenant-property');

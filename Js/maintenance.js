@@ -72,18 +72,13 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const openMaintenanceModal = async (request = null) => {
-        const response = await fetch('modal.html');
-        maintenanceModalContainer.innerHTML = await response.text();
-        const modal = maintenanceModalContainer.querySelector('.modal-overlay');
-        modal.querySelector('#modal-title').textContent = request ? 'Edit Maintenance Request' : 'Add Maintenance Request';
-
         const propertyOptions = properties.map(p => `<option value="${p.id}" ${request?.propertyId === p.id ? 'selected' : ''}>${p.name}</option>`).join('');
         const categories = ['Plumbing', 'Electrical', 'HVAC', 'Painting', 'General Repair', 'Other'];
         const categoryOptions = categories.map(c => `<option value="${c}" ${request?.category === c ? 'selected' : ''}>${c}</option>`).join('');
         const statuses = ['Pending', 'In Progress', 'Completed'];
         const statusOptions = statuses.map(s => `<option value="${s}" ${request?.status === s ? 'selected' : ''}>${s}</option>`).join('');
 
-        modal.querySelector('#modal-body').innerHTML = `
+        const bodyHtml = `
             <form id="maintenance-form">
                 <input type="hidden" id="request-id" value="${request?.id || ''}">
                 <div class="form-group">
@@ -138,6 +133,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             </form>
         `;
+
+        const title = request ? 'Edit Maintenance Request' : 'Add Maintenance Request';
+        const modalHtml = `
+            <div class="modal-overlay hidden">
+                <div class="modal-content-wrapper" style="max-width: 700px;">
+                    <div class="modal-header">
+                        <h2 id="modal-title">${title}</h2>
+                        <button class="close-modal-btn">&times;</button>
+                    </div>
+                    <div id="modal-body">${bodyHtml}</div>
+                </div>
+            </div>`;
+        maintenanceModalContainer.innerHTML = modalHtml;
+        const modal = maintenanceModalContainer.querySelector('.modal-overlay');
         rentalUtils.openModal(modal);
 
         const propertySelect = modal.querySelector('#request-property');

@@ -182,7 +182,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     <button type="button" class="close-modal-btn btn-secondary">Cancel</button>
                     <button type="submit" class="btn-primary">Save Payment</button>
                 </div>
-            </form>`;
+            </form>
+        `;
 
         await rentalUtils.createAndOpenModal({
             modalId: 'payment-modal',
@@ -260,7 +261,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     <button type="button" class="close-modal-btn btn-secondary">Cancel</button>
                     <button type="submit" class="btn-primary">Save Document</button>
                 </div>
-            </form>`;
+            </form>
+        `;
 
         await rentalUtils.createAndOpenModal({
             modalId: 'document-modal',
@@ -317,7 +319,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const bodyHtml = `
             <div class="document-view">
                 <div class="document-info">
-                    <p><strong>Type:</strong> ${doc.type}</p>
+                    <p><strong>Type:</strong> ${doc.category}</p>
                     <p><strong>Date:</strong> ${rentalUtils.formatDate(doc.uploadDate || doc.date)}</p>
                     ${doc.fileName ? `<p><strong>File:</strong> ${doc.fileName}</p>` : ''}
                 </div>
