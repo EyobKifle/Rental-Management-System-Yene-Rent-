@@ -1,13 +1,34 @@
 /* === Analytics Page Specific Styles === */
 
+/* General Page Structure */
+.page-header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+}
+
+.page-header h1 {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: var(--gray-900);
+  margin: 0;
+}
+
+.page-header p {
+  color: var(--gray-500);
+  margin-top: 0.25rem;
+  margin-bottom: 0;
+}
 .reports-header {
     display: flex;
     gap: 1rem;
     margin-bottom: 1.5rem;
     flex-wrap: wrap;
 }
-.reports-header .btn-secondary i {
+.reports-header .btn-secondary svg {
     margin-right: 0.5rem;
+    width: 1rem;
 }
 .stats-grid {
     display: grid;
@@ -36,10 +57,9 @@
 
 @media (min-width: 1024px) {
     .analytics-main-grid {
-        grid-template-columns: 2fr 1fr;
+        grid-template-columns: 1fr; /* Changed to a single column layout */
         grid-template-areas:
-            "main sidebar"
-            "small sidebar";
+            "main" "small" "sidebar"; /* Stack areas vertically */
     }
 
     .chart-container-large {
@@ -57,8 +77,8 @@
 
 .small-charts-grid {
     display: grid;
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
 }
 
 @media (min-width: 768px) {

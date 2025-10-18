@@ -137,6 +137,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
                 <div class="form-row">
                     <div class="form-group">
+                        <label for="payment-type" class="form-label">Payment Type</label>
+                        <select id="payment-type" class="form-input" required>
+                            <option value="Rent" ${payment && payment.type === 'Rent' ? 'selected' : ''}>Rent</option>
+                            <option value="Deposit" ${payment && payment.type === 'Deposit' ? 'selected' : ''}>Deposit</option>
+                            <option value="Late Fee" ${payment && payment.type === 'Late Fee' ? 'selected' : ''}>Late Fee</option>
+                            <option value="Other" ${payment && payment.type === 'Other' ? 'selected' : ''}>Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
                         <label for="payment-amount" class="form-label">Amount (ETB)</label>
                         <input type="number" id="payment-amount" class="form-input" value="${payment ? payment.amount : ''}" required min="0">
                     </div>
@@ -188,6 +197,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const paymentData = {
             id: id || rentalUtils.generateId(),
             leaseId: form.querySelector('#payment-lease').value,
+            type: form.querySelector('#payment-type').value,
             amount: parseFloat(form.querySelector('#payment-amount').value),
             date: form.querySelector('#payment-date').value,
             method: form.querySelector('#payment-method').value,
