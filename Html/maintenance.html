@@ -32,12 +32,25 @@
                 <div class="table-header">
                     <input type="text" id="search-input" class="form-input" placeholder="Search by title, property, or status...">
                 </div>
-                <div id="maintenance-list" class="maintenance-grid"></div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Property</th>
+                            <th>Status</th>
+                            <th>Reported Date</th>
+                            <th>Cost</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="maintenance-list"></tbody>
+                </table>
             </div>
             <div id="empty-state" class="hidden empty-state"><i class="fa-solid fa-screwdriver-wrench"></i><h3>No Maintenance Requests</h3><p>Get started by adding a new maintenance request.</p></div>
         </div>
     </main>
     <div id="maintenance-modal"></div>
+    <div id="maintenance-details-modal"></div>
     <script src="../Js/auth.js"></script>
     <script src="../Js/api.js"></script>
     <script src="../Js/shared.js"></script>

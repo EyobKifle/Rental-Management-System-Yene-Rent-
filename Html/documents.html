@@ -32,7 +32,26 @@
                 <div class="table-header">
                     <input type="text" id="search-input" class="form-input" placeholder="Search by document name...">
                 </div>
-                <div id="document-list" class="document-grid"></div>
+                <div id="document-filter-nav" class="filter-nav">
+                    <button class="filter-btn active" data-category="all">All Agreements</button>
+                    <button class="filter-btn" data-category="Lease Agreement">Lease Agreements</button>
+                    <button class="filter-btn" data-category="Payment Receipt">Receipts</button>
+                    <button class="filter-btn" data-category="Tax Document">Tax Documents</button>
+                    <button class="filter-btn" data-category="Other">Others</button>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Category</th>
+                            <th>Linked To</th>
+                            <th>Size</th>
+                            <th>Upload Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="document-list"></tbody>
+                </table>
             </div>
             <div id="empty-state" class="hidden empty-state"><i class="fa-solid fa-folder-open"></i><h3>No Documents Found</h3><p>Get started by uploading a new document.</p></div>
         </div>

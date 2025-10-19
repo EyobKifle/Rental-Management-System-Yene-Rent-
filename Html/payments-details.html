@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Details - Rental System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="../Css/styles.css">
+    <link rel="stylesheet" href="../Css/header.css">
+    <link rel="stylesheet" href="../Css/sidebar.css">
+    <link rel="stylesheet" href="../Css/payments.css"> <!-- Re-use some styles -->
+    <link rel="stylesheet" href="../Css/maintenance-details.css"> <!-- Re-use details layout -->
+</head>
+<body>
+
+    <div id="sidebar-container"></div>
+    <div id="header-container"></div>
+
+    <main id="main-content" class="main-content">
+        <div id="payment-details-view">
+            <div class="page-header">
+                <div>
+                    <button id="back-btn" class="btn-secondary"><i class="fa-solid fa-arrow-left"></i> Back to Payments</button>
+                    <h1 id="payment-title">Payment Details</h1>
+                    <p id="payment-subtitle">View comprehensive information and receipt for this payment.</p>
+                </div>
+                <div class="page-actions">
+                    <button id="print-btn" class="btn-secondary"><i class="fa-solid fa-print"></i> Print</button>
+                    <button id="edit-btn" class="btn-primary"><i class="fa-solid fa-pencil"></i> Edit Payment</button>
+                    <button id="delete-btn" class="btn-danger"><i class="fa-solid fa-trash-can"></i> Delete Payment</button>
+                </div>
+            </div>
+
+            <div class="data-card">
+                <div class="maintenance-details-grid">
+                    <div class="detail-section">
+                        <h4>Payment Information</h4>
+                        <div class="detail-item"><span>Tenant</span><span id="detail-tenant"></span></div>
+                        <div class="detail-item"><span>Property / Unit</span><span id="detail-property"></span></div>
+                        <div class="detail-item"><span>Amount</span><span id="detail-amount"></span></div>
+                        <div class="detail-item"><span>Payment Date</span><span id="detail-payment-date"></span></div>
+                        <div class="detail-item"><span>Payment Method</span><span id="detail-method"></span></div>
+                        <div class="detail-item"><span>Payment For</span><span id="detail-type"></span></div>
+                        <div class="detail-item"><span>Receipt Number</span><span id="detail-receipt-number"></span></div>
+                    </div>
+                    <div class="detail-section">
+                        <h4>Receipt</h4>
+                        <div id="receipt-image-wrapper" class="detail-image-wrapper"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="../Js/auth.js"></script>
+    <script src="../Js/api.js"></script>
+    <script src="../Js/shared.js"></script>
+    <script src="../Js/payments-details.js"></script>
+</body>
+</html>

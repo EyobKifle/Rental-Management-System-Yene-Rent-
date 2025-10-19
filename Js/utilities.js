@@ -20,6 +20,14 @@ document.addEventListener('DOMContentLoaded', () => {
             api.get(UTILITY_KEY),
             api.get(PROPERTY_KEY)
         ]);
+
+        // Check for editId in URL params to open modal directly
+        const urlParams = new URLSearchParams(window.location.search);
+        const editId = urlParams.get('editId');
+        if (editId) {
+            const utilityToEdit = utilities.find(util => util.id === editId);
+            if (utilityToEdit) openUtilityModal(utilityToEdit);
+        }
         renderUtilities();
     };
 
@@ -41,6 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const property = properties.find(p => p.id === util.propertyId);
                 const row = document.createElement('tr');
                 const statusClass = util.status.toLowerCase();
+                row.dataset.id = util.id; // Add ID to row for click events
                 row.innerHTML = `
                     <td>${util.type}</td>
                     <td>${property?.name || 'N/A'}</td>
@@ -55,6 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div class="action-dropdown">
                             <button type="button" class="action-dropdown-btn" data-id="${util.id}"><i class="fa-solid fa-ellipsis-vertical"></i></button>
                             <div id="dropdown-${util.id}" class="dropdown-menu hidden">
+                                <a href="#" class="dropdown-item view-btn" data-id="${util.id}"><i class="fa-solid fa-eye"></i>View Details</a>
                                 <a href="#" class="dropdown-item edit-btn" data-id="${util.id}"><i class="fa-solid fa-pencil"></i>Edit</a>
                                 <a href="#" class="dropdown-item delete-btn" data-id="${util.id}"><i class="fa-solid fa-trash-can"></i>Delete</a>
                             </div>
@@ -103,6 +113,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     <label for="utility-status" class="form-label">Status</label>
                     <select id="utility-status" class="form-input" required>${statusOptions}</select>
                 </div>
+                <div class="form-group">
+                    <label for="receipt-image" class="form-label">Receipt Screenshot (Optional)</label>
+                    <input type="file" id="receipt-image" class="form-input" accept="image/*">
+                </div>
                 <div class="form-actions">
                     <button type="button" class="close-modal-btn btn-secondary">Cancel</button>
                     <button type="submit" class="btn-primary">Save Bill</button>
@@ -134,6 +148,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!rentalUtils.validateForm(form)) return;
 
         const id = form.querySelector('#utility-id').value;
+        const existingUtility = utilities.find(u => u.id === id);
+        const receiptImageFile = form.querySelector('#receipt-image').files[0];
+
         const utilityData = {
             id: id || rentalUtils.generateId(),
             type: form.querySelector('#utility-type').value,
@@ -141,6 +158,7 @@ document.addEventListener('DOMContentLoaded', () => {
             amount: parseFloat(form.querySelector('#utility-amount').value),
             dueDate: form.querySelector('#utility-due-date').value,
             status: form.querySelector('#utility-status').value,
+            receiptImageUrl: receiptImageFile ? await rentalUtils.readFileAsDataURL(receiptImageFile) : existingUtility?.receiptImageUrl || null,
         };
 
         if (id) {
@@ -157,13 +175,18 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     utilitiesTableBody.addEventListener('click', (e) => {
-        const id = e.target.closest('[data-id]')?.dataset.id;
+        const row = e.target.closest('tr');
+        const id = row?.dataset.id;
         if (!id) return;
 
         if (e.target.closest('.action-dropdown-btn')) {
+            e.stopPropagation(); // Prevent row click from firing
             // Close all other dropdowns first
             document.querySelectorAll('.dropdown-menu').forEach(menu => menu.classList.add('hidden'));
             document.getElementById(`dropdown-${id}`).classList.toggle('hidden');
+        } else if (e.target.closest('.view-btn')) {
+            e.preventDefault();
+            window.location.href = `utilities-details.html?utilityId=${id}`;
         } else if (e.target.closest('.edit-btn')) {
             e.preventDefault();
             const utilityToEdit = utilities.find(util => util.id === id);
@@ -177,6 +200,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     rentalUtils.showNotification('Utility bill deleted successfully!', 'error');
                 });
             }
+        } else {
+            // If the click is on the row but not an action button, navigate to details
+            window.location.href = `utilities-details.html?utilityId=${id}`;
         }
     });
 

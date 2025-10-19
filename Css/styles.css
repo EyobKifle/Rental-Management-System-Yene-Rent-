@@ -199,6 +199,10 @@ a:hover {
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  padding: 2rem 1rem; /* Add padding for smaller screens */
+  overflow-y: auto; /* Allow overlay to scroll if content is too tall */
+  align-items: flex-start; /* Align modal to the top */
+  justify-content: center;
 }
 
 .modal-content-wrapper {
@@ -208,6 +212,10 @@ a:hover {
   width: 100%;
   max-width: 500px;
   padding: 1.5rem;
+  display: flex; /* Use flexbox for layout */
+  flex-direction: column; /* Stack header, body, footer vertically */
+  max-height: 95vh; /* Limit height to 95% of viewport height */
+  overflow: hidden; /* Hide overflow on the wrapper itself */
 }
 
 .close-modal-btn {
@@ -220,6 +228,11 @@ a:hover {
 
 .close-modal-btn:hover {
   color: var(--gray-600);
+}
+
+.modal-content-wrapper #modal-body {
+    flex-grow: 1; /* Allow body to take up available space */
+    overflow-y: auto; /* Make the body scrollable */
 }
 
 table {
