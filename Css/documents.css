@@ -65,3 +65,30 @@
     top: 0.5rem;
     right: 0.5rem;
 }
+
+/* === Filter Navigation for Table View === */
+.filter-nav {
+    display: flex;
+    gap: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    padding: 0 1.5rem;
+    margin: 1rem -1.5rem; /* Negative margin to break out of card padding */
+}
+
+.filter-btn {
+    padding: 0.75rem 0.25rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--gray-500);
+    background-color: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    margin-bottom: -1px; /* Align with the container's border */
+}
+
+.filter-btn.active {
+    color: var(--primary-color);
+    border-bottom-color: var(--primary-color);
+}

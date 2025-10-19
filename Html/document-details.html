@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Details - Rental System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="../Css/styles.css">
+    <link rel="stylesheet" href="../Css/header.css">
+    <link rel="stylesheet" href="../Css/sidebar.css">
+    <link rel="stylesheet" href="../Css/documents.css"> <!-- Re-use some document styles -->
+    <link rel="stylesheet" href="../Css/document-details.css"> <!-- New specific styles -->
+</head>
+<body>
+
+    <div id="sidebar-container"></div>
+    <div id="header-container"></div>
+
+    <main id="main-content" class="main-content">
+        <div id="document-details-view">
+            <div class="page-header">
+                <div>
+                    <button id="back-btn" class="btn-secondary"><i class="fa-solid fa-arrow-left"></i> Back to Documents</button>
+                    <h1 id="document-title">Document Details</h1>
+                    <p id="document-subtitle">View comprehensive information and preview for this document.</p>
+                </div>
+                <div class="page-actions">
+                    <button id="print-document-btn" class="btn-secondary"><i class="fa-solid fa-print"></i> Print</button>
+                    <button id="edit-document-btn" class="btn-primary"><i class="fa-solid fa-pencil"></i> Edit Document</button>
+                    <button id="delete-document-btn" class="btn-danger"><i class="fa-solid fa-trash-can"></i> Delete Document</button>
+                </div>
+            </div>
+
+            <div class="data-card">
+                <div class="document-details-grid">
+                    <div class="detail-section">
+                        <h4>Document Information</h4>
+                        <div class="detail-item"><span>Name</span><span id="detail-name"></span></div>
+                        <div class="detail-item"><span>Category</span><span id="detail-category"></span></div>
+                        <div class="detail-item"><span>Linked To</span><span id="detail-linked-to"></span></div>
+                        <div class="detail-item"><span>Size</span><span id="detail-size"></span></div>
+                        <div class="detail-item"><span>Upload Date</span><span id="detail-upload-date"></span></div>
+                    </div>
+                    <div class="detail-section document-preview-section">
+                        <h4>Document Preview</h4>
+                        <div id="document-preview-content" class="document-preview-content">
+                            <!-- Document preview will be rendered here -->
+                        </div>
+                        <div class="preview-actions">
+                            <a id="download-document-btn" href="#" target="_blank" class="btn-secondary hidden"><i class="fa-solid fa-download"></i> Download File</a>
+                            <button id="share-document-btn" class="btn-secondary hidden"><i class="fa-solid fa-share-alt"></i> Share</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="../Js/auth.js"></script>
+    <script src="../Js/api.js"></script>
+    <script src="../Js/shared.js"></script>
+    <script src="../Js/document-details.js"></script>
+</body>
+</html>

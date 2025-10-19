@@ -176,7 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (imageInput.files && imageInput.files[0]) {
             const file = imageInput.files[0];
-            imageData = await rentalUtils.convertFileToBase64(file);
+            imageData = await rentalUtils.readFileAsDataURL(file);
         }
 
         const propertyData = {

@@ -23,6 +23,14 @@ document.addEventListener('DOMContentLoaded', () => {
             api.get(PROPERTY_KEY),
             api.get(UNIT_KEY)
         ]);
+
+        // Check for editId in URL params to open modal directly
+        const urlParams = new URLSearchParams(window.location.search);
+        const editId = urlParams.get('editId');
+        if (editId) {
+            const requestToEdit = requests.find(req => req.id === editId);
+            if (requestToEdit) openMaintenanceModal(requestToEdit);
+        }
         renderRequests();
     };
 
@@ -46,27 +54,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 const property = properties.find(p => p.id === req.propertyId);
                 const unit = units.find(u => u.id === req.unitId);
                 const statusClass = req.status.toLowerCase().replace(' ', '-');
-                const card = document.createElement('div');
-                card.className = 'data-card maintenance-card';
-                card.innerHTML = `
-                    <div class="maintenance-card-header">
-                        <h3>${req.title}</h3>
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${req.title}</td>
+                    <td>${property?.name || 'N/A'} ${unit ? `<span class="lease-property-unit">(Unit ${unit.unitNumber})</span>` : ''}</td>
+                    <td><span class="status-badge status-${statusClass}">${req.status}</span></td>
+                    <td>${rentalUtils.formatDate(req.reportedDate)}</td>
+                    <td>${req.cost ? rentalUtils.formatCurrency(req.cost) : 'N/A'}</td>
+                    <td>
                         <div class="action-dropdown">
                             <button class="action-dropdown-btn" data-id="${req.id}"><i class="fa-solid fa-ellipsis-vertical"></i></button>
                             <div id="dropdown-${req.id}" class="dropdown-menu hidden">
+                                <a href="#" class="dropdown-item view-details-btn" data-id="${req.id}"><i class="fa-solid fa-eye"></i>View Details</a>
                                 <a href="#" class="dropdown-item edit-btn" data-id="${req.id}"><i class="fa-solid fa-pencil"></i>Edit</a>
                                 <a href="#" class="dropdown-item delete-btn" data-id="${req.id}"><i class="fa-solid fa-trash-can"></i>Delete</a>
                             </div>
                         </div>
-                    </div>
-                    <div class="maintenance-card-details">
-                        <div><span>Status</span><span class="status-badge status-${statusClass}">${req.status}</span></div>
-                        <div><span>Property</span><span>${property?.name || 'N/A'} ${unit ? `(Unit ${unit.unitNumber})` : ''}</span></div>
-                        <div><span>Reported</span><span>${rentalUtils.formatDate(req.reportedDate)}</span></div>
-                        <div><span>Cost</span><span>${req.cost ? rentalUtils.formatCurrency(req.cost) : 'N/A'}</span></div>
-                    </div>
+                    </td>
                 `;
-                maintenanceList.appendChild(card);
+                maintenanceList.appendChild(row);
             });
         }
     };
@@ -115,6 +121,13 @@ document.addEventListener('DOMContentLoaded', () => {
                         <input type="number" id="request-cost" class="form-input" value="${request?.cost || ''}">
                     </div>
                 </div>
+                <div class="form-row hidden" id="receipt-details-container">
+                    <div class="form-group">
+                        <label for="request-receipt-number" class="form-label">Receipt Number (Optional)</label>
+                        <input type="text" id="request-receipt-number" class="form-input" value="${request?.receiptNumber || ''}">
+                    </div>
+                    <div class="form-group"></div>
+                </div>
                 <div class="image-upload-group">
                     <div class="image-upload-container form-group">
                         <label for="before-image" class="form-label">"Before" Photo</label>
@@ -125,6 +138,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         <label for="after-image" class="form-label">"After" Photo</label>
                         <input type="file" id="after-image" class="form-input" accept="image/*">
                         <div class="image-preview">${request?.afterImageUrl ? `<img src="${request.afterImageUrl}">` : ''}</div>
+                    </div>
+                    <div class="image-upload-container form-group hidden" id="receipt-image-container">
+                        <label for="receipt-image" class="form-label">Receipt Photo</label>
+                        <input type="file" id="receipt-image" class="form-input" accept="image/*">
+                        <div class="image-preview">${request?.receiptImageUrl ? `<img src="${request.receiptImageUrl}">` : ''}</div>
                     </div>
                 </div>
                 <div class="form-actions">
@@ -151,6 +169,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const propertySelect = modal.querySelector('#request-property');
         const unitSelect = modal.querySelector('#request-unit');
+        const costInput = modal.querySelector('#request-cost');
+        const receiptDetailsContainer = modal.querySelector('#receipt-details-container');
+        const receiptImageContainer = modal.querySelector('#receipt-image-container');
+
+        const toggleReceiptFields = () => {
+            const show = !!costInput.value && parseFloat(costInput.value) > 0;
+            receiptDetailsContainer.classList.toggle('hidden', !show);
+            receiptImageContainer.classList.toggle('hidden', !show);
+        };
+
 
         const populateUnits = (propertyId) => {
             unitSelect.innerHTML = '<option value="">Property-wide</option>';
@@ -168,6 +196,9 @@ document.addEventListener('DOMContentLoaded', () => {
         propertySelect.addEventListener('change', () => populateUnits(propertySelect.value));
         if (request?.propertyId) populateUnits(request.propertyId);
 
+        costInput.addEventListener('input', toggleReceiptFields);
+        toggleReceiptFields(); // Initial check
+
         modal.querySelector('#maintenance-form').addEventListener('submit', handleFormSubmit);
     };
 
@@ -181,6 +212,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const beforeImageFile = form.querySelector('#before-image').files[0];
         const afterImageFile = form.querySelector('#after-image').files[0];
+        const receiptImageFile = form.querySelector('#receipt-image').files[0];
 
         const requestData = {
             id: id || rentalUtils.generateId(),
@@ -191,8 +223,10 @@ document.addEventListener('DOMContentLoaded', () => {
             status: form.querySelector('#request-status').value,
             reportedDate: form.querySelector('#request-date').value,
             cost: parseFloat(form.querySelector('#request-cost').value) || null,
-            beforeImageUrl: beforeImageFile ? await rentalUtils.convertFileToBase64(beforeImageFile) : existingRequest?.beforeImageUrl || null,
-            afterImageUrl: afterImageFile ? await rentalUtils.convertFileToBase64(afterImageFile) : existingRequest?.afterImageUrl || null,
+            receiptNumber: form.querySelector('#request-receipt-number').value || null,
+            beforeImageUrl: beforeImageFile ? await rentalUtils.readFileAsDataURL(beforeImageFile) : existingRequest?.beforeImageUrl || null,
+            afterImageUrl: afterImageFile ? await rentalUtils.readFileAsDataURL(afterImageFile) : existingRequest?.afterImageUrl || null,
+            receiptImageUrl: receiptImageFile ? await rentalUtils.readFileAsDataURL(receiptImageFile) : existingRequest?.receiptImageUrl || null,
         };
 
         if (id) {
@@ -215,6 +249,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.target.closest('.action-dropdown-btn')) {
             document.querySelectorAll('.dropdown-menu').forEach(menu => menu.classList.add('hidden'));
             document.getElementById(`dropdown-${id}`).classList.toggle('hidden');
+        } else if (e.target.closest('.view-details-btn')) {
+            e.preventDefault();
+            window.location.href = `maintenance-details.html?requestId=${id}`;
         } else if (e.target.closest('.edit-btn')) {
             e.preventDefault();
             const requestToEdit = requests.find(r => r.id === id);

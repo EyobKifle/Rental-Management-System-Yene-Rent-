@@ -1,0 +1,24 @@
+/* === Print Specific Styles for Utility Details === */
+@media print {
+    /* Hide all non-essential elements */
+    body > #sidebar-container,
+    body > #header-container,
+    #utility-details-view .page-header {
+        display: none;
+    }
+
+    /* Reset layout for printing */
+    body, .main-content {
+        margin: 0 !important;
+        padding: 0 !important;
+        background-color: #fff;
+    }
+
+    .data-card, .maintenance-details-grid {
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        display: block; /* Ensure it's not a grid */
+    }
+}

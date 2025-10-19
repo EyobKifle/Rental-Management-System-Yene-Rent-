@@ -284,7 +284,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (fileInput.files && fileInput.files[0]) {
             const file = fileInput.files[0];
-            fileData = await rentalUtils.convertFileToBase64(file);
+            fileData = await rentalUtils.readFileAsDataURL(file);
         }
 
         const documentData = {

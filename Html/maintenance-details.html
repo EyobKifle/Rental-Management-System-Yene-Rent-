@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maintenance Details - Rental System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="../Css/styles.css">
+    <link rel="stylesheet" href="../Css/header.css">
+    <link rel="stylesheet" href="../Css/sidebar.css">
+    <link rel="stylesheet" href="../Css/maintenance.css"> <!-- Re-use some styles -->
+    <link rel="stylesheet" href="../Css/maintenance-details.css"> <!-- New specific styles -->
+</head>
+<body>
+
+    <div id="sidebar-container"></div>
+    <div id="header-container"></div>
+
+    <main id="main-content" class="main-content">
+        <div id="maintenance-details-view">
+            <div class="page-header">
+                <div>
+                    <button id="back-btn" class="btn-secondary"><i class="fa-solid fa-arrow-left"></i> Back to Requests</button>
+                    <h1 id="request-title">Maintenance Request Details</h1>
+                    <p id="request-subtitle">View comprehensive information for this maintenance task.</p>
+                </div>
+                <div class="page-actions">
+                    <button id="print-request-btn" class="btn-secondary"><i class="fa-solid fa-print"></i> Print</button>
+                    <button id="edit-request-btn" class="btn-primary"><i class="fa-solid fa-pencil"></i> Edit Request</button>
+                    <button id="delete-request-btn" class="btn-danger"><i class="fa-solid fa-trash-can"></i> Delete Request</button>
+                </div>
+            </div>
+
+            <div class="data-card">
+                <div class="maintenance-details-grid">
+                    <div class="detail-section">
+                        <h4>Request Information</h4>
+                        <div class="detail-item"><span>Title</span><span id="detail-title"></span></div>
+                        <div class="detail-item"><span>Property</span><span id="detail-property"></span></div>
+                        <div class="detail-item"><span>Unit</span><span id="detail-unit"></span></div>
+                        <div class="detail-item"><span>Category</span><span id="detail-category"></span></div>
+                        <div class="detail-item"><span>Status</span><span id="detail-status"></span></div>
+                        <div class="detail-item"><span>Date Reported</span><span id="detail-reported-date"></span></div>
+                    </div>
+                    <div class="detail-section">
+                        <h4>Financials & Receipt</h4>
+                        <div class="detail-item"><span>Cost</span><span id="detail-cost"></span></div>
+                        <div class="detail-item"><span>Receipt Number</span><span id="detail-receipt-number"></span></div>
+                        <div id="receipt-image-wrapper" class="detail-image-wrapper"></div>
+                    </div>
+                </div>
+                <div class="detail-section image-gallery-section">
+                    <h4>Before & After Photos</h4>
+                    <div class="maintenance-image-gallery"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="../Js/auth.js"></script>
+    <script src="../Js/api.js"></script>
+    <script src="../Js/shared.js"></script>
+    <script src="../Js/maintenance-details.js"></script>
+</body>
+</html>
