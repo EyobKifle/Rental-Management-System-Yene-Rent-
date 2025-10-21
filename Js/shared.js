@@ -522,12 +522,13 @@ class RentalUtils {
      * @param {string} options.bodyHtml - The HTML content for the modal body.
      * @param {string} [options.formId] - The ID of the form inside the modal.
      * @param {Function} [options.onSubmit] - The submit handler for the form.
+     * @param {string} [options.maxWidth] - The maximum width of the modal (e.g., '700px').
      */
-    async createAndOpenModal({ modalId, title, bodyHtml, formId, onSubmit }) {
+    async createAndOpenModal({ modalId, title, bodyHtml, formId, onSubmit, maxWidth = '500px' }) {
         const modalContainer = document.getElementById(modalId);
         const modalHtml = `
             <div class="modal-overlay hidden">
-                <div class="modal-content-wrapper">
+                <div class="modal-content-wrapper" style="max-width: ${maxWidth};">
                     <div class="modal-header">
                         <h2 id="modal-title">${title}</h2>
                         <button class="close-modal-btn">&times;</button>

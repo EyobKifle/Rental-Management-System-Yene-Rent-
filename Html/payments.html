@@ -19,21 +19,17 @@
         <div id="payments-view">
             <div class="page-header">
                 <div>
-                    <h1>Payments</h1>
-                    <p>Track and manage all incoming payments.</p>
+                    <h1>Payment Schedule</h1>
+                    <p>Track all scheduled, paid, and overdue rent payments.</p>
                 </div>
-                <button id="add-payment-btn" class="btn-primary">
-                    <i class="fa-solid fa-plus"></i>
-                    <span>Record Payment</span>
-                </button>
             </div>
 
             <!-- Stats Cards -->
             <div class="stats-grid">
                 <div class="data-card stat-card"><h3>Total Collected</h3><h2 id="stat-total-collected">ETB 0</h2></div>
                 <div class="data-card stat-card"><h3>This Month</h3><h2 id="stat-this-month">ETB 0</h2></div>
-                <div class="data-card stat-card"><h3>Outstanding</h3><h2 id="stat-outstanding">ETB 0</h2></div>
-                <div class="data-card stat-card"><h3>Overdue</h3><h2 id="stat-overdue">ETB 0</h2></div>
+                <div class="data-card stat-card"><h3>Total Overdue Amount</h3><h2 id="stat-outstanding">ETB 0</h2></div>
+                <div class="data-card stat-card"><h3>Overdue Payments</h3><h2 id="stat-overdue">0</h2></div>
             </div>
 
             <div class="data-card">
@@ -46,10 +42,9 @@
                             <tr>
                                 <th>Tenant</th>
                                 <th>Property / Unit</th>
+                                <th>Due Date</th>
                                 <th>Amount</th>
-                                <th>Payment Date</th>
-                                <th>Method</th>
-                                <th>Receipt Number</th>
+                                <th>Status</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>

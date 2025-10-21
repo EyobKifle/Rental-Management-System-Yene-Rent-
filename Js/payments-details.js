@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const detailTenant = document.getElementById('detail-tenant');
     const detailProperty = document.getElementById('detail-property');
     const detailAmount = document.getElementById('detail-amount');
+    const detailDueDate = document.getElementById('detail-due-date');
     const detailPaymentDate = document.getElementById('detail-payment-date');
     const detailMethod = document.getElementById('detail-method');
     const detailType = document.getElementById('detail-type');
@@ -62,6 +63,20 @@ document.addEventListener('DOMContentLoaded', () => {
         setupEventListeners();
     };
 
+    const getPaymentStatus = (payment) => {
+        if (payment.status === 'Paid') {
+            return { text: 'Paid', class: 'status-paid' };
+        }
+        const today = new Date().setHours(0, 0, 0, 0);
+        const dueDate = new Date(payment.dueDate).setHours(0, 0, 0, 0);
+
+        if (today > dueDate) {
+            return { text: 'Overdue', class: 'status-overdue' };
+        }
+        return { text: 'Scheduled', class: 'status-scheduled' };
+    };
+
+
     const renderPaymentDetails = () => {
         const lease = allData.leases.find(l => l.id === currentPayment.leaseId);
         const tenant = lease ? allData.tenants.find(t => t.id === lease.tenantId) : null;
@@ -70,14 +85,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Header
         paymentTitle.textContent = `Payment from ${tenant?.name || 'N/A'}`;
-        paymentSubtitle.textContent = `Amount: ${rentalUtils.formatCurrency(currentPayment.amount)} on ${rentalUtils.formatDate(currentPayment.date)}`;
+        paymentSubtitle.textContent = `Amount: ${rentalUtils.formatCurrency(currentPayment.amount)} due on ${rentalUtils.formatDate(currentPayment.dueDate)}`;
 
         // Details
+        const status = getPaymentStatus(currentPayment);
         detailTenant.textContent = tenant?.name || 'N/A';
         detailProperty.textContent = `${property?.name || 'N/A'} ${unit ? `(Unit ${unit.unitNumber})` : ''}`;
         detailAmount.textContent = rentalUtils.formatCurrency(currentPayment.amount);
-        detailPaymentDate.textContent = rentalUtils.formatDate(currentPayment.date);
-        detailMethod.textContent = currentPayment.method;
+        detailDueDate.textContent = rentalUtils.formatDate(currentPayment.dueDate);
+        detailPaymentDate.textContent = currentPayment.date ? rentalUtils.formatDate(currentPayment.date) : 'N/A';
+        detailMethod.textContent = currentPayment.method || 'N/A';
         detailType.textContent = currentPayment.type;
         detailReceiptNumber.textContent = currentPayment.receiptNumber || 'N/A';
 
@@ -101,7 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         editBtn.addEventListener('click', () => {
-            window.location.href = `payments.html?editId=${currentPayment.id}`;
+            window.location.href = `payments.html?editId=${currentPayment.id}`; // This will now open the "Mark as Paid" modal
         });
 
         deleteBtn.addEventListener('click', async () => {

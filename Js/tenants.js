@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (filteredTenants.length === 0) {
             emptyState.classList.remove('hidden');
-            tenantList.classList.add('hidden');
+            tenantList.closest('.data-card').classList.add('hidden');
         } else {
             emptyState.classList.add('hidden');
             tenantList.classList.remove('hidden');
@@ -72,6 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     </td>
                     <td>${property?.name || 'N/A'} <span class="lease-property-unit">Unit ${unit?.unitNumber || 'N/A'}</span></td>
                     <td>${lease ? `${rentalUtils.formatDate(lease.startDate)} - ${rentalUtils.formatDate(lease.endDate)}` : 'N/A'}</td>
+                    <td>${tenant.tinNumber || 'N/A'}</td>
                     <td><span class="status-badge ${status.class}">${status.text}</span></td>
                     <td>
                         <div class="action-dropdown">
@@ -114,16 +115,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="form-row">
                     <div class="form-group">
                         <label for="tenant-property" class="form-label">Property</label>
-                        <select id="tenant-property" class="form-input" required>
-                            <option value="">Select a property</option>
+                        <select id="tenant-property" class="form-input">
+                            <option value="">Assign to property...</option>
                             ${propertyOptions}
                         </select>
                     </div>
                     <div class="form-group">
                         <label for="tenant-unit" class="form-label">Unit</label>
-                        <select id="tenant-unit" class="form-input" required>
+                        <select id="tenant-unit" class="form-input">
                             <option value="">Select a property first</option>
                         </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="tenant-tin" class="form-label">TIN Number (Optional)</label>
+                        <input type="text" id="tenant-tin" class="form-input" value="${tenant?.tinNumber || ''}">
                     </div>
                     <div class="form-group">
                         <label for="tenant-move-in" class="form-label">Move-in Date</label>
@@ -138,34 +145,31 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
 
         const title = tenant ? 'Edit Tenant' : 'Add New Tenant';
-        const modalHtml = `
-            <div class="modal-overlay hidden">
-                <div class="modal-content-wrapper" style="max-width: 700px;">
-                    <div class="modal-header">
-                        <h2 id="modal-title">${title}</h2>
-                        <button class="close-modal-btn">&times;</button>
-                    </div>
-                    <div id="modal-body">${bodyHtml}</div>
-                </div>
-            </div>`;
-        tenantModalContainer.innerHTML = modalHtml;
-        const modal = tenantModalContainer.querySelector('.modal-overlay');
-        rentalUtils.openModal(modal);
+        await rentalUtils.createAndOpenModal({
+            modalId: 'tenant-modal',
+            title: title,
+            bodyHtml: bodyHtml,
+            formId: 'tenant-form',
+            onSubmit: handleFormSubmit,
+            maxWidth: '700px'
+        });
 
-        const propertySelect = modal.querySelector('#tenant-property');
-        const unitSelect = modal.querySelector('#tenant-unit');
+        const modal = tenantModalContainer.querySelector('.modal-overlay');
+
+        const propertySelect = modal.querySelector('#tenant-property'); // This line is new
+        const unitSelect = modal.querySelector('#tenant-unit'); // This line is new
 
         const populateUnits = (propertyId) => {
             unitSelect.innerHTML = '<option value="">Select a unit</option>';
             if (!propertyId) return;
 
-            const availableUnits = units.filter(u => u.propertyId === propertyId && (!u.tenantId || u.tenantId === tenant?.id));
+            const availableUnits = units.filter(u => u.propertyId === propertyId && (!u.tenantId || u.tenantId === tenant?.id)); // Only show vacant units or the tenant's current unit
             availableUnits.forEach(u => {
                 const option = document.createElement('option');
                 option.value = u.id;
                 option.textContent = `Unit ${u.unitNumber}`;
                 if (assignedUnit && assignedUnit.id === u.id) {
-                    option.selected = true;
+                    option.selected = true; // Select the unit if editing
                 }
                 unitSelect.appendChild(option);
             });
@@ -174,9 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
         propertySelect.addEventListener('change', () => populateUnits(propertySelect.value));
         
         // Initial population if editing
-        if (assignedPropertyId) populateUnits(assignedPropertyId);
-
-        modal.querySelector('#tenant-form').addEventListener('submit', handleFormSubmit);
+        if (assignedPropertyId) { propertySelect.value = assignedPropertyId; populateUnits(assignedPropertyId); }
     };
 
     const handleFormSubmit = async (e) => {
@@ -194,6 +196,7 @@ document.addEventListener('DOMContentLoaded', () => {
             email: form.querySelector('#tenant-email').value,
             phone: form.querySelector('#tenant-phone').value,
             unitId: unitId,
+            tinNumber: form.querySelector('#tenant-tin').value || null,
             moveInDate: form.querySelector('#tenant-move-in').value,
         };
 
