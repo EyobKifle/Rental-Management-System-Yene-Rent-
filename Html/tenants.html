@@ -32,7 +32,20 @@
                 <div class="table-header">
                     <input type="text" id="search-input" class="form-input" placeholder="Search by name, email, or property...">
                 </div>
-                <div id="tenant-list" class="tenant-grid"></div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Contact</th>
+                            <th>Property / Unit</th>
+                            <th>Lease Period</th>
+                            <th>TIN Number</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tenant-list"></tbody>
+                </table>
             </div>
             <div id="empty-state" class="hidden empty-state"><i class="fa-solid fa-users-slash"></i><h3>No Tenants Found</h3><p>Get started by adding a new tenant.</p></div>
         </div>

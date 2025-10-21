@@ -137,6 +137,34 @@ a:hover {
   margin-bottom: 1rem;
 }
 
+.form-label-group {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.form-label-group .form-label {
+    margin-bottom: 0;
+}
+
+.form-label-action {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.form-row {
+    /* This is now just a grouping element, no flex by default */
+    width: 100%;
+}
+
+.form-row-columns {
+    display: flex;
+    gap: 1rem;
+}
+
 .form-actions {
   display: flex;
   justify-content: flex-end; /* Pushes buttons to the right */

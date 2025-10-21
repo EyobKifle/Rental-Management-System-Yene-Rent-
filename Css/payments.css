@@ -34,3 +34,13 @@
 .receipt-link:hover {
     text-decoration: underline;
 }
+
+.status-badge.status-scheduled {
+    background-color: var(--gray-100);
+    color: var(--gray-600);
+}
+
+.status-badge.status-overdue {
+    background-color: var(--danger-100);
+    color: var(--danger-700);
+}

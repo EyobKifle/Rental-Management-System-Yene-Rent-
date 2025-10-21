@@ -54,61 +54,73 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (propertyUnits.length === 0) {
             emptyState.classList.remove('hidden');
-            unitList.classList.add('hidden');
+            unitList.closest('.data-card').classList.add('hidden');
         } else {
             emptyState.classList.add('hidden');
-            unitList.classList.remove('hidden');
+            unitList.closest('.data-card').classList.remove('hidden');
             propertyUnits.forEach(unit => {
                 const tenant = tenants.find(t => t.id === unit.tenantId);
-                const card = document.createElement('div');
-                card.className = 'data-card unit-card';
-                card.innerHTML = `
-                    <div class="unit-card-header">
-                        <h3>Unit ${unit.unitNumber}</h3>
+                const row = document.createElement('tr');
+                row.dataset.id = unit.id; // For click navigation
+                row.innerHTML = `
+                    <td>${unit.unitNumber}</td>
+                    <td>${tenant?.name || 'N/A'}</td>
+                    <td>${rentalUtils.formatCurrency(unit.rent)}</td>
+                    <td>${unit.bedrooms || 0} / ${unit.bathrooms || 0}</td>
+                    <td><span class="status-badge ${tenant ? 'status-occupied' : 'status-vacant'}">${tenant ? 'Occupied' : 'Vacant'}</span></td>
+                    <td>
                         <div class="action-dropdown">
                             <button class="action-dropdown-btn" data-id="${unit.id}"><i class="fa-solid fa-ellipsis-vertical"></i></button>
                             <div id="dropdown-${unit.id}" class="dropdown-menu hidden">
+                                <a href="units-details.html?unitId=${unit.id}" class="dropdown-item"><i class="fa-solid fa-eye"></i>View Details</a>
                                 <a href="#" class="dropdown-item edit-btn" data-id="${unit.id}"><i class="fa-solid fa-pencil"></i>Edit</a>
                                 <a href="#" class="dropdown-item delete-btn" data-id="${unit.id}"><i class="fa-solid fa-trash-can"></i>Delete</a>
                             </div>
                         </div>
-                    </div>
-                    <div class="unit-card-details">
-                        <div>
-                            <span>Status</span>
-                            <span class="status-badge ${tenant ? 'status-occupied' : 'status-active'}">${tenant ? 'Occupied' : 'Vacant'}</span>
-                        </div>
-                        <div>
-                            <span>Tenant</span>
-                            <span>${tenant ? tenant.name : 'N/A'}</span>
-                        </div>
-                        <div>
-                            <span>Rent</span>
-                            <span>${rentalUtils.formatCurrency(unit.rent)}</span>
-                        </div>
-                    </div>
+                    </td>
                 `;
-                unitList.appendChild(card);
+                unitList.appendChild(row);
             });
         }
     };
 
     const openUnitModal = async (unit = null) => {
-        const response = await fetch('modal.html');
-        unitModalContainer.innerHTML = await response.text();
-        const modal = unitModalContainer.querySelector('.modal-overlay');
-        modal.querySelector('#modal-title').textContent = unit ? 'Edit Unit' : 'Add New Unit';
+        const tenant = unit ? tenants.find(t => t.id === unit.tenantId) : null;
 
-        modal.querySelector('#modal-body').innerHTML = `
+        const bodyHtml = `
             <form id="unit-form">
                 <input type="hidden" id="unit-id" value="${unit ? unit.id : ''}">
-                <div class="form-group">
-                    <label for="unit-number" class="form-label">Unit Number / Name</label>
-                    <input type="text" id="unit-number" class="form-input" value="${unit ? unit.unitNumber : ''}" required>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="unit-number" class="form-label">Unit Number / Name</label>
+                        <input type="text" id="unit-number" class="form-input" value="${unit?.unitNumber || ''}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="unit-rent" class="form-label">Default Monthly Rent (ETB)</label>
+                        <input type="number" id="unit-rent" class="form-input" value="${unit?.rent || ''}" required min="0">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="unit-bedrooms" class="form-label">Bedrooms</label>
+                        <input type="number" id="unit-bedrooms" class="form-input" value="${unit?.bedrooms || '1'}" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="unit-bathrooms" class="form-label">Bathrooms</label>
+                        <input type="number" id="unit-bathrooms" class="form-input" value="${unit?.bathrooms || '1'}" min="0">
+                    </div>
                 </div>
                 <div class="form-group">
-                    <label for="unit-rent" class="form-label">Monthly Rent (ETB)</label>
-                    <input type="number" id="unit-rent" class="form-input" value="${unit ? unit.rent : currentProperty.rent || ''}" required>
+                    <label for="unit-tenant" class="form-label">Current Tenant</label>
+                    <input 
+                        type="text" 
+                        id="unit-tenant" 
+                        class="form-input" 
+                        value="${tenant ? tenant.name : 'Vacant'}" 
+                        disabled 
+                        style="background-color: var(--gray-100);"
+                    >
+                    <small class="form-hint">Tenant is assigned via the Leases page.</small>
                 </div>
                 <div class="form-actions">
                     <button type="button" class="close-modal-btn btn-secondary">Cancel</button>
@@ -116,8 +128,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             </form>
         `;
-        rentalUtils.openModal(modal);
-        modal.querySelector('#unit-form').addEventListener('submit', handleFormSubmit);
+
+        // Use the modern, consistent modal creation utility
+        await rentalUtils.createAndOpenModal({
+            modalId: 'unit-modal',
+            title: unit ? 'Edit Unit' : 'Add New Unit',
+            bodyHtml: bodyHtml,
+            formId: 'unit-form',
+            onSubmit: handleFormSubmit
+        });
     };
 
     const handleFormSubmit = async (e) => {
@@ -131,7 +150,9 @@ document.addEventListener('DOMContentLoaded', () => {
             propertyId: currentProperty.id,
             unitNumber: form.querySelector('#unit-number').value,
             rent: parseFloat(form.querySelector('#unit-rent').value),
-            tenantId: null // Tenant assignment will be handled via leases
+            bedrooms: parseInt(form.querySelector('#unit-bedrooms').value, 10),
+            bathrooms: parseInt(form.querySelector('#unit-bathrooms').value, 10),
+            tenantId: id ? units.find(u => u.id === id)?.tenantId : null // Preserve tenant if editing
         };
 
         if (id) {
@@ -149,10 +170,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     unitList.addEventListener('click', (e) => {
         const target = e.target;
-        const card = target.closest('.unit-card');
         const id = e.target.closest('[data-id]')?.dataset.id;
+        if (!id) return;
 
         if (target.closest('.action-dropdown-btn')) {
+            e.stopPropagation();
             document.querySelectorAll('.dropdown-menu').forEach(menu => menu.classList.add('hidden'));
             document.getElementById(`dropdown-${id}`).classList.toggle('hidden');
         } else if (target.closest('.edit-btn')) {
@@ -161,14 +183,17 @@ document.addEventListener('DOMContentLoaded', () => {
             openUnitModal(unitToEdit);
         } else if (target.closest('.delete-btn')) {
             e.preventDefault();
-            if (rentalUtils.confirm('Are you sure you want to delete this unit?')) {
+            const unitToDelete = units.find(u => u.id === id);
+            if (unitToDelete.tenantId) {
+                rentalUtils.showNotification('Cannot delete an occupied unit. Please remove the tenant first.', 'error');
+            } else if (rentalUtils.confirm('Are you sure you want to delete this unit?')) {
                 api.delete(UNIT_KEY, id).then(() => {
                     units = units.filter(u => u.id !== id);
                     renderUnits();
                     rentalUtils.showNotification('Unit deleted successfully!', 'error');
                 });
             }
-        } else if (card && !target.closest('.action-dropdown')) {
+        } else if (target.closest('tr')) {
             // Click on unit card (excluding dropdown) navigates to unit details
             window.location.href = `units-details.html?unitId=${id}`;
         }

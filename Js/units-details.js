@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const backBtn = document.getElementById('back-btn');
     const tenantForm = document.getElementById('tenant-form');
     const addPaymentBtn = document.getElementById('add-payment-btn');
+    const cancelTenantBtn = document.getElementById('cancel-tenant-btn');
     const addDocumentBtn = document.getElementById('add-document-btn');
     const paymentsTbody = document.getElementById('payments-tbody');
     const documentsTbody = document.getElementById('documents-tbody');
@@ -420,6 +421,11 @@ document.addEventListener('DOMContentLoaded', () => {
         populateSummaryCard();
         // No modal to close here as this form is inline on the page, not in a modal.
         rentalUtils.showNotification('Tenant information saved successfully!');
+    });
+
+    // Cancel tenant form changes
+    cancelTenantBtn.addEventListener('click', () => {
+        populateTenantForm(); // Re-populates the form with the original data
     });
 
     // Documents table event delegation

@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
     // DOM Elements
-    const addPaymentBtn = document.getElementById('add-payment-btn');
     const paymentModalContainer = document.getElementById('payment-modal');
     const paymentsTableBody = document.getElementById('payments-table-body');
     const emptyState = document.getElementById('empty-state');
@@ -44,6 +43,20 @@ document.addEventListener('DOMContentLoaded', () => {
         calculateStats();
     };
 
+    const getPaymentStatus = (payment) => {
+        if (payment.status === 'Paid') {
+            return { text: 'Paid', class: 'status-paid' };
+        }
+        const today = new Date().setHours(0, 0, 0, 0);
+        const dueDate = new Date(payment.dueDate).setHours(0, 0, 0, 0);
+
+        if (today > dueDate) {
+            return { text: 'Overdue', class: 'status-overdue' };
+        }
+        return { text: 'Scheduled', class: 'status-scheduled' };
+    };
+
+
     const renderPayments = (filter = '') => {
         paymentsTableBody.innerHTML = '';
         const searchLower = filter.toLowerCase();
@@ -52,7 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const lease = allData.leases.find(l => l.id === payment.leaseId);
             if (!lease) return false;
             const tenant = allData.tenants.find(t => t.id === lease.tenantId);
-            const property = allData.properties.find(p => p.id === lease.propertyId);
+            const property = allData.properties.find(p => p.id === lease.propertyId); // This was incorrect, property is on lease
             return (tenant?.name.toLowerCase().includes(searchLower) || property?.name.toLowerCase().includes(searchLower));
         });
 
@@ -62,27 +75,28 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             emptyState.classList.add('hidden');
             paymentsTableBody.closest('.data-card').classList.remove('hidden');
-            filteredPayments.forEach(payment => {
+            // Sort by due date, most recent first
+            filteredPayments.sort((a, b) => new Date(b.dueDate) - new Date(a.dueDate)).forEach(payment => {
                 const lease = allData.leases.find(l => l.id === payment.leaseId);
                 const tenant = lease ? allData.tenants.find(t => t.id === lease.tenantId) : null;
                 const property = lease ? allData.properties.find(p => p.id === lease.propertyId) : null;
                 const unit = lease ? allData.units.find(u => u.id === lease.unitId) : null;
+                const status = getPaymentStatus(payment);
 
                 const row = document.createElement('tr');
                 row.dataset.id = payment.id; // Add ID to row for click events
                 row.innerHTML = `
                     <td>${tenant?.name || 'N/A'}</td>
                     <td>${property?.name || 'N/A'} ${unit ? `(Unit ${unit.unitNumber})` : ''}</td>
+                    <td>${rentalUtils.formatDate(payment.dueDate)}</td>
                     <td>${rentalUtils.formatCurrency(payment.amount)}</td>
-                    <td>${rentalUtils.formatDate(payment.date)}</td>
-                    <td>${payment.method}</td>
-                    <td>${payment.receiptNumber || 'N/A'}</td>
+                    <td><span class="status-badge ${status.class}">${status.text}</span></td>
                     <td>
                         <div class="action-dropdown">
                             <button class="action-dropdown-btn" data-id="${payment.id}"><i class="fa-solid fa-ellipsis-vertical"></i></button>
                             <div id="dropdown-${payment.id}" class="dropdown-menu hidden">
                                 <a href="payments-details.html?paymentId=${payment.id}" class="dropdown-item"><i class="fa-solid fa-eye"></i>View Details</a>
-                                <a href="#" class="dropdown-item edit-btn" data-id="${payment.id}"><i class="fa-solid fa-pencil"></i>Edit</a>
+                                ${status.text !== 'Paid' ? `<a href="#" class="dropdown-item edit-btn" data-id="${payment.id}"><i class="fa-solid fa-check-circle"></i>Mark as Paid</a>` : ''}
                                 <a href="#" class="dropdown-item delete-btn" data-id="${payment.id}"><i class="fa-solid fa-trash-can"></i>Delete</a>
                             </div>
                         </div>
@@ -94,80 +108,56 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const calculateStats = () => {
-        const totalCollected = allData.payments.reduce((sum, p) => sum + p.amount, 0);
+        const totalCollected = allData.payments
+            .filter(p => p.status === 'Paid')
+            .reduce((sum, p) => sum + p.amount, 0);
+
         const now = new Date();
         const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
         const thisMonthCollected = allData.payments
-            .filter(p => new Date(p.date) >= firstDayOfMonth)
+            .filter(p => p.status === 'Paid' && new Date(p.date) >= firstDayOfMonth)
             .reduce((sum, p) => sum + p.amount, 0);
+
+        const overduePayments = allData.payments.filter(p => getPaymentStatus(p).text === 'Overdue');
+        const overdueAmount = overduePayments.reduce((sum, p) => sum + p.amount, 0);
 
         statTotalCollected.textContent = rentalUtils.formatCurrency(totalCollected);
         statThisMonth.textContent = rentalUtils.formatCurrency(thisMonthCollected);
-        // Placeholder for outstanding/overdue logic
-        statOutstanding.textContent = rentalUtils.formatCurrency(0);
-        statOverdue.textContent = rentalUtils.formatCurrency(0);
+        statOutstanding.textContent = rentalUtils.formatCurrency(overdueAmount); // Using this for overdue
+        statOverdue.textContent = overduePayments.length; // Using this for count
     };
 
     const openPaymentModal = async (payment = null) => {
-        // Get all leases that are not expired.
-        let availableLeases = allData.leases.filter(l => new Date(l.endDate) >= new Date());
-
-        // If editing a payment, ensure its current lease is in the list, even if it's expired.
-        if (payment && payment.leaseId) {
-            const isCurrentLeaseInList = availableLeases.some(l => l.id === payment.leaseId);
-            if (!isCurrentLeaseInList) {
-                const currentLease = allData.leases.find(l => l.id === payment.leaseId);
-                if (currentLease) availableLeases.push(currentLease);
-            }
-        }
-
-        const leaseOptions = availableLeases.map(lease => {
-            const tenant = allData.tenants.find(t => t.id === lease.tenantId);
-            const property = allData.properties.find(p => p.id === lease.propertyId);
-            return `<option value="${lease.id}" ${payment?.leaseId === lease.id ? 'selected' : ''}>${tenant?.name} at ${property?.name}</option>`;
-        }).join('');
+        const lease = allData.leases.find(l => l.id === payment.leaseId);
+        const tenant = lease ? allData.tenants.find(t => t.id === lease.tenantId) : null;
 
         const bodyHtml = `
             <form id="payment-form">
                 <input type="hidden" id="payment-id" value="${payment?.id || ''}">
-                <div class="form-group">
-                    <label for="payment-lease" class="form-label">Lease</label>
-                    <select id="payment-lease" class="form-input" required>
-                        <option value="">Select a lease</option>
-                        ${leaseOptions}
-                    </select>
-                </div>
+                <p>Marking payment for <strong>${tenant?.name || 'N/A'}</strong> for amount <strong>${rentalUtils.formatCurrency(payment.amount)}</strong> due on ${rentalUtils.formatDate(payment.dueDate)}.</p>
                 <div class="form-row">
-                    <div class="form-group">
-                        <label for="payment-amount" class="form-label">Amount (ETB)</label>
-                        <input type="number" id="payment-amount" class="form-input" value="${payment?.amount || ''}" required>
-                    </div>
                     <div class="form-group">
                         <label for="payment-date" class="form-label">Payment Date</label>
-                        <input type="date" id="payment-date" class="form-input" value="${payment?.date || new Date().toISOString().split('T')[0]}" required>
+                        <input type="date" id="payment-date" class="form-input" value="${new Date().toISOString().split('T')[0]}" required>
                     </div>
-                </div>
-                <div class="form-row">
                     <div class="form-group">
                         <label for="payment-method" class="form-label">Method</label>
                         <select id="payment-method" class="form-input" required>
-                            <option value="Bank Transfer" ${payment?.method === 'Bank Transfer' ? 'selected' : ''}>Bank Transfer</option>
-                            <option value="Cash" ${payment?.method === 'Cash' ? 'selected' : ''}>Cash</option>
-                            <option value="CBE Birr" ${payment?.method === 'CBE Birr' ? 'selected' : ''}>CBE Birr</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="payment-type" class="form-label">Payment For</label>
-                        <select id="payment-type" class="form-input" required>
-                            <option value="Rent" ${payment?.type === 'Rent' ? 'selected' : ''}>Rent</option>
-                            <option value="Deposit" ${payment?.type === 'Deposit' ? 'selected' : ''}>Deposit</option>
-                            <option value="Other" ${payment?.type === 'Other' ? 'selected' : ''}>Other</option>
+                            <option value="Bank Transfer">Bank Transfer</option>
+                            <option value="Cash">Cash</option>
+                            <option value="CBE Birr">CBE Birr</option>
                         </select>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label for="payment-receipt-number" class="form-label">Receipt Number (Optional)</label>
-                    <input type="text" id="payment-receipt-number" class="form-input" value="${payment?.receiptNumber || ''}">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="payment-receipt-number" class="form-label">Receipt Number (Optional)</label>
+                        <input type="text" id="payment-receipt-number" class="form-input" value="">
+                    </div>
+                    <div class="form-group">
+                        <label for="tenant-tin" class="form-label">Tenant TIN (Optional)</label>
+                        <input type="text" id="tenant-tin" class="form-input" value="">
+                    </div>
                 </div>
                 <div class="form-group">
                     <label for="receipt-file" class="form-label">Receipt (Optional)</label>
@@ -179,7 +169,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             </form>
         `;
-        await rentalUtils.createAndOpenModal({ modalId: 'payment-modal', title: payment ? 'Edit Payment' : 'Record Payment', bodyHtml, formId: 'payment-form', onSubmit: handleFormSubmit });
+        await rentalUtils.createAndOpenModal({ modalId: 'payment-modal', title: 'Record Payment', bodyHtml, formId: 'payment-form', onSubmit: handleFormSubmit });
     };
 
     const handleFormSubmit = async (e) => {
@@ -192,28 +182,22 @@ document.addEventListener('DOMContentLoaded', () => {
         const receiptFile = form.querySelector('#receipt-file').files[0];
 
         const paymentData = {
-            id: id || rentalUtils.generateId(),
-            leaseId: form.querySelector('#payment-lease').value,
-            amount: parseFloat(form.querySelector('#payment-amount').value),
+            ...existingPayment, // Keep all original scheduled data
+            status: 'Paid',
             date: form.querySelector('#payment-date').value,
             method: form.querySelector('#payment-method').value,
-            type: form.querySelector('#payment-type').value,
             receiptNumber: form.querySelector('#payment-receipt-number').value || null,
             receiptUrl: receiptFile ? await rentalUtils.readFileAsDataURL(receiptFile) : existingPayment?.receiptUrl || null,
+            // Note: TIN and withholding would ideally be saved on the tenant/lease or payment record
         };
 
-        if (id) {
-            await api.update(PAYMENT_KEY, id, paymentData);
-            allData.payments = allData.payments.map(p => p.id === id ? paymentData : p);
-        } else {
-            await api.create(PAYMENT_KEY, paymentData);
-            allData.payments.push(paymentData);
-        }
+        await api.update(PAYMENT_KEY, id, paymentData);
+        allData.payments = allData.payments.map(p => p.id === id ? paymentData : p);
 
         renderPayments();
         calculateStats();
         rentalUtils.closeModal(form.closest('.modal-overlay'));
-        rentalUtils.showNotification(`Payment ${id ? 'updated' : 'recorded'} successfully!`);
+        rentalUtils.showNotification(`Payment recorded successfully!`);
     };
 
     paymentsTableBody.addEventListener('click', (e) => {
@@ -246,7 +230,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    addPaymentBtn.addEventListener('click', () => openPaymentModal());
     searchInput.addEventListener('input', rentalUtils.debounce(e => renderPayments(e.target.value), 300));
 
     initialize();

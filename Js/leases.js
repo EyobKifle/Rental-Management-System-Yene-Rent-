@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const PROPERTY_KEY = 'properties';
     const UNIT_KEY = 'units';
     const DOCUMENT_KEY = 'documents';
+    const PAYMENT_KEY = 'payments';
 
     // Data
     let leases = [];
@@ -109,16 +110,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const bodyHtml = `
             <form id="lease-form">
                 <input type="hidden" id="lease-id" value="${lease ? lease.id : ''}">
-                <div class="form-row">
-                    <div class="form-group">
+                <div class="form-group">
+                    <div class="form-label-group">
                         <label for="lease-tenant" class="form-label">Tenant</label>
-                        <select id="lease-tenant" class="form-input" required>
-                            <option value="">Select a tenant</option>
-                            ${tenantOptions}
-                        </select>
+                        <a href="tenants.html" target="_blank" class="form-label-action">Add New Tenant <i class="fa-solid fa-external-link-alt fa-xs"></i></a>
                     </div>
+                    <select id="lease-tenant" class="form-input" required>
+                        <option value="">Select a tenant</option>
+                        ${tenantOptions}
+                    </select>
                 </div>
-                <div class="form-row">
+                <div class="form-row-columns">
                     <div class="form-group">
                         <label for="lease-property" class="form-label">Property</label>
                         <select id="lease-property" class="form-input" required>
@@ -133,7 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         </select>
                     </div>
                 </div>    
-                <div class="form-row">
+                <div class="form-row-columns">
                     <div class="form-group">
                         <label for="lease-start-date" class="form-label">Start Date</label>
                         <input type="date" id="lease-start-date" class="form-input" value="${lease ? lease.startDate : ''}" required>
@@ -143,7 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <input type="date" id="lease-end-date" class="form-input" value="${lease ? lease.endDate : ''}" required>
                     </div>
                 </div>
-                <div class="form-row">
+                <div class="form-row-columns">
                     <div class="form-group">
                         <label for="lease-rent" class="form-label">Monthly Rent (ETB)</label>
                         <input type="number" id="lease-rent" class="form-input" value="${lease?.rentAmount || ''}" required min="0">
@@ -153,7 +155,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <input type="number" id="lease-withholding" class="form-input" value="${lease?.withholdingAmount || ''}" min="0">
                     </div>
                 </div>
-                <div class="form-row">
+                <div class="form-row-columns">
                     <div class="form-group">
                         <label for="lease-agreement-file" class="form-label">Lease Agreement</label>
                         <input type="file" id="lease-agreement-file" class="form-input" accept="image/*,.pdf">
@@ -173,19 +175,16 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
 
         const title = isRenewal ? 'Renew Lease' : (lease && lease.id ? 'Edit Lease' : 'Add New Lease');
-        const modalHtml = `
-            <div class="modal-overlay hidden">
-                <div class="modal-content-wrapper" style="max-width: 700px;">
-                    <div class="modal-header">
-                        <h2 id="modal-title">${title}</h2>
-                        <button class="close-modal-btn">&times;</button>
-                    </div>
-                    <div id="modal-body">${bodyHtml}</div>
-                </div>
-            </div>`;
-        leaseModalContainer.innerHTML = modalHtml;
-        const modal = leaseModalContainer.querySelector('.modal-overlay');
+        await rentalUtils.createAndOpenModal({
+            modalId: 'lease-modal',
+            title: title,
+            bodyHtml: bodyHtml,
+            formId: 'lease-form',
+            onSubmit: handleFormSubmit,
+            maxWidth: '700px'
+        });
 
+        const modal = leaseModalContainer.querySelector('.modal-overlay');
         const propertySelect = modal.querySelector('#lease-property');
         const unitSelect = modal.querySelector('#lease-unit');
 
@@ -208,9 +207,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         propertySelect.addEventListener('change', () => populateUnits(propertySelect.value));
         if (assignedPropertyId) populateUnits(assignedPropertyId);
-
-        rentalUtils.openModal(modal);
-        modal.querySelector('#lease-form').addEventListener('submit', handleFormSubmit);
     };
 
     const openLeaseDetailsModal = (lease) => {
@@ -318,6 +314,9 @@ document.addEventListener('DOMContentLoaded', () => {
             await api.create(LEASE_KEY, leaseData);
             leases.push(leaseData);
         }
+
+        // Generate or update the payment schedule for this lease
+        await generatePaymentSchedule(leaseData);
 
         // Update tenant and unit records
         const tenantToUpdate = tenants.find(t => t.id === leaseData.tenantId);
