@@ -41,7 +41,7 @@ function handleLogin(e) {
         // For now, we'll just set a dummy session item and redirect.
         sessionStorage.setItem('userLoggedIn', 'true');
         sessionStorage.setItem('currentUser', JSON.stringify(user));
-        window.location.href = 'index.html';
+        window.location.href = 'dashboard.html';
     } else {
         alert('Invalid credentials. Use demo@user.com / password');
     }
@@ -49,7 +49,7 @@ function handleLogin(e) {
 
 function checkSession() {
     const isLoggedIn = sessionStorage.getItem('userLoggedIn');
-    const protectedPages = ['index.html', 'properties.html', 'tenants.html', 'leases.html', 'payments.html', 'expenses.html', 'documents.html', 'analytics.html', 'settings.html', 'utilities.html', 'maintenance.html', 'units.html'];
+    const protectedPages = ['dashboard.html', 'properties.html', 'tenants.html', 'leases.html', 'payments.html', 'expenses.html', 'documents.html', 'analytics.html', 'settings.html', 'utilities.html', 'maintenance.html', 'units.html'];
     const currentPage = window.location.pathname.split('/').pop() || 'index.html';
 
     if (!isLoggedIn && protectedPages.includes(currentPage)) {

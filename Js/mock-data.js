@@ -58,7 +58,9 @@ function generateDynamicData() {
                 leaseId: lease.id,
                 amount: lease.rentAmount,
                 date: date.toISOString().split('T')[0],
+                dueDate: date.toISOString().split('T')[0],
                 method: ['Bank Transfer', 'Cash', 'CBE Birr'][Math.floor(Math.random() * 3)],
+                status: i > 0 ? 'Paid' : 'Scheduled', // Mark older payments as Paid
                 receiptUrl: null,
                 receiptName: null,
             });
@@ -85,35 +87,4 @@ function generateDynamicData() {
     MOCK_DATA.payments = payments;
     MOCK_DATA.expenses = expenses;
 }
-
-/**
- * Seeds the localStorage with mock data if it's not already present.
- * This function should be called once when the application starts.
- */
-function seedMockData() {
-    // Check if data already exists to avoid overwriting user changes
-    const hasData = localStorage.getItem('properties');
-    if (hasData && JSON.parse(hasData).length > 0) {
-        console.log('Mock data already exists. Seeding skipped.');
-        return;
-    }
-
-    console.log('Seeding mock data into localStorage...');
-
-    // Generate dynamic payments and expenses before seeding
-    generateDynamicData();
-
-    Object.keys(MOCK_DATA).forEach(key => {
-        try {
-            localStorage.setItem(key, JSON.stringify(MOCK_DATA[key]));
-            console.log(`- Seeded ${MOCK_DATA[key].length} items into '${key}'`);
-        } catch (error) {
-            console.error(`Error seeding mock data for key "${key}":`, error);
-        }
-    });
-
-    console.log('Mock data seeding complete.');
-}
-
-// Expose the seeder function to be called from other scripts
 window.seedMockData = seedMockData;

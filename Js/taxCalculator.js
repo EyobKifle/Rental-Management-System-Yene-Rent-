@@ -42,7 +42,7 @@ class TaxCalculator {
         let withholdingTax = 0;
         for (const propId in paymentsByProperty) {
             const prop = paymentsByProperty[propId];
-            if (prop.taxType.includes('withholding')) {
+            if (prop.taxType && prop.taxType.includes('withholding')) {
                 withholdingTax += prop.totalIncome * this.settings.withholdingTaxRate;
             }
         }

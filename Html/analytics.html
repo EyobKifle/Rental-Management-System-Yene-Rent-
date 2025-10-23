@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <script src="https://unpkg.com/lucide@latest/dist/lucide.min.js"></script>
+
     <title>Analytics - Rental System</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
     <link
@@ -28,9 +28,12 @@
           <h1>Analytics</h1>
           <p>Detailed financial insights and reports</p>
         </div>
+
+  
+
         <div class="reports-header">
-            <button id="export-income-statement" class="btn-secondary"><i data-lucide="file-text"></i> Income Statement</button>
-            <button id="export-tax-report" class="btn-secondary"><i data-lucide="landmark"></i> Tax Calculation Report</button>
+            <button id="export-income-statement" class="btn-secondary"><i class="fas fa-file-alt"></i> Income Statement</button>
+            <button id="export-tax-report" class="btn-secondary"><i class="fas fa-landmark"></i> Tax Calculation Report</button>
         </div>
 
         <div class="stats-grid">
@@ -68,7 +71,26 @@
               <canvas id="expenseBreakdownChart"></canvas>
             </div>
           </div>
-
+      <!-- Filter Controls -->
+        <div class="data-card filters">
+            <div class="form-group">
+                <label for="filter-start" class="form-label">Start Date</label>
+                <input type="date" id="filter-start" class="form-input">
+            </div>
+            <div class="form-group">
+                <label for="filter-end" class="form-label">End Date</label>
+                <input type="date" id="filter-end" class="form-input">
+            </div>
+            <div class="form-group">
+                <label for="filter-property" class="form-label">Property</label>
+                <select id="filter-property" class="form-input">
+                    <option value="all">All Properties</option>
+                </select>
+            </div>
+            <button id="btn-generate-report" class="btn-primary">Generate Report</button>
+            <button id="export-pdf" class="btn-secondary" style="margin-left: auto;"><i class="fas fa-download"></i> Export PDF</button>
+        </div>
+        
           <div class="analytics-sidebar">
             <div class="data-card">
               <h3>Financial Summary</h3>
@@ -107,13 +129,66 @@
             </div>
           </div>
         </div>
+
+        <!-- Detailed Tables Section -->
+        <div class="detailed-tables-grid">
+          <!-- Transactions Table -->
+          <div class="data-card">
+            <h3>Detailed Transactions</h3>
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Description</th>
+                    <th>Category</th>
+                    <th>Type</th>
+                    <th>Amount</th>
+                    <th>Recorded By</th>
+                  </tr>
+                </thead>
+                <tbody id="transactions-table-body">
+                  <!-- Rows will be injected by JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Tax Summary & Audit Log -->
+          <div class="side-tables-grid">
+            <div class="data-card">
+              <h3>Tax Summary</h3>
+              <div class="table-container">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Tax Type</th>
+                      <th>Amount</th>
+                      <th>Period</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tax-summary-table-body"></tbody>
+                </table>
+              </div>
+            </div>
+            <div class="data-card">
+              <h3>Audit Log</h3>
+              <div class="table-container">
+                <table class="data-table" id="audit-log-table-body"></table>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="report-footer" class="report-footer"></div>
       </div>
     </main>
 
-    <script src="/Js/auth.js"></script>
-    <script src="/Js/api.js"></script>
-    <script src="/Js/shared.js"></script>
-    <script src="/Js/main.js"></script>
-    <script src="/Js/analytics.js"></script>
+    <script src="../Js/auth.js"></script>
+    <script src="../Js/api.js"></script>
+    <script src="../Js/mock-data.js"></script>
+    <script src="../Js/shared.js"></script>
+    <script src="../Js/taxCalculator.js"></script>
+    <script src="../Js/analytics.js"></script>
   </body>
 </html>

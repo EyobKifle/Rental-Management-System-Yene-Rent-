@@ -1,5 +1,72 @@
+// lib/ethiopian-date.js should be loaded before this file in HTML
+
 // Shared JavaScript utilities for Rental Management System
 // This file contains common functions used across all pages
+
+/**
+ * Manages application settings using localStorage.
+ * Provides a centralized way to get and set configuration values like tax rates.
+ */
+class SettingsService {
+    constructor(storageKey = 'appSettings') {
+        this.storageKey = storageKey;
+        this.defaults = {
+            general: { lastNotificationCheck: null },
+            tax: {
+                vatRate: 0.15,
+                withholdingTaxRate: 0.15,
+                businessIncomeTaxRate: 0.30,
+                expenseVatDeductibleRate: 1.0,
+            },
+            regional: {
+                calendar: 'gregorian' // 'gregorian' or 'ethiopian'
+            },
+            notifications: {
+                // Placeholder: User can set a specific date for a tax payment reminder.
+                taxReminders: [
+                    {
+                        id: 'default-tax-1',
+                        name: 'Annual Business Tax',
+                        calendar: 'gregorian', // 'gregorian' or 'ethiopian' per reminder
+                        enabled: true, // Keep track if reminder is active
+                    type: 'annually', // 'monthly', 'quarterly', 'annually', 'specific'
+                    day: 25,          // Day of the month (1-31)
+                    month: 9,         // Month for annual reminders (1-12)
+                    date: '2024-09-25',// Full date for specific reminders
+                    hour: 9,           // Reminder hour (0-23)
+                    minute: 0,         // Reminder minute (0-59)
+                    // Dates for quarterly reminders
+                    quarterlyDates: ['2025-01-15', '2025-04-15', '2025-07-15', '2025-10-15']
+                    },
+                    { id: 'viewedNotifications', type: 'internal', viewed: [] } // To track viewed notifications
+                ]
+            }
+        };
+    }
+
+    /**
+     * Retrieves all settings, merging stored values with defaults.
+     * @returns {object} The complete settings object.
+     */
+    getSettings() {
+        const stored = JSON.parse(localStorage.getItem(this.storageKey) || '{}');
+        // Deep merge defaults with stored settings
+        return {
+            ...this.defaults,
+            general: { ...this.defaults.general, ...(stored.general || {}) },
+            tax: { ...this.defaults.tax, ...(stored.tax || {}) },
+            regional: { ...this.defaults.regional, ...(stored.regional || {}) },
+            notifications: { 
+                ...this.defaults.notifications, 
+                taxReminders: stored.notifications?.taxReminders || this.defaults.notifications.taxReminders
+            },
+        };
+    }
+
+    saveSettings(settings) {
+        localStorage.setItem(this.storageKey, JSON.stringify(settings));
+    }
+}
 
 
 /**
@@ -9,6 +76,7 @@
 class RentalUtils {
     constructor() {
         this.headerPromise = null;
+        this.notificationInterval = null;
         this.sidebarPromise = null;
         this.init();
     }
@@ -31,6 +99,7 @@ class RentalUtils {
         Promise.all([this.headerPromise, this.sidebarPromise]).then(([headerContainer]) => {
             if (headerContainer) {
                 this.setupHeaderInteractions(headerContainer);
+                this.updateNotificationBadge();
             }
         });
         this.setupGlobalEventListeners(); // This now includes modal handlers
@@ -122,6 +191,7 @@ class RentalUtils {
         const userMenuDropdown = headerContainer.querySelector('#user-menu-dropdown');
         const languageMenuButton = headerContainer.querySelector('#language-menu-button');
         const languageMenuDropdown = headerContainer.querySelector('#language-menu-dropdown');
+        const notificationBtn = headerContainer.querySelector('.notification-btn');
 
         // Function to update toggle icon based on sidebar state
         const updateToggleIcon = () => {
@@ -175,6 +245,11 @@ class RentalUtils {
 
         setupDropdown(userMenuButton, userMenuDropdown);
         setupDropdown(languageMenuButton, languageMenuDropdown);
+
+        // Make the notification bell navigate to the notifications page
+        if (notificationBtn) {
+            notificationBtn.addEventListener('click', () => window.location.href = 'notifications.html');
+        }
     }
 
     /**
@@ -269,7 +344,13 @@ class RentalUtils {
      * @param {HTMLElement} modal - The modal element to close.
      */
     closeModal(modal) {
-        modal.classList.add('hidden');
+        modal.classList.remove('visible');
+        // Wait for the animation to finish before hiding it completely
+        modal.addEventListener('transitionend', () => {
+            modal.classList.add('hidden');
+            // Clean up the container to prevent multiple modals from stacking
+            if (modal.parentElement.id.endsWith('-modal')) modal.parentElement.innerHTML = '';
+        }, { once: true });
         document.body.style.overflow = '';
     }
 
@@ -433,12 +514,42 @@ class RentalUtils {
      */
     formatDate(date, options = {}) {
         if (!date) return 'N/A';
+        const settings = window.settingsService.getSettings();
+        const calendarType = settings.regional.calendar;
+
+        if (calendarType === 'ethiopian') {
+            const etDate = new EthiopianDate(date);
+            // Format to 'DD/MM/YYYY'
+            return `${String(etDate.date).padStart(2, '0')}/${String(etDate.month).padStart(2, '0')}/${etDate.year}`;
+        } else {
+            // Default Gregorian formatting
+            const defaultOptions = {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            };
+            // Ensure the date object is created correctly, especially on Safari
+            const safeDate = new Date(date.replace(/-/g, '/'));
+            return safeDate.toLocaleDateString('en-US', { ...defaultOptions, ...options });
+        }
+    }
+
+    /**
+     * Formats a date-time string into a more readable format.
+     * @param {string} date - The date-time string to format.
+     * @param {object} [options] - Formatting options for toLocaleString.
+     * @returns {string} - The formatted date-time string.
+     */
+    formatDateTime(date, options = {}) {
+        if (!date) return 'N/A';
         const defaultOptions = {
             year: 'numeric',
             month: 'short',
-            day: 'numeric'
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
         };
-        return new Date(date).toLocaleDateString('en-US', { ...defaultOptions, ...options });
+        return new Date(date).toLocaleString('en-US', { ...defaultOptions, ...options });
     }
 
     /**
@@ -548,19 +659,118 @@ class RentalUtils {
     }
 
     /**
-     * Sets up Lucide icons by replacing data-lucide attributes with SVG elements.
-     * Assumes Lucide script is loaded (e.g., via CDN).
+     * Sets up Font Awesome icons. Since Font Awesome is loaded via CDN in the HTML, this method ensures it's ready.
      */
-    setupLucideIcons() {
-        if (typeof lucide !== 'undefined' && lucide.createIcons) {
-            lucide.createIcons();
-        } else {
-            console.warn('Lucide library not loaded. Icons may not render properly.');
+    async setupFontAwesomeIcons() {
+        return new Promise((resolve) => {
+            const checkFontAwesome = () => {
+                if (typeof FontAwesome !== 'undefined' || document.querySelector('link[href*="font-awesome"]')) {
+                    resolve();
+                } else {
+                    // If not ready, check again shortly.
+                    setTimeout(checkFontAwesome, 50);
+                }
+            };
+
+            // Set a timeout to prevent an infinite loop if the library fails to load
+            const timeout = setTimeout(() => {
+                console.warn('Font Awesome library not loaded after 3 seconds. Icons may not render properly.');
+                resolve(); // Resolve anyway to not block other scripts
+            }, 3000);
+
+            checkFontAwesome();
+        });
+    }
+
+    /**
+     * Checks for overdue payments and updates the notification badge visibility.
+     */
+    async updateNotificationBadge() {
+        const notificationBtn = document.querySelector('.notification-btn');
+        if (!notificationBtn) return;
+
+        const notificationBadge = notificationBtn.querySelector('.notification-badge');
+        const bellIcon = notificationBtn.querySelector('i');
+
+        try {
+            const payments = await api.get('payments');
+            const settings = window.settingsService.getSettings();
+            const lastCheck = settings.general.lastNotificationCheck ? new Date(settings.general.lastNotificationCheck) : new Date(0);
+
+            const overduePayments = payments.filter(payment => {
+                if (payment.status && payment.status === 'Paid') {
+                    return false;
+                }
+                const today = new Date().setHours(0, 0, 0, 0);
+                const dueDate = new Date(payment.dueDate);
+                return dueDate.setHours(0, 0, 0, 0) < today;
+            });
+
+            const dueTaxReminders = this.getDueTaxReminders(settings.notifications.taxReminders);
+            const totalNotifications = overduePayments.length + dueTaxReminders.length;
+
+            // A notification is "new" if it became due after the last time the user checked the notifications page.
+            const hasUnviewedNotifications = overduePayments.some(p => new Date(p.dueDate) > lastCheck) || dueTaxReminders.length > 0;
+
+            if (totalNotifications > 0) {
+                notificationBadge.classList.remove('hidden');
+                // Only animate if there are unviewed notifications
+                if (hasUnviewedNotifications) {
+                    this.startNotificationAnimation(bellIcon);
+                } else {
+                    this.stopNotificationAnimation();
+                }
+            } else {
+                notificationBadge.classList.add('hidden');
+                this.stopNotificationAnimation();
+            }
+        } catch (error) {
+            console.error("Failed to update notification badge:", error);
         }
+    }
+
+    getDueTaxReminders(reminders = []) {
+        const dueReminders = [];
+        const today = new Date();
+        const todayDate = today.getDate();
+        const todayMonth = today.getMonth() + 1;
+        const currentHour = today.getHours();
+        const currentMinute = today.getMinutes();
+
+        reminders.forEach(reminder => {
+            if (!reminder.enabled || reminder.type === 'internal') return;
+            let isDue = false;
+            switch (reminder.type) {
+                case 'monthly': isDue = todayDate === reminder.day; break;
+                case 'quarterly': isDue = reminder.quarterlyDates?.includes(today.toISOString().split('T')[0]); break;
+                case 'annually': isDue = todayDate === reminder.day && todayMonth === reminder.month; break;
+                case 'specific': isDue = reminder.date === today.toISOString().split('T')[0]; break;
+            }
+            const reminderHour = reminder.hour || 0;
+            const reminderMinute = reminder.minute || 0;
+            if (isDue && (currentHour > reminderHour || (currentHour === reminderHour && currentMinute >= reminderMinute))) {
+                dueReminders.push(reminder);
+            }
+        });
+        return dueReminders;
+    }
+
+    startNotificationAnimation(iconElement) {
+        if (this.notificationInterval) clearInterval(this.notificationInterval);
+        this.notificationInterval = setInterval(() => {
+            iconElement.classList.add('notification-ring');
+            setTimeout(() => iconElement.classList.remove('notification-ring'), 1000);
+        }, 10000); // Every 10 seconds
+    }
+
+    stopNotificationAnimation() {
+        if (this.notificationInterval) clearInterval(this.notificationInterval);
+        this.notificationInterval = null;
     }
 }
 
 // Initialize utilities when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     window.rentalUtils = new RentalUtils();
+    window.settingsService = new SettingsService();
 });
