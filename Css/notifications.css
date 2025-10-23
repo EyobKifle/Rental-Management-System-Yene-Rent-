@@ -1,0 +1,66 @@
+/* === Notifications Page Styles === */
+
+.notifications-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.notification-card {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    background-color: var(--gray-50);
+    padding: 1.5rem;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--gray-200);
+    box-shadow: var(--shadow-sm);
+}
+
+.notification-card.overdue {
+    border-left: 5px solid var(--danger-color);
+}
+
+.notification-card.tax-due {
+    border-left: 5px solid var(--warning-color);
+}
+
+.notification-card.tax-due .notification-icon {
+    color: var(--warning-color);
+}
+
+.notification-icon {
+    font-size: 1.75rem;
+    color: var(--gray-500);
+    flex-shrink: 0;
+}
+
+.notification-card.overdue .notification-icon {
+    color: var(--danger-color);
+}
+
+.notification-content {
+    flex-grow: 1;
+}
+
+.notification-title {
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--gray-800);
+    margin-bottom: 0.25rem;
+}
+
+.notification-details {
+    font-size: 0.875rem;
+    color: var(--gray-600);
+    margin: 0;
+}
+
+.notification-details strong {
+    color: var(--gray-900);
+}
+
+.notification-actions {
+    display: flex;
+    gap: 0.75rem;
+}

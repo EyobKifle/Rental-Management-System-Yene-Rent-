@@ -1,4 +1,4 @@
-// dashboard.js - Page-specific JavaScript for index.html (Dashboard)
+// dashboard.js - Page-specific JavaScript for dashboard.html (Dashboard)
 
 document.addEventListener('DOMContentLoaded', () => {
     const initialize = async () => {
