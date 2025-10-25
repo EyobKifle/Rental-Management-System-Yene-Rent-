@@ -11,6 +11,7 @@ class SettingsService {
     constructor(storageKey = 'appSettings') {
         this.storageKey = storageKey;
         this.defaults = {
+            appearance: { theme: 'light' }, // 'light' or 'dark'
             general: { lastNotificationCheck: null },
             tax: {
                 vatRate: 0.15,
@@ -19,7 +20,8 @@ class SettingsService {
                 expenseVatDeductibleRate: 1.0,
             },
             regional: {
-                calendar: 'gregorian' // 'gregorian' or 'ethiopian'
+                calendar: 'gregorian', // 'gregorian' or 'ethiopian'
+                language: 'en' // 'en' or 'am'
             },
             notifications: {
                 // Placeholder: User can set a specific date for a tax payment reminder.
@@ -53,6 +55,7 @@ class SettingsService {
         // Deep merge defaults with stored settings
         return {
             ...this.defaults,
+            appearance: { ...this.defaults.appearance, ...(stored.appearance || {}) },
             general: { ...this.defaults.general, ...(stored.general || {}) },
             tax: { ...this.defaults.tax, ...(stored.tax || {}) },
             regional: { ...this.defaults.regional, ...(stored.regional || {}) },
@@ -85,6 +88,8 @@ class RentalUtils {
      * Initializes all the utility setups.
      */
     init() {
+        this.initI18n();
+        this.applyTheme(); // Apply theme as early as possible
         this.headerPromise = this.loadComponent('#header-container', 'header.html').then(headerContainer => {
             if (headerContainer) {
                 this.setPageTitle();
@@ -103,6 +108,76 @@ class RentalUtils {
             }
         });
         this.setupGlobalEventListeners(); // This now includes modal handlers
+    }
+    
+    /**
+     * Initializes the internationalization setup.
+     */
+    async initI18n() {
+        const settings = window.settingsService.getSettings();
+        const lang = settings.regional.language || 'en';
+        if (lang === 'am') {
+            // Load the Amharic translation file
+            await this.loadScript('/Js/i18n/am.js');
+        }
+        this.translatePage();
+    }
+
+    /**
+     * Translates a given key into the current language.
+     * @param {string} key - The key to translate.
+     * @returns {string} - The translated string or the key itself.
+     */
+    t(key) {
+        const settings = window.settingsService.getSettings();
+        const lang = settings.regional.language || 'en';
+        if (lang === 'en') return key;
+        return window.translations?.[lang]?.[key] || key;
+    }
+
+    /**
+     * Finds all elements with a `data-i18n` attribute and translates them.
+     */
+    translatePage() {
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            el.textContent = this.t(key);
+        });
+    }
+
+    /**
+     * Applies the saved theme (light/dark) to the body.
+     */
+    applyTheme() {
+        const settings = window.settingsService.getSettings();
+        const theme = settings.appearance.theme || 'light';
+        document.body.setAttribute('data-theme', theme);
+    }
+
+    /**
+     * Toggles the theme and saves the preference.
+     */
+    toggleTheme() {
+        const currentTheme = document.body.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        document.body.setAttribute('data-theme', newTheme);
+        const settings = window.settingsService.getSettings();
+        window.settingsService.saveSettings({ ...settings, appearance: { theme: newTheme } });
+    }
+    
+    /**
+     * Dynamically loads a script.
+     * @param {string} src - The source URL of the script.
+     * @returns {Promise} - A promise that resolves when the script is loaded.
+     */
+    loadScript(src) {
+        return new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = src;
+            script.onload = () => resolve();
+            script.onerror = () => reject(new Error(`Script load error for ${src}`));
+            document.head.appendChild(script);
+        });
     }
 
     /**
@@ -192,6 +267,22 @@ class RentalUtils {
         const languageMenuButton = headerContainer.querySelector('#language-menu-button');
         const languageMenuDropdown = headerContainer.querySelector('#language-menu-dropdown');
         const notificationBtn = headerContainer.querySelector('.notification-btn');
+
+        // Language switcher logic
+        if (languageMenuDropdown) {
+            languageMenuDropdown.addEventListener('click', (e) => {
+                const langItem = e.target.closest('.dropdown-item');
+                if (langItem) {
+                    e.preventDefault();
+                    const lang = langItem.dataset.lang;
+                    const settings = window.settingsService.getSettings();
+                    settings.regional.language = lang;
+                    window.settingsService.saveSettings(settings);
+                    window.location.reload(); // Reload to apply the new language
+                }
+            });
+        }
+
 
         // Function to update toggle icon based on sidebar state
         const updateToggleIcon = () => {

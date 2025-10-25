@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rental Management System | Simplify Your Portfolio</title>
-    <link rel="stylesheet" href="../Css/style.css">
+    <title>Yene Rent | Rental Management System</title>
+    <link rel="stylesheet" href="../Css/publicstyles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
@@ -19,6 +19,9 @@
             <a href="/contact.html">Contact</a>
         </nav>
         <div class="nav-actions">
+            <button id="theme-toggle" class="btn btn-icon" aria-label="Toggle theme">
+                <i class="fas fa-moon"></i>
+            </button>
             <a href="login.html" class="btn btn-login">Login</a>
             <a href="/get-started.html" class="btn btn-primary">Get Started</a>
         </div>
@@ -237,6 +240,28 @@
         </div>
     </footer>
 
-    <script src="../Js/script.js"></script>
+    <script>
+        // Simple theme toggler for the landing page
+        document.addEventListener('DOMContentLoaded', () => {
+            const themeToggle = document.getElementById('theme-toggle');
+            const themeIcon = themeToggle.querySelector('i');
+            const storageKey = 'appSettings';
+
+            const applyTheme = (theme) => {
+                document.body.setAttribute('data-theme', theme);
+                themeIcon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+            };
+
+            const settings = JSON.parse(localStorage.getItem(storageKey) || '{}');
+            let currentTheme = settings.appearance?.theme || 'light';
+            applyTheme(currentTheme);
+
+            themeToggle.addEventListener('click', () => {
+                currentTheme = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+                applyTheme(currentTheme);
+                localStorage.setItem(storageKey, JSON.stringify({ ...settings, appearance: { theme: currentTheme } }));
+            });
+        });
+    </script>
 </body>
 </html>

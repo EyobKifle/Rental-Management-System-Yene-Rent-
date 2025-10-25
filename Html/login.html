@@ -12,31 +12,31 @@
     <div class="login-container">
         <div class="login-card">
             <div class="login-header">
-                <h1>Rental System</h1>
-                <p>Sign in to manage your properties</p>
+                <h1 data-i18n="Rental System">Rental System</h1>
+                <p data-i18n="Sign in to manage your properties">Sign in to manage your properties</p>
             </div>
             <form id="login-form" class="login-form">
                 <div class="form-group">
-                    <label for="email" class="form-label">Email Address</label>
+                    <label for="email" class="form-label" data-i18n="Email Address">Email Address</label>
                     <input type="email" id="email" class="form-input" placeholder="Enter your email" required
                         autocomplete="email" value="demo@user.com" />
                 </div>
 
                 <div class="form-group">
-                    <label for="password" class="form-label">Password</label>
+                    <label for="password" class="form-label" data-i18n="Password">Password</label>
                     <input type="password" id="password" class="form-input" placeholder="Enter your password" required
                         autocomplete="current-password" value="password" />
                 </div>
                 <p class="forgot-password">
                     <a href="#">Forgot your password?</a>
                 </p>
-                <button type="submit" class="btn-primary">Sign In</button>
+                <button type="submit" class="btn-primary" data-i18n="Sign In">Sign In</button>
             </form>
 
 
         </div>
     </div>
-
+    <script src="../Js/shared.js"></script>
     <script src="../Js/auth.js"></script>
 </body>
 
