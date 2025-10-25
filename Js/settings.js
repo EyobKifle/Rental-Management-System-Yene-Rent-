@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const taxForm = document.getElementById('tax-settings-form');
     const preferencesForm = document.getElementById('preferences-tab-panel'); // A container for preferences
     const addReminderBtn = document.getElementById('add-reminder-btn');
+    const darkModeToggle = document.getElementById('dark-mode-toggle');
 
     const initialize = async () => {
         await window.rentalUtils.headerPromise;
@@ -14,6 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setupEventListeners();
         loadRegionalSettings();
         loadNotificationSettings();
+        loadAppearanceSettings();
         
         const switchTab = (tabId) => {
             const targetTab = document.querySelector(`.setting-tab[data-tab="${tabId}"]`);
@@ -55,6 +57,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const calendarSystemSelect = document.getElementById('calendar-system');
         if (calendarSystemSelect) calendarSystemSelect.value = settings.regional.calendar;
     };
+
+    const loadAppearanceSettings = () => {
+        const settings = window.settingsService.getSettings();
+        if (darkModeToggle) darkModeToggle.checked = settings.appearance.theme === 'dark';
+    };
+
 
     const loadNotificationSettings = () => {
         const remindersList = document.getElementById('tax-reminders-list');
@@ -430,6 +438,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const calendarSystemSelect = document.getElementById('calendar-system');
         if (calendarSystemSelect) {
             calendarSystemSelect.addEventListener('change', saveRegionalSettings);
+        }
+
+        if (darkModeToggle) {
+            darkModeToggle.addEventListener('change', rentalUtils.toggleTheme);
         }
 
         addReminderBtn.addEventListener('click', () => openReminderModal());
