@@ -120,7 +120,6 @@ class RentalUtils {
             }
         }
         this.setupGlobalEventListeners(); // This now includes modal handlers
-        this.setupScrollReveal(); // Add this line to initialize scroll animations
     }
     
     /**
