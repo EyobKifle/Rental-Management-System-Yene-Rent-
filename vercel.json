@@ -1,24 +1,23 @@
 {
-  "version": 2,
-  "public": true,
-  "cleanUrls": true,
-  "trailingSlash": false,
   "rewrites": [
     {
       "source": "/",
-      "destination": "/html/index.html"
+      "destination": "/Html/index.html"
     },
     {
-      "source": "/:path*",
-      "destination": "/html/:path*.html"
-    },
+      "source": "/:path((?!.*\\.).*)",
+      "destination": "/Html/:path.html"
+    }
+  ],
+  "headers": [
     {
-      "source": "/css/:path*",
-      "destination": "/css/:path*"
-    },
-    {
-      "source": "/js/:path*",
-      "destination": "/js/:path*"
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, s-maxage=1, stale-while-revalidate=59"
+        }
+      ]
     }
   ]
 }

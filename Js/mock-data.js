@@ -52,7 +52,7 @@ function generateDynamicData() {
             const leaseStartDate = new Date(lease.startDate);
             if (date < leaseStartDate) continue;
 
-            // Generate a payment
+            // Generate a payment - mark all as Paid for analytics
             payments.push({
                 id: `payment-${lease.id}-${i}`,
                 leaseId: lease.id,
@@ -60,26 +60,52 @@ function generateDynamicData() {
                 date: date.toISOString().split('T')[0],
                 dueDate: date.toISOString().split('T')[0],
                 method: ['Bank Transfer', 'Cash', 'CBE Birr'][Math.floor(Math.random() * 3)],
-                status: i > 0 ? 'Paid' : 'Scheduled', // Mark older payments as Paid
+                status: 'Paid', // All payments are Paid
                 receiptUrl: null,
                 receiptName: null,
             });
         }
     });
 
-    const expenseCategories = ['Maintenance', 'Utilities', 'Salaries', 'Supplies', 'Marketing'];
+    const commonExpenseCategories = ['Utilities', 'Salaries', 'Supplies', 'Marketing', 'Insurance', 'Property Tax'];
     for (let i = 0; i < 6; i++) {
-        for (let j = 0; j < 3; j++) { // 3 expenses per month
-            const date = new Date(today.getFullYear(), today.getMonth() - i, Math.floor(Math.random() * 28) + 1);
-            const category = expenseCategories[Math.floor(Math.random() * expenseCategories.length)];
+        const monthDate = new Date(today.getFullYear(), today.getMonth() - i, 1);
+
+        // Generate common expenses for each property
+        MOCK_DATA.properties.forEach(property => {
+            commonExpenseCategories.forEach(category => {
+                const randomDay = Math.floor(Math.random() * 28) + 1;
+                const expenseDate = new Date(monthDate.getFullYear(), monthDate.getMonth(), randomDay);
+                let amount = 0;
+                if (category === 'Utilities') amount = Math.floor(Math.random() * 2000) + 1000;
+                else if (category === 'Salaries') amount = Math.floor(Math.random() * 5000) + 8000; // e.g., for guards, cleaners
+                else if (category === 'Insurance') amount = 4500; // Fixed monthly premium
+                else if (category === 'Property Tax') amount = (property.rent * 12 * 0.02) / 12; // Estimated annual tax divided by 12
+                else amount = Math.floor(Math.random() * 1500) + 200;
+
+                expenses.push({
+                    id: `expense-${property.id}-${category}-${i}`,
+                    propertyId: property.id,
+                    date: expenseDate.toISOString().split('T')[0],
+                    amount: parseFloat(amount.toFixed(2)),
+                    category: category,
+                    description: `Monthly ${category} for ${property.name}`,
+                });
+            });
+        });
+
+        // Generate some random, one-off maintenance expenses
+        for (let j = 0; j < 2; j++) { // 2 random maintenance jobs per month
+            const randomDay = Math.floor(Math.random() * 28) + 1;
+            const expenseDate = new Date(monthDate.getFullYear(), monthDate.getMonth(), randomDay);
             const property = MOCK_DATA.properties[Math.floor(Math.random() * MOCK_DATA.properties.length)];
             expenses.push({
-                id: `expense-${i}-${j}`,
+                id: `expense-maint-${i}-${j}`,
                 propertyId: property.id,
-                date: date.toISOString().split('T')[0],
-                amount: Math.floor(Math.random() * (category === 'Salaries' ? 15000 : 5000)) + 500,
-                category: category,
-                description: `Monthly ${category.toLowerCase()} for ${property.name}`,
+                date: expenseDate.toISOString().split('T')[0],
+                amount: Math.floor(Math.random() * 4000) + 500,
+                category: 'Maintenance',
+                description: `Repair work at ${property.name}`,
             });
         }
     }

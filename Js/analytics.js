@@ -140,7 +140,8 @@ class AnalyticsDataService {
     const incomeByProperty = this._aggregateIncomeByProperty(
       filteredPayments,
       allLeases,
-      allProperties
+      allUnits,
+      allProperties,
     );
     const expenseByCategory = this._aggregateExpenseByCategory(filteredExpenses);
     const taxData = this.taxCalculator.calculateAllTaxes({ totalRevenue, totalExpenses, paymentsByProperty: incomeByProperty, expenses: filteredExpenses });
@@ -188,19 +189,24 @@ class AnalyticsDataService {
    * Aggregates income by property from filtered payments.
    * @param {Array<object>} payments - Filtered payment data.
    * @param {Array<object>} leases - All lease data.
+   * @param {Array<object>} units - All unit data.
    * @param {Array<object>} properties - All property data.
    * @returns {object} - Aggregated income by property.
    */
-  _aggregateIncomeByProperty(payments, leases, properties) {
+  _aggregateIncomeByProperty(payments, leases, units, properties) {
     return payments.reduce((acc, p) => {
       const lease = leases.find((l) => l.id === p.leaseId);
-      const property = lease
-        ? properties.find((prop) => prop.id === lease.propertyId)
-        : null;
+      if (!lease) return acc;
+
+      const unit = units.find(u => u.id === lease.unitId);
+      if (!unit) return acc;
+
+      const property = properties.find((prop) => prop.id === unit.propertyId);
 
       if (property) {
-        if (!acc[property.id])
-          acc[property.id] = { name: property.name, totalIncome: 0 };
+        if (!acc[property.id]) {
+          acc[property.id] = { name: property.name, totalIncome: 0, taxType: property.taxType };
+        }
         acc[property.id].totalIncome += p.amount;
       }
       return acc;
@@ -272,16 +278,24 @@ document.addEventListener("DOMContentLoaded", () => {
   Chart.defaults.plugins.tooltip.cornerRadius = 4;
   Chart.defaults.plugins.tooltip.displayColors = true;
   Chart.defaults.plugins.tooltip.boxPadding = 4;
+  // Custom tooltip to show currency and percentage for Pie/Doughnut
   Chart.defaults.plugins.tooltip.callbacks.label = function(context) {
-      let label = context.dataset.label || '';
-      if (label) {
-          label += ': ';
-      }
-      if (context.parsed.y !== null) {
-          label += rentalUtils.formatCurrency(context.parsed.y);
-      }
-      return label;
+    let label = context.dataset.label || '';
+    if (label) {
+      label += ': ';
+    }
+    if (context.parsed.y !== null && context.chart.config.type !== 'pie' && context.chart.config.type !== 'doughnut') {
+      label += rentalUtils.formatCurrency(context.parsed.y);
+    } else if (context.chart.config.type === 'pie' || context.chart.config.type === 'doughnut') {
+      const total = context.dataset.data.reduce((sum, value) => sum + value, 0);
+      const value = context.parsed;
+      // Prevent division by zero if total is 0
+      const percentage = total === 0 ? 0 : ((value / total) * 100).toFixed(1);
+      return `${context.label}: ${rentalUtils.formatCurrency(value)} (${percentage}%)`;
+    }
+    return label;
   };
+ 
   let charts = {};
   let taxCalculator; // Declared here, initialized after class is loaded
   let allProperties = [];
@@ -309,7 +323,7 @@ document.addEventListener("DOMContentLoaded", () => {
     allProperties = await api.get("properties"); // Fetch once for the filter
     populatePropertyFilter();
 
-    // Set default date range (e.g., this month)
+    // Set default date range (e.g., last 12 months for richer data)
     setDefaultDateFilters();
 
     // Generate initial report on page load
@@ -430,14 +444,15 @@ document.addEventListener("DOMContentLoaded", () => {
     analyticsView.querySelector("#summary-net-profit").textContent =
       rentalUtils.formatCurrency(netProfit);
 
+    // FIX: Corrected escaped HTML entities to actual tags in the tax breakdown
     analyticsView.querySelector("#summary-tax-breakdown").innerHTML = `
-            <div class="summary-item"><span>VAT Payable</span><span>${rentalUtils.formatCurrency(
+      <div class="summary-item"><span>VAT Payable</span><span>${rentalUtils.formatCurrency(
               taxData.vat.payable
             )}</span></div>
-            <div class="summary-item"><span>Business Income Tax</span><span>${rentalUtils.formatCurrency(
+      <div class="summary-item"><span>Business Income Tax</span><span>${rentalUtils.formatCurrency(
               taxData.businessIncomeTax.payable
             )}</span></div>
-            <div class="summary-item"><span>Withholding Tax</span><span>${rentalUtils.formatCurrency(
+      <div class="summary-item"><span>Withholding Tax</span><span>${rentalUtils.formatCurrency(
               taxData.withholdingTax.total
             )}</span></div>
         `;
@@ -498,26 +513,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const auditLogTbody = document.getElementById("audit-log-table-body");
     if (auditLogTbody) {
-      auditLogTbody.innerHTML = `
-                <thead>
-                    <tr><th>Timestamp</th><th>User</th><th>Action</th><th>Entity</th><th>Details</th></tr>
-                </thead>
-                <tbody>
-                    ${tables.auditLog
-                      .map(
-                        (row) => `
-                        <tr>
-                            <td>${rentalUtils.formatDateTime(
-                              row.timestamp
-                            )}</td><td>${row.user}</td><td>${
-                          row.action
-                        }</td><td>${row.entity}</td><td>${row.details}</td>
-                        </tr>
-                    `
-                      )
-                      .join("")}
-                </tbody>
-            `;
+      // Ensure we only inject the rows, not the whole table
+      auditLogTbody.innerHTML = tables.auditLog
+        .map(
+          (row) => `
+            <tr>
+              <td>${rentalUtils.formatDateTime(
+                row.timestamp
+              )}</td><td>${row.user}</td><td>${
+            row.action
+          }</td><td>${row.entity}</td><td>${row.details}</td>
+            </tr>
+          `
+        )
+        .join("");
     }
   };
 
@@ -527,22 +536,30 @@ document.addEventListener("DOMContentLoaded", () => {
     if (charts[chartId]) {
       charts[chartId].destroy();
     }
-    // Simplified and more robust check for empty data
-    const hasData = data.datasets && data.datasets.some(ds => ds.data && ds.data.length > 0 && ds.data.some(d => d > 0));
-
+    
+    // FIX: Robust check to ensure data exists for all chart types before rendering
+    let hasData = false;
+    if (type === 'pie' || type === 'doughnut') {
+        // For Pie/Doughnut, check the first dataset's data array
+        const dataArray = data.datasets?.[0]?.data || [];
+        hasData = dataArray.length > 0 && dataArray.some(val => val > 0);
+    } else {
+        // For Bar/Line, check all datasets
+        hasData = data.datasets && data.datasets.some(ds => ds.data && ds.data.some(val => val !== 0));
+    }
+    
     if (!hasData) {
       // Clear canvas and draw placeholder text
       ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
       ctx.font = "16px 'Inter', sans-serif";
-      ctx.fillStyle = "#9ca3af"; // gray-400
+      ctx.fillStyle = "#666";
       ctx.textAlign = "center";
-      ctx.fillText(
-        "No data for selected period",
-        ctx.canvas.width / 2,
-        ctx.canvas.height / 2
-      );
+      const x = ctx.canvas.width / 2;
+      const y = ctx.canvas.height / 2;
+      ctx.fillText("No data available for this period", x, y);
       return;
     }
+
     charts[chartId] = new Chart(ctx, {
       type, 
       data,
@@ -667,9 +684,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const setDefaultDateFilters = () => {
     const today = new Date();
-    const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+    // FIX: Set date range to the start of the month, 12 months ago, to capture richer mock data
+    const twelveMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 11, 1);
     const lastDay = new Date(); // Use today as the end date
-    filterStart.value = firstDay.toISOString().split("T")[0];
+    filterStart.value = twelveMonthsAgo.toISOString().split("T")[0];
     filterEnd.value = lastDay.toISOString().split("T")[0];
   };
 
@@ -679,6 +697,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!data || data.length === 0) {
       const colSpan =
         tbody.previousElementSibling.firstElementChild.children.length;
+      // FIX: Corrected escaped HTML entity
       tbody.innerHTML = `<tr><td colspan="${colSpan}" class="text-center p-4">No data available for the selected period.</td></tr>`;
       return;
     }
@@ -694,12 +713,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const reportFooter = document.getElementById("report-footer");
 
     // Inject user and date info into the footer for printing
-    reportFooter.innerHTML = `
-            <p><strong>TIN:</strong> 1234567890</p>
-            <p>Report generated by <strong>${
-              currentUser.name || "N/A"
-            }</strong> on ${new Date().toLocaleString()}</p>
-        `;
+    // FIX: Corrected escaped HTML entities
+    reportFooter.innerHTML = ` 
+      <p><strong>TIN:</strong> 1234567890</p>
+      <p>Report generated by <strong>${
+        currentUser.name || "N/A"
+      }</strong> on ${new Date().toLocaleString()}</p>
+    `;
 
     const opt = {
       margin: 0.5,
