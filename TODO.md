@@ -1,16 +1,8 @@
-# UI Issues Fix Plan
+# TODO: Fix Analytics Page Charts with Mock Data
 
-## Completed Tasks
-- [ ] Analyze codebase and identify issues
-- [ ] Create plan and get approval
-
-## Pending Tasks
-- [x] Create signup.html (similar to login.html)
-- [x] Add signup link to login.html
-- [x] Create header-public.html for public pages (index, login, signup)
-- [ ] Modify shared.js to load appropriate header based on page type
-- [x] Update login.css to use consistent variables from publicstyles.css
-- [ ] Add theme toggle to header.html and handle in shared.js
-- [ ] Ensure Insystemstyles.css variables are used consistently
-- [ ] Update header.css to support themes
-- [ ] Test dashboard header/sidebar loading
+## Tasks
+- [ ] Update `Js/api.js` to use comprehensive mock data from `Js/mock-data.js` instead of limited demo data
+- [ ] Modify `Js/mock-data.js` to ensure payments for recent months are marked as 'Paid' and generate data for last 6 months
+- [ ] Adjust default date filter in `Js/analytics.js` to cover the last 6 months
+- [ ] Test analytics page to ensure all charts (Profit & Loss, Income by Property, Expense Breakdown) populate with data
+- [ ] Verify tables and stats display correctly with mock data
