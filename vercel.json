@@ -1,13 +1,13 @@
 {
   "version": 2,
-  "routes": [
+  "rewrites": [
     {
-      "src": "^/$",
-      "dest": "/Html/index.html"
+      "source": "/(Css|Js|assets|lib|fonts|images|videos)/:path*",
+      "destination": "/$1/:path*"
     },
     {
-      "src": "/(.*)",
-      "dest": "/Html/$1"
+      "source": "/:path*",
+      "destination": "/Html/:path*"
     }
   ]
 }
