@@ -36,9 +36,9 @@
 }
 
 [data-theme="dark"] {
-    --primary-color: #4f46e5;
-    --primary-hover-color: #6366f1;
-    --secondary-color: #a78bfa;
+    --primary-color: #1d1d23;
+    --primary-hover-color: #232440;
+    --secondary-color: #131628;
     --success-color: #22c55e;
     --danger-color: #f43f5e;
     --warning-color: #facc15;
@@ -56,7 +56,7 @@
 
     --border-color: var(--gray-200);
     --body-bg: #111827;
-    --text-color: var(--gray-700);
+    --text-color: var(--gray-300);
     --card-bg: #1f2937;
 }
 * {
@@ -429,9 +429,8 @@ tbody tr:hover {
     color: var(--gray-700);
 }
 
-.action-dropdown .dropdown-menu {
+.dropdown-menu {
     position: absolute;
-    right: 0;
     top: calc(100% + 4px);
     z-index: 10;
     background-color: white;
@@ -441,4 +440,35 @@ tbody tr:hover {
     min-width: 160px;
     padding: 0.5rem 0;
     overflow: hidden;
+    /* Position based on parent */
+    left: 0; 
+}
+
+/* For dropdowns that should be aligned to the right, like in the header */
+.dropdown-menu.align-right {
+    left: auto;
+    right: 0;
+}
+
+.dropdown-item {
+    display: block;
+    width: 100%;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    color: var(--gray-700);
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.dropdown-item:hover {
+    background-color: var(--gray-100);
+    color: var(--gray-900);
+    text-decoration: none;
+}
+
+.dropdown-divider {
+    height: 1px;
+    margin: 0.5rem 0;
+    overflow: hidden;
+    background-color: var(--gray-200);
 }

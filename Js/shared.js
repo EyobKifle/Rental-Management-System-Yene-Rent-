@@ -90,24 +90,37 @@ class RentalUtils {
     init() {
         this.initI18n();
         this.applyTheme(); // Apply theme as early as possible
-        this.headerPromise = this.loadComponent('#header-container', 'header.html').then(headerContainer => {
-            if (headerContainer) {
-                this.setPageTitle();
-                this.setupUserAvatar();
+        if (!this.isPublicPage()) {
+            // For internal pages
+            this.headerPromise = this.loadComponent('#header-container', 'header.html').then(headerContainer => {
+                if (headerContainer) {
+                    this.setPageTitle();
+                    this.setupUserAvatar();
+                    this.setupHeaderInteractions(headerContainer);
+                    this.updateNotificationBadge();
+                }
+                return headerContainer;
+            });
+            this.sidebarPromise = this.loadComponent('#sidebar-container', 'sidebar.html').then(() => {
+                this.setupNavigation();
+            });
+        } else { // For public pages (index.html, login.html)
+            this.headerPromise = this.loadComponent('#header-container', '/Html/header-public.html').then(headerContainer => {
+                if (headerContainer) {
+                    this.setupHeaderInteractions(headerContainer);
+                }
+                return headerContainer;
+            });
+            // On public pages, also ensure the main document title is set correctly
+            const pageTitle = document.title.split(' - ')[0];
+            if (pageTitle.toLowerCase().includes('yene rent')) {
+                // No change needed for index
+            } else {
+                document.title = 'Yene Rent | ' + pageTitle;
             }
-            return headerContainer;
-        });
-        this.sidebarPromise = this.loadComponent('#sidebar-container', 'sidebar.html').then(() => {
-            this.setupNavigation();
-        });
-        // Wait for both header and sidebar to load before setting up interactions
-        Promise.all([this.headerPromise, this.sidebarPromise]).then(([headerContainer]) => {
-            if (headerContainer) {
-                this.setupHeaderInteractions(headerContainer);
-                this.updateNotificationBadge();
-            }
-        });
+        }
         this.setupGlobalEventListeners(); // This now includes modal handlers
+        this.setupScrollReveal(); // Add this line to initialize scroll animations
     }
     
     /**
@@ -258,6 +271,7 @@ class RentalUtils {
     /**
      * Sets up interactive elements within the header, like dropdowns and the sidebar toggle.
      * @param {HTMLElement} headerContainer - The container element for the header.
+     * @param {boolean} isPublicPage - Whether the current page is a public page (index, login, signup).
      */
     setupHeaderInteractions(headerContainer) {
         const sidebar = document.getElementById('sidebar');
@@ -266,12 +280,28 @@ class RentalUtils {
         const userMenuDropdown = headerContainer.querySelector('#user-menu-dropdown');
         const languageMenuButton = headerContainer.querySelector('#language-menu-button');
         const languageMenuDropdown = headerContainer.querySelector('#language-menu-dropdown');
-        const notificationBtn = headerContainer.querySelector('.notification-btn');
+        const themeToggle = headerContainer.querySelector('#theme-toggle');
+        const notificationBtn = headerContainer.querySelector('.notification-btn'); // For internal header
 
-        // Language switcher logic
-        if (languageMenuDropdown) {
-            languageMenuDropdown.addEventListener('click', (e) => {
-                const langItem = e.target.closest('.dropdown-item');
+        // Theme toggle logic
+        if (themeToggle) {
+            const themeIcon = themeToggle.querySelector('i');
+            const updateThemeIcon = () => {
+                const currentTheme = document.body.getAttribute('data-theme');
+                themeIcon.className = currentTheme === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+            };
+            updateThemeIcon(); // Set initial icon
+            themeToggle.addEventListener('click', () => {
+                this.toggleTheme();
+                updateThemeIcon();
+            });
+        }
+
+        // New Language switcher logic for dropdown
+        const langDropdown = headerContainer.querySelector('#language-menu-dropdown');
+        if (langDropdown) {
+            langDropdown.addEventListener('click', (e) => {
+                const langItem = e.target.closest('[data-lang]');
                 if (langItem) {
                     e.preventDefault();
                     const lang = langItem.dataset.lang;
@@ -283,23 +313,25 @@ class RentalUtils {
             });
         }
 
-
         // Function to update toggle icon based on sidebar state
         const updateToggleIcon = () => {
+            if (!sidebarToggle) return;
             const icon = sidebarToggle.querySelector('i');
-            if (window.innerWidth <= 1024) {
-                // Mobile: check if sidebar has 'open' class
-                if (sidebar.classList.contains('open')) {
-                    icon.className = 'fa-solid fa-times';
+            if (sidebar) {
+                if (window.innerWidth <= 1024) {
+                    // Mobile: check if sidebar has 'open' class
+                    if (sidebar.classList.contains('open')) {
+                        icon.className = 'fa-solid fa-times';
+                    } else {
+                        icon.className = 'fa-solid fa-bars';
+                    }
                 } else {
-                    icon.className = 'fa-solid fa-bars';
-                }
-            } else {
-                // Desktop: check if body has 'sidebar-collapsed'
-                if (document.body.classList.contains('sidebar-collapsed')) {
-                    icon.className = 'fa-solid fa-bars';
-                } else {
-                    icon.className = 'fa-solid fa-times';
+                    // Desktop: check if body has 'sidebar-collapsed'
+                    if (document.body.classList.contains('sidebar-collapsed')) {
+                        icon.className = 'fa-solid fa-bars';
+                    } else {
+                        icon.className = 'fa-solid fa-times';
+                    }
                 }
             }
         };
@@ -329,18 +361,85 @@ class RentalUtils {
                     document.querySelectorAll('.dropdown-menu').forEach(d => {
                         if (d !== dropdown) d.classList.add('hidden');
                     });
+                    // Add align-right class for header dropdowns
+                    if (button.closest('.header-right')) {
+                        dropdown.classList.add('align-right');
+                    }
                     dropdown.classList.toggle('hidden');
                 });
             }
         };
 
         setupDropdown(userMenuButton, userMenuDropdown);
-        setupDropdown(languageMenuButton, languageMenuDropdown);
+        setupDropdown(languageMenuButton, langDropdown); // Use the correct dropdown variable
 
+        // Add logout functionality
+        if (userMenuDropdown) {
+            const logoutBtn = userMenuDropdown.querySelector('#logout-btn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    sessionStorage.removeItem('userLoggedIn');
+                    sessionStorage.removeItem('currentUser');
+                    window.location.href = 'login.html';
+                });
+            }
+        }
         // Make the notification bell navigate to the notifications page
         if (notificationBtn) {
             notificationBtn.addEventListener('click', () => window.location.href = 'notifications.html');
         }
+
+        // Mobile menu toggle for public header
+        const menuToggle = headerContainer.querySelector('.menu-toggle');
+        const navLinks = headerContainer.querySelector('.nav-links');
+        if (menuToggle && navLinks) {
+            menuToggle.addEventListener('click', () => {
+                navLinks.classList.toggle('active');
+                // Change icon
+                const icon = menuToggle.querySelector('i');
+                if (navLinks.classList.contains('active')) {
+                    icon.classList.remove('fa-bars');
+                    icon.classList.add('fa-times'); // 'X' icon
+                } else {
+                    icon.classList.remove('fa-times');
+                    icon.classList.add('fa-bars'); // Hamburger icon
+                }
+            });
+    
+            // Close menu when a link is clicked (for single-page navigation)
+            navLinks.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', () => {
+                    if (navLinks.classList.contains('active')) {
+                        navLinks.classList.remove('active');
+                        menuToggle.querySelector('i').classList.replace('fa-times', 'fa-bars');
+                    }
+                });
+            });
+        }
+
+        // Fix anchor links on non-index public pages (like login.html)
+        const currentPath = window.location.pathname.split('/').pop() || 'index.html';
+        const isIndexPage = currentPath === 'index.html' || currentPath === '';
+
+        if (this.isPublicPage() && !isIndexPage) {
+            const anchorLinks = headerContainer.querySelectorAll('a[href^="#"]');
+            anchorLinks.forEach(link => {
+                const originalHref = link.getAttribute('href');
+                link.setAttribute('href', `/Html/index.html${originalHref}`);
+            });
+        }
+    }
+
+    /**
+     * Determines if the current page is a public page.
+     * If not logged in, public pages include index.html, login.html, signup.html.
+     * If logged in, public pages are only login.html, signup.html.
+     * @returns {boolean} True if the page is public, false otherwise.
+     */
+    isPublicPage() {
+        // A page is considered public if it does NOT have a sidebar container.
+        return !document.getElementById('sidebar-container');
     }
 
     /**
@@ -363,18 +462,17 @@ class RentalUtils {
      */
     setupGlobalEventListeners() {
         document.addEventListener('click', (event) => {
-            // Close all open dropdowns if click is outside
-            const dropdownBtn = event.target.closest('.action-dropdown-btn');
+            // A more robust check for any dropdown toggle button
+            const isDropdownButton = event.target.closest('#user-menu-button, #language-menu-button, .action-dropdown-btn');
             const openDropdowns = document.querySelectorAll('.dropdown-menu:not(.hidden)');
 
-            // If the click is not on a dropdown button, close all open dropdowns.
-            if (!dropdownBtn) {
+            // If the click is outside any dropdown button and the dropdowns are open, close them.
+            if (!isDropdownButton && openDropdowns.length > 0) {
                 openDropdowns.forEach(dropdown => {
                     dropdown.classList.add('hidden');
                 });
             }
 
-            // This logic seems outdated, the new dropdown logic handles this better.
             // Close user menu if click is outside
             const userMenu = document.getElementById('user-menu');
             if (userMenu && userMenu.classList.contains('active') && !event.target.closest('.user-menu-container')) {
@@ -393,7 +491,8 @@ class RentalUtils {
             const modalOverlay = event.target.closest('.modal-overlay');
             if (modalOverlay) {
                 // Close if clicking the overlay itself or a button with .close-modal-btn
-                if (event.target === modalOverlay || event.target.closest('.close-modal-btn')) {
+                const isDropdownItem = event.target.closest('.dropdown-item');
+                if (!isDropdownItem && (event.target === modalOverlay || event.target.closest('.close-modal-btn'))) {
                     this.closeModal(modalOverlay);
                 }
             }
@@ -862,6 +961,7 @@ class RentalUtils {
 
 // Initialize utilities when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    window.rentalUtils = new RentalUtils();
+    // Initialize services on the window object to be globally accessible
     window.settingsService = new SettingsService();
+    window.rentalUtils = new RentalUtils();
 });

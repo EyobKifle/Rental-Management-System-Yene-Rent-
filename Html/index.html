@@ -9,24 +9,7 @@
 </head>
 <body>
 
-    <header class="navbar">
-        <div class="logo">Yene Rent</div>
-        <nav class="nav-links">
-            <a href="#home">Home</a>
-            <a href="#features-overview">Features</a>
-            <a href="#pricing">Pricing</a>
-            <a href="#demo">Demo</a>
-            <a href="/contact.html">Contact</a>
-        </nav>
-        <div class="nav-actions">
-            <button id="theme-toggle" class="btn btn-icon" aria-label="Toggle theme">
-                <i class="fas fa-moon"></i>
-            </button>
-            <a href="login.html" class="btn btn-login">Login</a>
-            <a href="/get-started.html" class="btn btn-primary">Get Started</a>
-        </div>
-        <button class="menu-toggle" aria-label="Toggle navigation menu"><i class="fas fa-bars"></i></button>
-    </header>
+    <div id="header-container"></div>
 
     <main>
         <section id="home" class="hero-section">
@@ -127,7 +110,7 @@
                         <li><i class="fas fa-check"></i> Basic Financial Tracking</li>
                         <li><i class="fas fa-times"></i> Limited Support</li>
                     </ul>
-                    <a href="/signup.html?plan=basic" class="btn btn-secondary">Get Started</a>
+                    <a href="/Html/signup.html" class="btn btn-secondary">Get Started</a>
                 </div>
                 <div class="price-card popular reveal">
                     <h3>Professional</h3>
@@ -240,28 +223,10 @@
         </div>
     </footer>
 
-    <script>
-        // Simple theme toggler for the landing page
-        document.addEventListener('DOMContentLoaded', () => {
-            const themeToggle = document.getElementById('theme-toggle');
-            const themeIcon = themeToggle.querySelector('i');
-            const storageKey = 'appSettings';
-
-            const applyTheme = (theme) => {
-                document.body.setAttribute('data-theme', theme);
-                themeIcon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
-            };
-
-            const settings = JSON.parse(localStorage.getItem(storageKey) || '{}');
-            let currentTheme = settings.appearance?.theme || 'light';
-            applyTheme(currentTheme);
-
-            themeToggle.addEventListener('click', () => {
-                currentTheme = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-                applyTheme(currentTheme);
-                localStorage.setItem(storageKey, JSON.stringify({ ...settings, appearance: { theme: currentTheme } }));
-            });
-        });
-    </script>
+    <!-- Load shared scripts for header, theme, and language functionality -->
+    <script src="/Js/api.js"></script>
+    <script src="/Js/lib/ethiopian-date.js"></script>
+    <script src="/Js/public-page.js"></script>
+    <script src="/Js/shared.js"></script>
 </body>
 </html>
