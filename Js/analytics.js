@@ -46,13 +46,14 @@ class AnalyticsDataService {
       currentDate.setMonth(currentDate.getMonth() + 1);
     }
     payments.forEach((p) => {
-      const d = new Date(p.date);
-      const key = `${d.getFullYear()}-${d.getMonth()}`;
+      // Use string splitting to avoid timezone issues with `new Date()`
+      const [year, month] = p.date.split('-').map(Number);
+      const key = `${year}-${month - 1}`; // month is 1-based, Date month is 0-based
       if (data[key]) data[key].revenue += p.amount;
     });
     expenses.forEach((e) => {
-      const d = new Date(e.date);
-      const key = `${d.getFullYear()}-${d.getMonth()}`;
+      const [year, month] = e.date.split('-').map(Number);
+      const key = `${year}-${month - 1}`; // month is 1-based, Date month is 0-based
       if (data[key]) data[key].expenses += e.amount;
     });
     return {
@@ -141,27 +142,9 @@ class AnalyticsDataService {
       allLeases,
       allProperties
     );
-    const expenseByCategory =
-      this._aggregateExpenseByCategory(filteredExpenses);
+    const expenseByCategory = this._aggregateExpenseByCategory(filteredExpenses);
 
-    // 4. Calculate Taxes
-    const propertyForTax = allProperties.find((p) => p.id === propertyId);
-    const paymentsByPropertyForTax =
-      propertyId !== "all"
-        ? {
-            [propertyId]: {
-              totalIncome: totalRevenue,
-              taxType: propertyForTax ? propertyForTax.taxType : "all-taxes",
-            },
-          }
-        : incomeByProperty;
-
-    const taxData = this.taxCalculator.calculateAllTaxes({
-      totalRevenue: totalRevenue,
-      totalExpenses: totalExpenses,
-      paymentsByProperty: paymentsByPropertyForTax,
-      expenses: expenses, // Pass all for calculation context
-    });
+    const taxData = this.taxCalculator.calculateAllTaxes({ totalRevenue, totalExpenses, paymentsByProperty: incomeByProperty, expenses: filteredExpenses });
 
     // 5. Prepare data for tables
     const transactions = this._collateTransactions(
@@ -191,8 +174,8 @@ class AnalyticsDataService {
       charts: {
         incomeByProperty,
         expenseByCategory,
-        profitLoss: AnalyticsDataService.getMonthlyProfitLoss(
-          filteredPayments,
+        profitLoss: AnalyticsDataService.getMonthlyProfitLoss( // Pass the filtered data here
+          filteredPayments, 
           filteredExpenses,
           start,
           end
@@ -277,6 +260,29 @@ document.addEventListener("DOMContentLoaded", () => {
   const mainContent = document.getElementById("main-content");
 
   // --- State ---
+  // Professional Chart.js global settings
+  Chart.defaults.font.family = "'Inter', sans-serif";
+  Chart.defaults.font.size = 12;
+  Chart.defaults.color = '#6b7280'; // gray-500
+  Chart.defaults.plugins.legend.position = 'bottom';
+  Chart.defaults.plugins.tooltip.enabled = true;
+  Chart.defaults.plugins.tooltip.backgroundColor = '#111827'; // gray-900
+  Chart.defaults.plugins.tooltip.titleFont = { size: 14, weight: 'bold' };
+  Chart.defaults.plugins.tooltip.bodyFont = { size: 12 };
+  Chart.defaults.plugins.tooltip.padding = 10;
+  Chart.defaults.plugins.tooltip.cornerRadius = 4;
+  Chart.defaults.plugins.tooltip.displayColors = true;
+  Chart.defaults.plugins.tooltip.boxPadding = 4;
+  Chart.defaults.plugins.tooltip.callbacks.label = function(context) {
+      let label = context.dataset.label || '';
+      if (label) {
+          label += ': ';
+      }
+      if (context.parsed.y !== null) {
+          label += rentalUtils.formatCurrency(context.parsed.y);
+      }
+      return label;
+  };
   let charts = {};
   let taxCalculator; // Declared here, initialized after class is loaded
   let allProperties = [];
@@ -286,21 +292,19 @@ document.addEventListener("DOMContentLoaded", () => {
   const initialize = async () => {
     await window.rentalUtils.headerPromise;
 
-    try {
-      currentUser = JSON.parse(sessionStorage.getItem("currentUser")) || {};
-    } catch (e) {
-      currentUser = {};
-    }
-
-    // Initialize services and calculators
-    // Ensure TaxCalculator class is available before instantiating
+    // Initialize services and calculators first
     if (typeof TaxCalculator !== "undefined") {
       const settings = window.settingsService.getSettings();
       taxCalculator = new TaxCalculator(settings.tax);
     } else {
-      console.error(
-        "TaxCalculator class is not defined. Make sure taxCalculator.js is loaded correctly."
-      );
+      console.error("TaxCalculator class is not defined. Make sure taxCalculator.js is loaded correctly.");
+      return; // Stop initialization if critical component is missing
+    }
+
+    try {
+      currentUser = JSON.parse(sessionStorage.getItem("currentUser")) || {};
+    } catch (e) {
+      currentUser = {};
     }
 
     allProperties = await api.get("properties"); // Fetch once for the filter
@@ -548,9 +552,14 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
     charts[chartId] = new Chart(ctx, {
-      type,
+      type, 
       data,
-      options: { responsive: true, maintainAspectRatio: false, ...options },
+      options: { 
+        responsive: true, 
+        maintainAspectRatio: false, 
+        plugins: { legend: { labels: { usePointStyle: true, boxWidth: 8 } } },
+        ...options 
+      },
     });
   };
 
@@ -565,40 +574,38 @@ document.addEventListener("DOMContentLoaded", () => {
           {
             label: "Revenue",
             data: monthlyData.revenues,
-            backgroundColor: "rgba(75, 192, 192, 0.6)",
-            borderColor: "rgba(75, 192, 192, 1)",
+            backgroundColor: "rgba(16, 185, 129, 0.6)", // success-color
+            borderColor: "rgba(16, 185, 129, 1)",
             borderWidth: 1,
           },
           {
             label: "Expenses",
             data: monthlyData.expenses,
-            backgroundColor: "rgba(255, 99, 132, 0.6)",
-            borderColor: "rgba(255, 99, 132, 1)",
+            backgroundColor: "rgba(239, 68, 68, 0.6)", // danger-color
+            borderColor: "rgba(239, 68, 68, 1)",
             borderWidth: 1,
           },
         ],
       },
       {
-        responsive: true,
-        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
         scales: {
           x: {
-            display: true,
-            title: {
-              display: true,
-              text: "Month",
-            },
+            stacked: false,
+            grid: { display: false },
           },
           y: {
-            beginAtZero: false, // Make y-axis dynamic to scale with data range
+            stacked: false,
+            beginAtZero: true, // Ensures a stable baseline for the bars
+            grid: {
+                color: '#e5e7eb', // gray-200
+                borderDash: [2, 4],
+            },
             ticks: {
               callback: function (value) {
-                return rentalUtils.formatCurrency(value); // Format y-axis labels as currency
+                // Use compact notation for cleaner y-axis
+                return rentalUtils.formatCurrency(value, 'ETB', true);
               },
-            },
-            title: {
-              display: true,
-              text: "Amount (ETB)",
             },
           },
         },
@@ -615,15 +622,18 @@ document.addEventListener("DOMContentLoaded", () => {
           label: "Income by Property",
           data: Object.values(incomeData).map((d) => d.totalIncome),
           backgroundColor: [
-            "#36A2EB",
-            "#FFCE56",
-            "#4BC0C0",
-            "#9966FF",
-            "#FF9F40",
-            "#FF6384",
+            '#3b82f6', // blue-500
+            '#8b5cf6', // violet-500
+            '#10b981', // emerald-500
+            '#f97316', // orange-500
+            '#ef4444', // red-500
+            '#f59e0b', // amber-500
           ],
+          hoverOffset: 4,
         },
       ],
+    }, {
+        plugins: { legend: { display: true } }
     });
   };
 
@@ -638,15 +648,18 @@ document.addEventListener("DOMContentLoaded", () => {
           label: "Expenses by Category",
           data: Object.values(expenseData),
           backgroundColor: [
-            "#FF6384",
-            "#36A2EB",
-            "#FFCE56",
-            "#4BC0C0",
-            "#9966FF",
-            "#FF9F40",
+            '#ef4444', // red-500
+            '#f97316', // orange-500
+            '#f59e0b', // amber-500
+            '#84cc16', // lime-500
+            '#22c55e', // green-500
+            '#14b8a6', // teal-500
           ],
+          hoverOffset: 4,
         },
       ],
+    }, {
+        plugins: { legend: { display: true } }
     });
   };
 

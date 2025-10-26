@@ -3,9 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
     <title>Analytics - Rental System</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
@@ -13,10 +13,10 @@
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
     />
-    <link rel="stylesheet" href="../Css/Insystemstyles.css" />
-    <link rel="stylesheet" href="../Css/header.css" />
-    <link rel="stylesheet" href="../Css/sidebar.css" />
-    <link rel="stylesheet" href="../Css/analytics.css" />
+    <link rel="stylesheet" href="/Css/Insystemstyles.css" />
+    <link rel="stylesheet" href="/Css/header.css" />
+    <link rel="stylesheet" href="/Css/sidebar.css" />
+    <link rel="stylesheet" href="/Css/analytics.css" />
   </head>
 
   <body>
@@ -25,116 +25,112 @@
     <main id="main-content" class="main-content">
       <div id="analytics-view">
         <div class="page-header">
-          <h1>Analytics</h1>
-          <p>Detailed financial insights and reports</p>
+          <div>
+            <h1>Analytics & Reports</h1>
+            <p>Visualize your portfolio's financial performance.</p>
+          </div>
+          <div class="page-actions">
+            <button id="export-pdf" class="btn-secondary"><i class="fa-solid fa-file-pdf"></i> Export as PDF</button>
+          </div>
         </div>
 
-  
-
-        <div class="reports-header">
-            <button id="export-income-statement" class="btn-secondary"><i class="fas fa-file-alt"></i> Income Statement</button>
-            <button id="export-tax-report" class="btn-secondary"><i class="fas fa-landmark"></i> Tax Calculation Report</button>
+        <!-- Filters -->
+        <div class="data-card filter-bar">
+          <div class="form-group">
+            <label for="filter-start" class="form-label">Start Date</label>
+            <input type="date" id="filter-start" class="form-input" />
+          </div>
+          <div class="form-group">
+            <label for="filter-end" class="form-label">End Date</label>
+            <input type="date" id="filter-end" class="form-input" />
+          </div>
+          <div class="form-group">
+            <label for="filter-property" class="form-label">Property</label>
+            <select id="filter-property" class="form-input">
+              <option value="all">All Properties</option>
+            </select>
+          </div>
+          <button id="btn-generate-report" class="btn-primary">Generate Report</button>
         </div>
 
+        <!-- Key Stats -->
         <div class="stats-grid">
-          <div class="data-card">
-            <p>Total Revenue</p>
-            <h2 id="stat-total-revenue" class="text-green">0 ETB</h2>
+          <div class="stat-card">
+            <div class="stat-header">
+              <i class="fa-solid fa-sack-dollar stat-icon"></i>
+              <h3 class="stat-title">Total Revenue</h3>
+            </div>
+            <p id="stat-total-revenue" class="stat-value">ETB 0</p>
           </div>
-          <div class="data-card">
-            <p>Total Expenses</p>
-            <h2 id="stat-total-expenses" class="text-red">0 ETB</h2>
+          <div class="stat-card">
+            <div class="stat-header">
+              <i class="fa-solid fa-receipt stat-icon"></i>
+              <h3 class="stat-title">Total Expenses</h3>
+            </div>
+            <p id="stat-total-expenses" class="stat-value">ETB 0</p>
           </div>
-          <div class="data-card">
-            <p>Net Profit</p>
-            <h2 id="stat-net-profit" class="text-gray-800">0 ETB</h2>
+          <div class="stat-card">
+            <div class="stat-header">
+              <i class="fa-solid fa-chart-line stat-icon"></i>
+              <h3 class="stat-title">Net Profit</h3>
+            </div>
+            <p id="stat-net-profit" class="stat-value">ETB 0</p>
           </div>
-          <div class="data-card">
-            <p>Estimated Tax Liability</p>
-            <h2 id="stat-estimated-tax" class="text-orange">0 ETB</h2>
+          <div class="stat-card">
+            <div class="stat-header">
+              <i class="fa-solid fa-landmark stat-icon"></i>
+              <h3 class="stat-title">Estimated Tax</h3>
+            </div>
+            <p id="stat-estimated-tax" class="stat-value">ETB 0</p>
           </div>
         </div>
 
-        <div class="analytics-main-grid">
-          <div class="data-card chart-container-large">
-            <h3>Profit & Loss Trend</h3>
+        <!-- Charts -->
+        <div class="chart-grid">
+          <div class="data-card chart-container">
+            <h3>Monthly Profit & Loss</h3>
             <canvas id="profitLossChart"></canvas>
           </div>
-
-              <div class="small-charts-grid">
-            <div class="data-card chart-container-small">
-              <h3>Income Overview</h3>
-              <canvas id="incomeOverviewChart"></canvas>
-            </div>
-            <div class="data-card chart-container-small">
-              <h3>Expense Breakdown</h3>
-              <canvas id="expenseBreakdownChart"></canvas>
-            </div>
+          <div class="data-card chart-container">
+            <h3>Income by Property</h3>
+            <canvas id="incomeOverviewChart"></canvas>
           </div>
-      <!-- Filter Controls -->
-        <div class="data-card filters">
-            <div class="form-group">
-                <label for="filter-start" class="form-label">Start Date</label>
-                <input type="date" id="filter-start" class="form-input">
-            </div>
-            <div class="form-group">
-                <label for="filter-end" class="form-label">End Date</label>
-                <input type="date" id="filter-end" class="form-input">
-            </div>
-            <div class="form-group">
-                <label for="filter-property" class="form-label">Property</label>
-                <select id="filter-property" class="form-input">
-                    <option value="all">All Properties</option>
-                </select>
-            </div>
-            <button id="btn-generate-report" class="btn-primary">Generate Report</button>
-            <button id="export-pdf" class="btn-secondary" style="margin-left: auto;"><i class="fas fa-download"></i> Export PDF</button>
+          <div class="data-card chart-container">
+            <h3>Expense Breakdown</h3>
+            <canvas id="expenseBreakdownChart"></canvas>
+          </div>
         </div>
-        
-          <div class="analytics-sidebar">
-            <div class="data-card">
-              <h3>Financial Summary</h3>
-              <div class="financial-summary">
-                <section>
-                  <h4>Income Sources</h4>
-                  <div id="summary-income-sources"></div>
-                  <div class="summary-total">
-                    <span>Total Income</span>
-                    <span id="summary-total-income"></span>
-                  </div>
-                </section>
-                <section>
-                  <h4>Expense Categories</h4>
-                  <div id="summary-expense-categories"></div>
-                  <div class="summary-total">
-                    <span>Total Expenses</span>
-                    <span id="summary-total-expenses"></span>
-                  </div>
-                </section>
-                <section>
-                  <h4>Tax Breakdown (Estimated)</h4>
-                  <div id="summary-tax-breakdown">
-                    <!-- Tax items will be injected here by JS -->
-                  </div>
-                  <div class="summary-total">
-                    <span>Total Estimated Tax</span>
-                    <span id="summary-total-tax"></span>
-                  </div>
-                </section>
-                <div class="summary-net-profit">
-                  <span>Net Profit</span>
-                  <span id="summary-net-profit"></span>
-                </div>
-              </div>
+
+        <!-- Financial Summary -->
+        <div class="data-card">
+          <h3>Financial Summary</h3>
+          <div class="summary-grid">
+            <div class="summary-section">
+              <h4>Income Sources</h4>
+              <div id="summary-income-sources"></div>
+              <div class="summary-total"><span>Total Income</span><span id="summary-total-income"></span></div>
+            </div>
+            <div class="summary-section">
+              <h4>Expense Categories</h4>
+              <div id="summary-expense-categories"></div>
+              <div class="summary-total"><span>Total Expenses</span><span id="summary-total-expenses"></span></div>
+            </div>
+            <div class="summary-section">
+              <h4>Profitability</h4>
+              <div class="summary-item"><span>Net Profit</span><span id="summary-net-profit"></span></div>
+            </div>
+            <div class="summary-section">
+              <h4>Tax Summary</h4>
+              <div id="summary-tax-breakdown"></div>
+              <div class="summary-total"><span>Total Tax Liability</span><span id="summary-total-tax"></span></div>
             </div>
           </div>
         </div>
 
-        <!-- Detailed Tables Section -->
-        <div class="detailed-tables-grid">
-          <!-- Transactions Table -->
+        <!-- Detailed Tables -->
+        <div class="data-card">
+          <h3>Transactions</h3>
           <div class="data-card">
-            <h3>Detailed Transactions</h3>
             <div class="table-container">
               <table class="data-table">
                 <thead>
@@ -154,41 +150,35 @@
             </div>
           </div>
 
-          <!-- Tax Summary & Audit Log -->
-          <div class="side-tables-grid">
-            <div class="data-card">
-              <h3>Tax Summary</h3>
-              <div class="table-container">
-                <table class="data-table">
-                  <thead>
-                    <tr>
-                      <th>Tax Type</th>
-                      <th>Amount</th>
-                      <th>Period</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody id="tax-summary-table-body"></tbody>
-                </table>
-              </div>
-            </div>
-            <div class="data-card">
-              <h3>Audit Log</h3>
-              <div class="table-container">
-                <table class="data-table" id="audit-log-table-body"></table>
-              </div>
-            </div>
-          </div>
+        <div class="data-card">
+          <h3>Tax Summary Table</h3>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Tax Type</th>
+                <th>Amount</th>
+                <th>Period</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="tax-summary-table-body"></tbody>
+          </table>
+        </div>
+
+        <div class="data-card">
+          <h3>Audit Log</h3>
+          <table id="audit-log-table-body" class="data-table">
+            <!-- Content will be rendered by JS -->
+          </table>
         </div>
         <div id="report-footer" class="report-footer"></div>
       </div>
     </main>
 
-    <script src="../Js/auth.js"></script>
-    <script src="../Js/api.js"></script>
-    <script src="../Js/mock-data.js"></script>
-    <script src="../Js/shared.js"></script>
-    <script src="../Js/taxCalculator.js"></script>
-    <script src="../Js/analytics.js"></script>
+    <script src="/Js/api.js"></script>
+    <script src="/Js/lib/ethiopian-date.js"></script>
+    <script src="/Js/shared.js"></script>
+    <script src="/Js/taxCalculator.js"></script>
+    <script src="/Js/analytics.js"></script>
   </body>
 </html>
