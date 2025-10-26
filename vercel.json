@@ -1,19 +1,17 @@
 {
   "version": 2,
-  "public": true,
   "rewrites": [
     {
-      "source": "/(Css|Js|assets|lib)/(.*)",
-      "destination": "/$1/$2"
+      "source": "/:path(Css|Js|assets|lib)/:file",
+      "destination": "/:path/:file"
     },
     {
-      "source": "/((?!api/)[^.]*)",
-      "destination": "/Html/$1.html"
+      "source": "/:path*.html",
+      "destination": "/Html/:path.html"
     },
     {
-      "source": "/",
-      "destination": "/Html/index.html"
+      "source": "/:path*",
+      "destination": "/Html/:path*.html"
     }
-  ],
-  "cleanUrls": true
+  ]
 }
