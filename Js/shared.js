@@ -92,7 +92,7 @@ class RentalUtils {
         this.applyTheme(); // Apply theme as early as possible
         if (!this.isPublicPage()) {
             // For internal pages
-            this.headerPromise = this.loadComponent('#header-container', 'header.html').then(headerContainer => {
+            this.headerPromise = this.loadComponent('#header-container', '/Html/header.html').then(headerContainer => {
                 if (headerContainer) {
                     this.setPageTitle();
                     this.setupUserAvatar();
@@ -101,7 +101,7 @@ class RentalUtils {
                 }
                 return headerContainer;
             });
-            this.sidebarPromise = this.loadComponent('#sidebar-container', 'sidebar.html').then(() => {
+            this.sidebarPromise = this.loadComponent('#sidebar-container', '/Html/sidebar.html').then(() => {
                 this.setupNavigation();
             });
         } else { // For public pages (index.html, login.html)
