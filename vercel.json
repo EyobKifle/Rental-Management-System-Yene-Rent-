@@ -1,17 +1,13 @@
 {
   "version": 2,
-  "routes": [
+  "rewrites": [
     {
-      "src": "/(Css|Js|assets|lib|fonts)/(.*)",
-      "dest": "/$1/$2"
+      "source": "/:path((?!api/).*\\.(?:css|js|ico|png|jpg|jpeg|gif|svg|mp4|woff|woff2|ttf|eot))",
+      "destination": "/:path"
     },
     {
-      "src": "/(.*).html",
-      "dest": "/Html/$1.html"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/Html/$1.html"
+      "source": "/:path((?!api/)[^/.]+)",
+      "destination": "/Html/:path.html"
     }
   ]
 }
