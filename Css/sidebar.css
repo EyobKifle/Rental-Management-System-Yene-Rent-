@@ -1,8 +1,8 @@
 /* === Sidebar Styles === */
 .sidebar {
     width: var(--sidebar-width);
-    height: calc(100vh - var(--header-height)); /* Full height minus header */
     position: fixed;
+    height: 100vh; /* Full viewport height */
     top: var(--header-height); /* Positioned below the header */
     left: 0;
     background-color: var(--primary-color);
@@ -12,6 +12,11 @@
     flex-direction: column;
     transition: transform 0.3s ease-in-out;
     z-index: 999;
+    padding-top: 1.5rem; /* Adjust padding since it's full height */
+}
+
+.sidebar.open {
+    transform: translateX(0);
 }
 
 .sidebar-header {
@@ -70,4 +75,12 @@
 /* When sidebar is collapsed, remove the left margin from main content */
 .sidebar-collapsed .main-content {
     margin-left: 0;
+}
+
+@media (max-width: 1024px) {
+    .sidebar {
+        top: 0; /* Align to the very top of the viewport on mobile */
+        height: 100vh;
+        padding-top: calc(var(--header-height) + 1rem); /* Add padding to clear the header */
+    }
 }

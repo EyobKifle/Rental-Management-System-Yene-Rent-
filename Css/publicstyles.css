@@ -768,15 +768,12 @@ footer {
         border-bottom: none;
     }
 
-    .nav-actions {
-        display: none; /* Hide action buttons on mobile to simplify header */
-    }
-
     .menu-toggle {
         display: block; /* Show menu toggle button */
     }
     
     /* Footer Adjustments */
+
     .footer-main {
         flex-direction: column;
         gap: 40px;
@@ -786,5 +783,28 @@ footer {
     .footer-column h4::after {
         left: 50%;
         transform: translateX(-50%);
+    }
+}
+
+@media (max-width: 480px) {
+    h1 { font-size: 2em; }
+    h2 { font-size: 2em; }
+    .hero-content h1 { font-size: 2.2em; }
+
+    .section {
+        padding: 40px 5%;
+    }
+
+    .btn {
+        padding: 8px 16px;
+        font-size: 0.9em;
+    }
+
+    .btn-large {
+        padding: 12px 24px;
+    }
+
+    .price-card {
+        padding: 25px;
     }
 }
