@@ -64,7 +64,7 @@
 
 /* When sidebar is collapsed, move it off-screen */
 .sidebar-collapsed .sidebar {
-    transform: translateX(calc(-1 * var(--sidebar-width) - 10px)); /* Hide it completely */
+    transform: translateX(-100%); /* Hide it completely */
 }
 
 /* When sidebar is collapsed, remove the left margin from main content */
