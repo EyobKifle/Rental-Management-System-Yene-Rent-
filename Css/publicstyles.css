@@ -764,12 +764,30 @@ footer {
         border-bottom: 1px solid var(--border-color);
     }
 
+    .nav-links .nav-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        padding: 1rem 1.5rem;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .nav-links .nav-actions .btn {
+        width: 100%;
+        text-align: center;
+    }
+
     .nav-links a:last-child {
         border-bottom: none;
     }
 
     .menu-toggle {
         display: block; /* Show menu toggle button */
+    }
+
+    /* Hide the original nav-actions container on mobile */
+    .navbar > .nav-actions {
+        display: none;
     }
     
     /* Footer Adjustments */
