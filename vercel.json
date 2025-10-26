@@ -2,12 +2,12 @@
   "version": 2,
   "rewrites": [
     {
-      "source": "/((?:Css|Js|assets|lib|fonts|images)/.*)",
-      "destination": "/$1"
+      "source": "/(Css|Js|assets|lib|fonts|images|videos)/:path*",
+      "destination": "/$1/:path*"
     },
     {
-      "source": "/:path((?!api/)[^/.]+)",
-      "destination": "/Html/:path.html"
+      "source": "/:path*",
+      "destination": "/Html/:path*"
     }
   ]
 }
