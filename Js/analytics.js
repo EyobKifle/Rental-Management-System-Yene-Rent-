@@ -143,7 +143,6 @@ class AnalyticsDataService {
       allProperties
     );
     const expenseByCategory = this._aggregateExpenseByCategory(filteredExpenses);
-
     const taxData = this.taxCalculator.calculateAllTaxes({ totalRevenue, totalExpenses, paymentsByProperty: incomeByProperty, expenses: filteredExpenses });
 
     // 5. Prepare data for tables
@@ -528,24 +527,17 @@ document.addEventListener("DOMContentLoaded", () => {
     if (charts[chartId]) {
       charts[chartId].destroy();
     }
-    // Check if data is empty and show placeholder text
-    const isEmpty =
-      (type === "bar" &&
-        (!data.datasets ||
-          data.datasets.every((ds) => !ds.data || ds.data.length === 0))) ||
-      ((type === "pie" || type === "doughnut") &&
-        (!data.datasets ||
-          !data.datasets[0] ||
-          !data.datasets[0].data ||
-          data.datasets[0].data.length === 0));
-    if (isEmpty) {
+    // Simplified and more robust check for empty data
+    const hasData = data.datasets && data.datasets.some(ds => ds.data && ds.data.length > 0 && ds.data.some(d => d > 0));
+
+    if (!hasData) {
       // Clear canvas and draw placeholder text
       ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-      ctx.font = "16px Arial";
-      ctx.fillStyle = "#666";
+      ctx.font = "16px 'Inter', sans-serif";
+      ctx.fillStyle = "#9ca3af"; // gray-400
       ctx.textAlign = "center";
       ctx.fillText(
-        "No data available",
+        "No data for selected period",
         ctx.canvas.width / 2,
         ctx.canvas.height / 2
       );
