@@ -2,6 +2,10 @@
   "version": 2,
   "rewrites": [
     {
+      "source": "/",
+      "destination": "/Html/index.html"
+    },
+    {
       "source": "/:path((?!api/).*\\.(?:css|js|ico|png|jpg|jpeg|gif|svg|mp4|woff|woff2|ttf|eot))",
       "destination": "/:path"
     },
