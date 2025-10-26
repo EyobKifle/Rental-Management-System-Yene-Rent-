@@ -1,23 +1,17 @@
 {
+  "version": 2,
   "rewrites": [
+    {
+      "source": "/((?!_next|api|assets|Css|Js|Html|favicon.ico|.*\\..*).*)",
+      "destination": "/Html/$1.html"
+    },
+    {
+      "source": "/:path((?!_next|api|assets|Css|Js|Html|favicon.ico).*)",
+      "destination": "/Html/:path"
+    },
     {
       "source": "/",
       "destination": "/Html/index.html"
-    },
-    {
-      "source": "/:path((?!.*\\.).*)",
-      "destination": "/Html/:path.html"
-    }
-  ],
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, s-maxage=1, stale-while-revalidate=59"
-        }
-      ]
     }
   ]
 }

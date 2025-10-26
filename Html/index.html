@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Yene Rent | Rental Management System</title>
+    <script>
+        // Redirect to dashboard if the user is already logged in
+        if (sessionStorage.getItem('userLoggedIn') === 'true' && window.location.pathname === '/index.html' || window.location.pathname === '/') {
+            window.location.replace('/dashboard.html');
+        }
+    </script>
     <link rel="stylesheet" href="/Css/publicstyles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
