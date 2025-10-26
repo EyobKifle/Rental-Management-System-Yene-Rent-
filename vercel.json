@@ -1,17 +1,19 @@
 {
   "version": 2,
+  "public": true,
   "rewrites": [
     {
-      "source": "/((?!_next|api|assets|Css|Js|Html|favicon.ico|.*\\..*).*)",
-      "destination": "/Html/$1.html"
+      "source": "/(Css|Js|assets|lib)/(.*)",
+      "destination": "/$1/$2"
     },
     {
-      "source": "/:path((?!_next|api|assets|Css|Js|Html|favicon.ico).*)",
-      "destination": "/Html/:path"
+      "source": "/((?!api/)[^.]*)",
+      "destination": "/Html/$1.html"
     },
     {
       "source": "/",
       "destination": "/Html/index.html"
     }
-  ]
+  ],
+  "cleanUrls": true
 }
