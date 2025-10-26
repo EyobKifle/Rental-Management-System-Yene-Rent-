@@ -2,8 +2,9 @@
  * taxCalculator.js
  * A module for calculating estimated taxes based on Ethiopian tax regulations.
  * Note: This provides an estimation for informational purposes and is not a substitute for professional tax advice.
+ *
+ * This is the consolidated and corrected version.
  */
-
 class TaxCalculator {
     constructor(settings) {
         // Default settings can be overridden by user-configured values
@@ -42,7 +43,7 @@ class TaxCalculator {
         let withholdingTax = 0;
         for (const propId in paymentsByProperty) {
             const prop = paymentsByProperty[propId];
-            if (prop.taxType && prop.taxType.includes('withholding')) {
+            if (prop.taxType && (prop.taxType.includes('withholding') || prop.taxType.includes('all-taxes'))) {
                 withholdingTax += prop.totalIncome * this.settings.withholdingTaxRate;
             }
         }
@@ -90,7 +91,3 @@ class TaxCalculator {
     }
 }
 
-// To use this in other files:
-// import TaxCalculator from './taxCalculator.js';
-// const calculator = new TaxCalculator(userSettings);
-// const taxes = calculator.calculateAllTaxes(financialData);
