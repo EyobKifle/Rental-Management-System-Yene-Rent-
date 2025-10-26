@@ -8,7 +8,7 @@
     background-color: var(--primary-color);
     color: var(--gray-300);
     padding: 1.5rem 1rem;
-    display: flex; 
+    display: flex;
     flex-direction: column;
     transition: transform 0.3s ease-in-out;
     z-index: 999;
@@ -64,12 +64,10 @@
 
 /* When sidebar is collapsed, move it off-screen */
 .sidebar-collapsed .sidebar {
-    transform: translateX(calc(-1 * var(--sidebar-width)));
+    transform: translateX(calc(-1 * var(--sidebar-width) - 10px)); /* Hide it completely */
 }
 
 /* When sidebar is collapsed, remove the left margin from main content */
 .sidebar-collapsed .main-content {
     margin-left: 0;
 }
-
-

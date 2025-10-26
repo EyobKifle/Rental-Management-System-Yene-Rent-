@@ -1,8 +1,16 @@
-# TODO: Update Navigation to Start from Landing Page
+# UI Issues Fix Plan
 
-- [x] Move Public/homepage.html to Html/index.html (new entry point)
-- [x] Rename current Html/index.html to Html/dashboard.html
-- [x] Update auth.js to redirect to dashboard.html after login
-- [x] Update links in new Html/index.html (formerly homepage.html) for correct paths
-- [x] Update references in shared.js to point to dashboard.html
-- [x] Update sidebar navigation links to dashboard.html
+## Completed Tasks
+- [ ] Analyze codebase and identify issues
+- [ ] Create plan and get approval
+
+## Pending Tasks
+- [x] Create signup.html (similar to login.html)
+- [x] Add signup link to login.html
+- [x] Create header-public.html for public pages (index, login, signup)
+- [ ] Modify shared.js to load appropriate header based on page type
+- [x] Update login.css to use consistent variables from publicstyles.css
+- [ ] Add theme toggle to header.html and handle in shared.js
+- [ ] Ensure Insystemstyles.css variables are used consistently
+- [ ] Update header.css to support themes
+- [ ] Test dashboard header/sidebar loading
