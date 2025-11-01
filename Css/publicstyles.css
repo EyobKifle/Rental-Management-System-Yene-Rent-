@@ -683,11 +683,11 @@ footer {
         padding-bottom: 40px;
         min-height: auto;
     }
-    
+
     .hero-content h1 {
         font-size: 2.5em;
     }
-    
+
     .hero-ctas {
         display: flex;
         justify-content: center;
@@ -732,13 +732,12 @@ footer {
         gap: 20px;
         align-items: center;
     }
-    
+
     .testimonial-card {
         width: 100%;
     }
-}
 
-@media (max-width: 768px) {
+    /* Navbar Adjustments for mobile and tablet */
     .navbar {
         padding: 15px 5%;
     }
@@ -785,22 +784,9 @@ footer {
         display: block; /* Show menu toggle button */
     }
 
-    /* Hide the original nav-actions container on mobile */
+    /* Hide the original nav-actions container on mobile and tablet */
     .navbar > .nav-actions {
         display: none;
-    }
-    
-    /* Footer Adjustments */
-
-    .footer-main {
-        flex-direction: column;
-        gap: 40px;
-        text-align: center;
-    }
-
-    .footer-column h4::after {
-        left: 50%;
-        transform: translateX(-50%);
     }
 }
 

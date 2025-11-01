@@ -64,3 +64,62 @@
     display: flex;
     gap: 0.75rem;
 }
+
+/* === Responsive Media Queries === */
+
+@media (max-width: 768px) {
+  .notifications-list {
+    gap: 0.875rem;
+  }
+
+  .notification-card {
+    padding: 1.25rem;
+    gap: 1.25rem;
+  }
+
+  .notification-icon {
+    font-size: 1.5rem;
+  }
+
+  .notification-title {
+    font-size: 0.95rem;
+  }
+
+  .notification-details {
+    font-size: 0.8rem;
+  }
+
+  .notification-actions {
+    gap: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .notifications-list {
+    gap: 0.75rem;
+  }
+
+  .notification-card {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1rem;
+    gap: 1rem;
+  }
+
+  .notification-icon {
+    font-size: 1.25rem;
+  }
+
+  .notification-title {
+    font-size: 0.9rem;
+  }
+
+  .notification-details {
+    font-size: 0.75rem;
+  }
+
+  .notification-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}

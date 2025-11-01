@@ -1,10 +1,56 @@
-.table-container {
-    padding: 0;
+/* === Tenants Page Specific Styles === */
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.page-header h1 {
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin: 0;
+}
+
+.page-header p {
+    color: var(--gray-500);
+    margin-top: 0.25rem;
+    margin-bottom: 0;
 }
 
 .table-header {
     padding: 1rem;
     border-bottom: 1px solid var(--gray-200);
+}
+
+.table-header .form-input {
+    max-width: 300px;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.data-table th,
+.data-table td {
+    padding: 0.75rem 1.5rem;
+    text-align: left;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.data-table th {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--gray-500);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.data-table tbody tr:hover {
+    background-color: var(--gray-50);
 }
 
 .status-badge {
@@ -16,23 +62,41 @@
     display: inline-flex;
 }
 
-.status-paid {
+.status-active {
     color: #059669;
     background-color: #f0fdf4;
 }
 
-.status-unpaid {
+.status-inactive {
     color: #d97706;
     background-color: #fffbeb;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 1rem;
+    color: var(--gray-400);
+    border: 2px dashed var(--gray-200);
+    border-radius: var(--radius-lg);
+}
+
+.empty-state i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.empty-state h3 {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+    font-size: 0.875rem;
 }
 
 /* === Responsive Media Queries === */
 
 @media (max-width: 1024px) {
-    .table-header {
-        padding: 0.875rem;
-    }
-
     .data-table th,
     .data-table td {
         padding: 0.5rem 1rem;
