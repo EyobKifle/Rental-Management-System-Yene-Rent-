@@ -120,6 +120,126 @@
     margin-top: 1rem;
 }
 
+/* === Responsive Media Queries === */
+
+@media (max-width: 768px) {
+  #document-details-view .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  #document-details-view .page-header h1 {
+    margin-top: 0;
+    margin-bottom: 0.125rem;
+  }
+
+  #document-details-view .page-header p {
+    font-size: 0.85rem;
+  }
+
+  #document-details-view .page-actions {
+    width: 100%;
+    justify-content: flex-end;
+    gap: 0.5rem;
+  }
+
+  .document-details-grid {
+    gap: 1.5rem;
+  }
+
+  .detail-section {
+    padding: 1.25rem;
+  }
+
+  .detail-section h4 {
+    font-size: 1rem;
+    margin-bottom: 0.875rem;
+  }
+
+  .detail-item {
+    padding: 0.625rem 0;
+    font-size: 0.9rem;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .detail-item span:last-child {
+    text-align: left;
+  }
+
+  .document-preview-content {
+    min-height: 250px;
+  }
+
+  .document-preview-content .placeholder-message {
+    font-size: 0.9rem;
+  }
+
+  .document-preview-content .placeholder-message i {
+    font-size: 2.5rem;
+  }
+
+  .preview-actions {
+    gap: 0.5rem;
+    margin-top: 0.875rem;
+  }
+}
+
+@media (max-width: 480px) {
+  #document-details-view .page-header {
+    margin-bottom: 1.25rem;
+  }
+
+  #document-details-view .page-header h1 {
+    font-size: 1.75rem;
+  }
+
+  #document-details-view .page-header p {
+    font-size: 0.8rem;
+  }
+
+  #document-details-view .page-actions {
+    gap: 0.375rem;
+  }
+
+  .document-details-grid {
+    gap: 1.25rem;
+  }
+
+  .detail-section {
+    padding: 1rem;
+  }
+
+  .detail-section h4 {
+    font-size: 0.95rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .detail-item {
+    padding: 0.5rem 0;
+    font-size: 0.85rem;
+  }
+
+  .document-preview-content {
+    min-height: 200px;
+  }
+
+  .document-preview-content .placeholder-message {
+    font-size: 0.8rem;
+  }
+
+  .document-preview-content .placeholder-message i {
+    font-size: 2rem;
+  }
+
+  .preview-actions {
+    flex-direction: column;
+    gap: 0.375rem;
+    margin-top: 0.75rem;
+  }
+}
+
 /* === Print Specific Styles === */
 @media print {
     /* Hide all non-essential elements */
