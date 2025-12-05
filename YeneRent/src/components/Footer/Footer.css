@@ -1,0 +1,144 @@
+footer {
+    background: var(--gray-800);
+    color: var(--gray-300);
+    padding: 60px 5% 20px;
+}
+
+.footer-main {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    max-width: 1200px;
+    margin: 0 auto 40px;    border-bottom: 1px solid var(--gray-700);
+    padding-bottom: 40px;
+}
+
+.footer-column {
+    flex: 1;
+}
+
+.footer-about p {
+    color: var(--gray-400);
+    margin-bottom: 20px;
+    line-height: 1.7;
+}
+
+
+.footer-column h4 {
+    font-size: 1.2em;
+    margin-bottom: 20px;
+    color: white;
+    position: relative;
+    padding-bottom: 10px;
+}
+
+.footer-column h4::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 40px;
+    height: 2px;
+    background: var(--accent-color);
+}
+
+.footer-contact .form-group {
+    margin-bottom: 15px;
+}
+
+.footer-contact input,
+.footer-contact textarea {
+    width: 100%;
+    padding: 12px;
+    border-radius: 5px;
+    border: 1px solid var(--gray-600);
+    background: var(--gray-900);
+    color: var(--gray-200);
+    font-family: var(--font-family);
+}
+
+.footer-contact input::placeholder,
+.footer-contact textarea::placeholder {
+    color: var(--gray-500);
+}
+
+.footer-quick-links ul {
+    list-style: none;
+}
+
+.footer-quick-links a {
+    color: var(--gray-300);
+    display: block;
+    padding: 5px 0;
+}
+
+.social-links {
+    display: flex;
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.social-links a {
+    color: var(--gray-400);
+    font-size: 1.5em;
+    display: inline-block;
+    transition: color var(--transition-speed), transform var(--transition-speed);
+}
+
+.social-links a:hover {
+    color: white;
+    transform: translateY(-2px);
+}
+
+.copyright {
+    font-size: 0.9em;
+    color: var(--gray-500);
+    text-align: center;
+}
+
+/* --- Media Queries for Responsiveness --- */
+@media (max-width: 992px) {
+    .footer-main {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .footer-column {
+        width: 100%;
+        max-width: 400px;
+        margin-bottom: 30px;
+    }
+
+    .footer-column h4::after {
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    .social-links {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    footer {
+        padding: 40px 5% 15px;
+    }
+
+    .footer-main {
+        gap: 30px;
+    }
+
+    .footer-column h4 {
+        font-size: 1.1em;
+    }
+
+    .footer-about p,
+    .footer-quick-links a {
+        font-size: 0.9em;
+    }
+
+    .copyright {
+        font-size: 0.8em;
+    }
+}

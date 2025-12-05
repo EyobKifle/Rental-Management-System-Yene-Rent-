@@ -1,0 +1,24 @@
+/* Scoped analytics styles reused from legacy CSS */
+.page-actions { display: flex; gap: 0.75rem; }
+.page-header h1 { font-size: 1.875rem; font-weight: 700; }
+.page-header p { color: var(--gray-500); margin-top: 0.25rem; }
+
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem; }
+.chart-grid { display: grid; grid-template-columns: 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+@media (min-width: 1024px) {
+  .chart-grid { grid-template-columns: 2fr 1fr; }
+  .chart-grid .chart-container:first-child { grid-column: 1 / -1; }
+}
+.chart-container { position: relative; height: 400px; width: 100%; }
+.chart-container canvas { width: 100% !important; height: 100% !important; }
+
+.summary-grid { display: flex; flex-direction: column; gap: 1.5rem; }
+.summary-section h4 { margin: 0 0 1rem; font-size: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; }
+.summary-item, .summary-total { display: flex; justify-content: space-between; font-size: 0.875rem; margin-bottom: 0.5rem; }
+.summary-total { font-weight: 600; margin-top: 1rem; padding-top: 0.75rem; border-top: 1px solid var(--border-color); }
+
+.filter-bar { display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap; margin-bottom: 1.5rem; }
+.table-container { overflow-x: auto; }
+.data-table { width: 100%; border-collapse: collapse; }
+.data-table th, .data-table td { padding: 0.75rem; text-align: left; border-bottom: 1px solid var(--gray-200); white-space: nowrap; }
+.data-table th { font-size: 0.75rem; font-weight: 500; color: var(--gray-500); }

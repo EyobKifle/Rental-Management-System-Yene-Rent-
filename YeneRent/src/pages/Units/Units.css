@@ -1,0 +1,31 @@
+/* Units page styles adapted from legacy */
+.header-actions { display: flex; gap: 1rem; }
+.unit-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1.5rem; }
+.unit-card { background-color: #fff; border-radius: var(--radius-lg); border: 1px solid var(--gray-200); padding: 1.5rem; display: flex; flex-direction: column; position: relative; transition: box-shadow 0.2s, transform 0.2s; }
+.unit-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+.unit-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; }
+.unit-card-header h3 { font-size: 1.25rem; font-weight: 600; color: var(--gray-800); margin: 0; }
+.unit-card-details { display: grid; gap: 0.75rem; color: var(--gray-600); font-size: 0.875rem; }
+.unit-card-details > div { display: flex; justify-content: space-between; align-items: center; padding-bottom: 0.5rem; border-bottom: 1px solid var(--gray-100); }
+.unit-card-details > div:last-child { border-bottom: none; }
+.unit-card-details span:first-child { font-weight: 500; color: var(--gray-500); }
+.unit-card-details span:last-child { font-weight: 600; color: var(--gray-700); }
+.status-badge.status-occupied { background-color: var(--danger-100); color: var(--danger-700); }
+@media (max-width: 1024px) { .unit-grid { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; } .unit-card { padding: 1.375rem; } .unit-card-header h3 { font-size: 1.2rem; } }
+@media (max-width: 768px) {
+  .header-actions { flex-direction: column; align-items: stretch; gap: 0.75rem; }
+  .header-actions .btn-primary { width: 100%; }
+  .unit-grid { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-top: 1.25rem; }
+  .unit-card { padding: 1.25rem; }
+  .unit-card-header { margin-bottom: 0.875rem; }
+  .unit-card-header h3 { font-size: 1.125rem; }
+  .unit-card-details { gap: 0.625rem; font-size: 0.8rem; }
+}
+@media (max-width: 480px) {
+  .unit-grid { grid-template-columns: 1fr; gap: 0.75rem; margin-top: 1rem; }
+  .unit-card { padding: 1rem; }
+  .unit-card-header { flex-direction: column; gap: 0.5rem; align-items: flex-start; }
+  .unit-card-header h3 { font-size: 1rem; }
+  .unit-card-details { gap: 0.5rem; font-size: 0.75rem; }
+  .unit-card-details > div { flex-direction: column; align-items: flex-start; gap: 0.25rem; padding-bottom: 0.375rem; }
+}

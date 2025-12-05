@@ -1,0 +1,74 @@
+.stat-card {
+    padding: 1.5rem;
+}
+
+.stat-card h3 {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--gray-500);
+    margin: 0 0 0.5rem 0;
+}
+
+.stat-card h2 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--gray-800);
+    margin: 0;
+}
+
+/* From dashboard.css, for consistency */
+.stats-grid .data-card p {
+  margin-bottom: 0.25rem;
+  color: var(--gray-500);
+  font-size: 0.875rem;
+}
+
+.stats-grid .data-card h2 {
+  font-size: 1.5rem; /* Adjusted to match dashboard's h2 for stats */
+  font-weight: 700;
+  margin: 0;
+}
+
+.stats-grid .data-card .text-green-600 {
+  color: var(--success-color);
+}
+
+.stats-grid .data-card .text-red-500 {
+  color: var(--danger-color);
+}
+
+/* Responsive adjustments from payments.css and dashboard.css */
+@media (max-width: 1024px) {
+  .stat-card h2 {
+    font-size: 1.625rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .stat-card {
+    padding: 1.25rem;
+  }
+
+  .stat-card h3 {
+    font-size: 0.8rem;
+  }
+
+  .stat-card h2 {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .stat-card {
+    padding: 1rem;
+    text-align: center;
+  }
+
+  .stat-card h3 {
+    font-size: 0.75rem;
+  }
+
+  .stat-card h2 {
+    font-size: 1.25rem;
+  }
+}

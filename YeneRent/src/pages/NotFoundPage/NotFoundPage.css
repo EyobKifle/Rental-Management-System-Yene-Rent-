@@ -1,0 +1,27 @@
+.not-found-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    min-height: 80vh;
+    background-color: var(--gray-50);
+}
+
+.not-found-content h1 {
+    font-size: 6rem;
+    font-weight: 900;
+    color: var(--primary-color);
+    margin: 0;
+}
+
+.not-found-content h2 {
+    font-size: 2rem;
+    margin-top: 0;
+    margin-bottom: 1rem;
+    color: var(--gray-800);
+}
+
+.not-found-content p {
+    color: var(--gray-600);
+    margin-bottom: 2rem;
+}
