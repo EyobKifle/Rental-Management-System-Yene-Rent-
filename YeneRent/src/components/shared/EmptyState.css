@@ -1,0 +1,103 @@
+/* EmptyState Styles */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+  text-align: center;
+  min-height: 300px;
+}
+
+.empty-state-icon {
+  font-size: 4rem;
+  color: var(--text-secondary);
+  margin-bottom: 1.5rem;
+  opacity: 0.6;
+}
+
+.empty-state-content {
+  max-width: 400px;
+}
+
+.empty-state-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 0.5rem 0;
+}
+
+.empty-state-description {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin: 0 0 2rem 0;
+  line-height: 1.5;
+}
+
+.empty-state-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* Responsive Design */
+@media (max-width: 640px) {
+  .empty-state {
+    padding: 2rem 1rem;
+    min-height: 250px;
+  }
+
+  .empty-state-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+  }
+
+  .empty-state-title {
+    font-size: 1.125rem;
+  }
+
+  .empty-state-description {
+    font-size: 0.8125rem;
+  }
+
+  .empty-state-actions {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+/* Variants */
+.empty-state-compact {
+  padding: 2rem 1rem;
+  min-height: 200px;
+}
+
+.empty-state-compact .empty-state-icon {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.empty-state-compact .empty-state-title {
+  font-size: 1.125rem;
+}
+
+.empty-state-compact .empty-state-description {
+  margin-bottom: 1.5rem;
+}
+
+/* Animation */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.empty-state {
+  animation: fadeInUp 0.3s ease-out;
+}
