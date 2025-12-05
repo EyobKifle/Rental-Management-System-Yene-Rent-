@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import './Properties.css'
 import Card from '../../components/ui/Card'
 import Button from '../../components/ui/Button'
-import { api } from '../../utils/api'
+import api from '../../utils/api'
 
 export default function PropertiesPage() {
   const [search, setSearch] = useState('')
@@ -21,6 +21,42 @@ export default function PropertiesPage() {
       (p.name || '').toLowerCase().includes(s) || (p.address || '').toLowerCase().includes(s)
     )
   }, [properties, search])
+
+  if (loading) {
+    return (
+      <div className="properties-page">
+        <div className="page-header">
+          <div>
+            <h1>Properties</h1>
+            <p>Loading properties...</p>
+          </div>
+        </div>
+        <div className="empty-state">
+          <i className="fa-solid fa-spinner fa-spin"></i>
+          <h3>Loading...</h3>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="properties-page">
+        <div className="page-header">
+          <div>
+            <h1>Properties</h1>
+            <p>View and manage all your properties</p>
+          </div>
+        </div>
+        <div className="empty-state">
+          <i className="fa-solid fa-exclamation-triangle"></i>
+          <h3>Error</h3>
+          <p>{error}</p>
+          <Button onClick={() => window.location.reload()}>Retry</Button>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="properties-page">

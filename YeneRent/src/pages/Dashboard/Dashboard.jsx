@@ -3,7 +3,8 @@ import './Dashboard.css'
 import Card from '../../components/ui/Card'
 import StatsCard from '../../components/ui/StatsCard'
 import Button from '../../components/ui/Button'
-import { api } from '../../utils/api'
+import api from '../../utils/api'
+import { formatDate } from '../../utils/utils'
 
 const fmtCurrency = (v) => {
   try { return new Intl.NumberFormat('en-ET', { style: 'currency', currency: 'ETB', maximumFractionDigits: 0 }).format(v || 0) } catch { return `ETB ${Number(v||0).toLocaleString()}` }
@@ -13,17 +14,29 @@ export default function DashboardPage() {
   const [properties, setProperties] = useState([])
   const [tenants, setTenants] = useState([])
   const [payments, setPayments] = useState([])
+  const [leases, setLeases] = useState([]) // Add leases state
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
     (async () => {
-      const [props, tens, pays] = await Promise.all([
-        api.get('properties'),
-        api.get('tenants'),
-        api.get('payments'),
-      ])
-      setProperties(props || [])
-      setTenants(tens || [])
-      setPayments(pays || [])
+      try {
+        const [props, tens, pays, lses] = await Promise.all([ // Fetch leases
+          api.get('properties'),
+          api.get('tenants'),
+          api.get('payments'),
+          api.get('leases')
+        ])
+        setProperties(props || [])
+        setTenants(tens || [])
+        setPayments(pays || [])
+        setLeases(lses || []) // Set leases state
+      } catch (err) {
+        setError('Failed to load dashboard data. Please try again.')
+        console.error('Dashboard data fetch error:', err)
+      } finally {
+        setLoading(false)
+      }
     })()
   }, [])
 
@@ -39,6 +52,51 @@ export default function DashboardPage() {
     const sorted = [...tenants].sort((a,b)=> new Date(b.moveInDate) - new Date(a.moveInDate))
     return sorted.slice(0,3)
   }, [tenants])
+
+  const expiringLeases = useMemo(() => {
+    const today = new Date();
+    const sixtyDaysFromNow = new Date();
+    sixtyDaysFromNow.setDate(today.getDate() + 60);
+
+    return leases.filter(lease => {
+        const endDate = new Date(lease.endDate);
+        return endDate >= today && endDate <= sixtyDaysFromNow;
+    }).sort((a, b) => new Date(a.endDate) - new Date(b.endDate));
+  }, [leases]);
+
+  if (loading) {
+    return (
+      <div className="dashboard-page">
+        <div className="page-header">
+          <h1>Dashboard</h1>
+          <p>Loading your rental overview...</p>
+        </div>
+        <div className="stats-grid">
+          <Card className="data-card"><p>Loading...</p></Card>
+          <Card className="data-card"><p>Loading...</p></Card>
+          <Card className="data-card"><p>Loading...</p></Card>
+          <Card className="data-card"><p>Loading...</p></Card>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="dashboard-page">
+        <div className="page-header">
+          <h1>Dashboard</h1>
+          <p>Welcome back, here's your rental overview.</p>
+        </div>
+        <div className="stats-grid">
+          <Card className="data-card">
+            <p className="text-red">{error}</p>
+            <Button onClick={() => window.location.reload()}>Retry</Button>
+          </Card>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="dashboard-page">
@@ -69,7 +127,7 @@ export default function DashboardPage() {
                   <tr key={t.id}>
                     <td>New Tenant Added</td>
                     <td>{t.name}</td>
-                    <td>{new Date(t.moveInDate).toLocaleDateString()}</td>
+                    <td>{formatDate(t.moveInDate)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -84,6 +142,29 @@ export default function DashboardPage() {
             <a href="/tenants#add" className="action-link"><i className="fa-solid fa-user-plus"></i><span>Add Tenant</span></a>
             <a href="/payments#record" className="action-link"><i className="fa-solid fa-money-bill-wave"></i><span>Record Payment</span></a>
           </div>
+        </Card>
+
+        <Card className="quick-actions-card"> {/* Reusing quick-actions-card for styling */}
+            <h3>Upcoming Lease Expirations</h3>
+            <div className="lease-expirations">
+                {expiringLeases.length > 0 ? (
+                    expiringLeases.map(lease => {
+                        const tenant = tenants.find(t => t.id === lease.tenantId);
+                        const property = properties.find(p => p.id === lease.propertyId);
+                        return (
+                            <div key={lease.id} className="lease-expiration-item">
+                                <div>
+                                    <p>{tenant?.name || 'N/A'}</p>
+                                    <p className="text-sm text-gray-500">{property?.name || 'N/A'}</p>
+                                </div>
+                                <span>{formatDate(lease.endDate)}</span>
+                            </div>
+                        );
+                    })
+                ) : (
+                    <p className="text-center text-gray-500">No leases are expiring in the next 60 days.</p>
+                )}
+            </div>
         </Card>
       </div>
     </div>

@@ -1,163 +1,401 @@
-// Ethiopian date utility functions
+// YeneRent/src/utils/ethiopianDate.js
+
+const amPM = {
+  am: 'ጥዋት',
+  pm: 'ከሰዓት'
+};
+const dayNames = ['እሑድ', 'ሰኞ', 'ማክሰኞ', 'ረቡዕ', 'ሐሙስ', 'ዓርብ', 'ቅዳሜ'];
+const monthNames = ['መስከረም', 'ጥቅምት', 'ኅዳር', 'ታኅሣሥ', 'ጥር', 'የካቲት', 'መጋቢት', 'ሚያዝያ', 'ግንቦት', 'ሰኔ', 'ሐምሌ', 'ነሐሴ', 'ጳጉሜ'];
+const era = 'ዓ/ም';
+
+const ET_EPOCH = 2796; // 2796 in the Ethiopian calendar is the first day of the first month of year 1 AD in the Gregorian calendar
+
+const GREGORIAN_EPOCH = 1721425.5; // Julian day number of Gregorian epoch: 0001-01-01
+
+const ETHIOPIC_EPOCH = 2796; // Julian day number of Ethiopic epoch: 0001-01-01
+
+const JD_EPOCH_OFFSET = 1723856; // Julian day number of Ethiopic epoch, relative to Gregorian
+
+const nMonths = 12;
+
+const monthDays = [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330, 360];
+
+const isLeap = year => year % 4 === 3;
+
+export const toGregorian = (year, month, day) => {
+  if (year === undefined || month === undefined || day === undefined) {
+    const today = new Date();
+    return toGregorian(today.getFullYear(), today.getMonth() + 1, today.getDate());
+  }
+
+  const era = Math.floor(year / 100);
+  const jdn = JD_EPOCH_OFFSET + 365 * (year - 1) + Math.floor(year / 4) + 30 * month + day - 31;
+  const r = (jdn - GREGORIAN_EPOCH) % 146097;
+  const n400 = Math.floor(r / 146097);
+  const n100 = Math.floor(r % 146097 / 36524);
+  const n4 = Math.floor(r % 36524 / 1461);
+  const n1 = Math.floor(r % 1461 / 365);
+  let gYear = 400 * n400 + 100 * n100 + 4 * n4 + n1;
+  let gDay = jdn - (GREGORIAN_EPOCH + 365 * (gYear - 1) + Math.floor((gYear - 1) / 4) - Math.floor((gYear - 1) / 100) + Math.floor((gYear - 1) / 400));
+
+  if (n100 === 4 || n1 === 4) {
+    gDay = 366;
+  } else {
+    gYear += 1;
+  }
+
+  const isGregorianLeap = gYear % 4 === 0 && gYear % 100 !== 0 || gYear % 400 === 0;
+  const gMonth = Math.floor((gDay - 1) / 31) + 1;
+  const gMonths = [0, 31, isGregorianLeap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  let gDayOfMonth = gDay;
+
+  for (let i = 1; i < gMonth; i++) {
+    gDayOfMonth -= gMonths[i];
+  }
+
+  let gMonthName = '';
+
+  for (let i = 1; i <= 12; i++) {
+    if (gDayOfMonth <= gMonths[i]) {
+      gMonthName = i;
+      break;
+    }
+
+    gDayOfMonth -= gMonths[i];
+  }
+
+  return [gYear, gMonthName, gDayOfMonth];
+};
+
+export const toEthiopian = (year, month, day) => {
+  if (year === undefined || month === undefined || day === undefined) {
+    const today = new Date();
+    return toEthiopian(today.getFullYear(), today.getMonth() + 1, today.getDate());
+  }
+
+  const isGregorianLeap = year % 4 === 0 && year % 100 !== 0 || year % 400 === 0;
+  const gMonths = [0, 31, isGregorianLeap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  let jdn = GREGORIAN_EPOCH - 1 + 365 * (year - 1) + Math.floor((year - 1) / 4) - Math.floor((year - 1) / 100) + Math.floor((year - 1) / 400);
+
+  for (let i = 1; i < month; i++) {
+    jdn += gMonths[i];
+  }
+
+  jdn += day;
+  const r = (jdn - JD_EPOCH_OFFSET) % 1461;
+  const n = r % 365;
+  const eYear = 4 * Math.floor((jdn - JD_EPOCH_OFFSET) / 1461) + Math.floor(r / 365);
+  const eMonth = Math.floor(n / 30) + 1;
+  const eDay = n % 30 + 1;
+  return [eYear, eMonth, eDay];
+};
+
+const defaultFormat = {
+  date: true,
+  time: false,
+  year: true,
+  month: true,
+  day: true,
+  dayName: false,
+  amPM: false,
+  hour: false,
+  minute: false,
+  second: false,
+  millisecond: false,
+  separator: '/',
+  monthName: false,
+  dayNameInTwo: false,
+  monthNameInTwo: false
+};
+
+const format = (moment, options) => {
+  options = { ...defaultFormat,
+    ...options
+  };
+  let formatted = '';
+
+  if (options.date) {
+    if (options.dayName) {
+      formatted += (options.dayNameInTwo ? dayNames[moment.day].substring(0, 2) : dayNames[moment.day]) + ', ';
+    }
+
+    if (options.month) {
+      if (options.monthName) {
+        formatted += (options.monthNameInTwo ? monthNames[moment.month - 1].substring(0, 2) : monthNames[moment.month - 1]) + ' ';
+      } else {
+        formatted += moment.month + options.separator;
+      }
+    }
+
+    if (options.day) {
+      formatted += moment.date + options.separator;
+    }
+
+    if (options.year) {
+      formatted += moment.year + ' ' + era;
+    }
+  }
+
+  if (options.time) {
+    if (options.date) {
+      formatted += ' ';
+    }
+
+    if (options.hour) {
+      formatted += moment.hour + ':';
+    }
+
+    if (options.minute) {
+      formatted += moment.minute + ':';
+    }
+
+    if (options.second) {
+      formatted += moment.second;
+    }
+
+    if (options.millisecond) {
+      formatted += '.' + moment.millisecond;
+    }
+
+    if (options.amPM) {
+      formatted += ' ' + (moment.hour < 12 ? amPM.am : amPM.pm);
+    }
+  }
+
+  return formatted;
+};
+
 export class EthiopianDate {
-  constructor(year, month, day) {
+  constructor() {
+    let moment;
+
+    if (arguments.length === 0) {
+      moment = new Date();
+    } else if (arguments.length === 1) {
+      moment = new Date(arguments[0]);
+    } else {
+      const [year, month, day, hour, minute, second, millisecond] = arguments;
+      const [gYear, gMonth, gDay] = toGregorian(year, month + 1, day);
+      moment = new Date(gYear, gMonth - 1, gDay, hour, minute, second, millisecond);
+    }
+
+    this._moment = moment;
+    const [year, month, date] = toEthiopian(moment.getFullYear(), moment.getMonth() + 1, moment.getDate());
+    this._year = year;
+    this._month = month;
+    this._date = date;
+    this._day = moment.getDay();
+    this._hour = moment.getHours();
+    this._minute = moment.getMinutes();
+    this._second = moment.getSeconds();
+    this._millisecond = moment.getMilliseconds();
+  }
+
+  get year() {
+    return this._year;
+  }
+
+  get month() {
+    return this._month;
+  }
+
+  get date() {
+    return this._date;
+  }
+
+  get day() {
+    return this._day;
+  }
+
+  get hour() {
+    return this._hour;
+  }
+
+  get minute() {
+    return this._minute;
+  }
+
+  get second() {
+    return this._second;
+  }
+
+  get millisecond() {
+    return this._millisecond;
+  }
+
+  get monthName() {
+    return monthNames[this._month - 1];
+  }
+
+  get dayName() {
+    return dayNames[this._day];
+  }
+
+  get amPm() {
+    return this._hour < 12 ? amPM.am : amPM.pm;
+  }
+
+  get isLeap() {
+    return isLeap(this._year);
+  }
+
+  get era() {
+    return era;
+  }
+
+  get moment() {
+    return this._moment;
+  }
+
+  set year(year) {
+    const [gYear, gMonth, gDay] = toGregorian(year, this._month, this._date);
+
+    this._moment.setFullYear(gYear, gMonth - 1, gDay);
+
+    this._year = year;
+  }
+
+  set month(month) {
+    const [gYear, gMonth, gDay] = toGregorian(this._year, month, this._date);
+
+    this._moment.setFullYear(gYear, gMonth - 1, gDay);
+
+    this._month = month;
+  }
+
+  set date(date) {
+    const [gYear, gMonth, gDay] = toGregorian(this._year, this._month, date);
+
+    this._moment.setFullYear(gYear, gMonth - 1, gDay);
+
+    this._date = date;
+  }
+
+  set day(day) {
+    this._moment.setDate(this._moment.getDate() - this._day + day);
+
+    this._day = day;
+  }
+
+  set hour(hour) {
+    this._moment.setHours(hour);
+
+    this._hour = hour;
+  }
+
+  set minute(minute) {
+    this._moment.setMinutes(minute);
+
+    this._minute = minute;
+  }
+
+  set second(second) {
+    this._moment.setSeconds(second);
+
+    this._second = second;
+  }
+
+  set millisecond(millisecond) {
+    this._moment.setMilliseconds(millisecond);
+
+    this._millisecond = millisecond;
+  }
+
+  getFullYear() {
+    return this._year;
+  }
+
+  getMonth() {
+    return this._month - 1;
+  }
+
+  getDate() {
+    return this._date;
+  }
+
+  getDay() {
+    return this._day;
+  }
+
+  getHours() {
+    return this._hour;
+  }
+
+  getMinutes() {
+    return this._minute;
+  }
+
+  getSeconds() {
+    return this._second;
+  }
+
+  getMilliseconds() {
+    return this._millisecond;
+  }
+
+  setFullYear(year) {
     this.year = year;
-    this.month = month;
-    this.day = day;
   }
 
-  // Convert Gregorian date to Ethiopian date
-  static fromGregorian(gregorianDate) {
-    // Ethiopian calendar starts 7-8 years behind Gregorian
-    // This is a simplified conversion - in production, use a proper library
-    const gregorianYear = gregorianDate.getFullYear();
-    const gregorianMonth = gregorianDate.getMonth();
-    const gregorianDay = gregorianDate.getDate();
-
-    // Simplified conversion (not 100% accurate)
-    let ethiopianYear = gregorianYear - 8;
-    let ethiopianMonth = gregorianMonth;
-    let ethiopianDay = gregorianDay;
-
-    // Adjust for Ethiopian calendar differences
-    if (gregorianMonth < 8 || (gregorianMonth === 8 && gregorianDay < 11)) {
-      ethiopianYear = gregorianYear - 9;
-    }
-
-    // Ethiopian months have different day counts
-    const monthDays = [30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 5]; // 13th month has 5 or 6 days
-    if (ethiopianDay > monthDays[ethiopianMonth]) {
-      ethiopianDay = monthDays[ethiopianMonth];
-    }
-
-    return new EthiopianDate(ethiopianYear, ethiopianMonth + 1, ethiopianDay);
+  setMonth(month) {
+    this.month = month + 1;
   }
 
-  // Convert Ethiopian date to Gregorian date
-  toGregorian() {
-    // Simplified conversion (not 100% accurate)
-    let gregorianYear = this.year + 8;
-    let gregorianMonth = this.month - 1;
-    let gregorianDay = this.day;
-
-    if (this.month > 4 || (this.month === 4 && this.day > 21)) {
-      gregorianYear = this.year + 9;
-    }
-
-    return new Date(gregorianYear, gregorianMonth, gregorianDay);
+  setDate(date) {
+    this.date = date;
   }
 
-  // Format Ethiopian date as string
+  setHours(hour) {
+    this.hour = hour;
+  }
+
+  setMinutes(minute) {
+    this.minute = minute;
+  }
+
+  setSeconds(second) {
+    this.second = second;
+  }
+
+  setMilliseconds(millisecond) {
+    this.millisecond = millisecond;
+  }
+
   toString() {
-    const monthNames = [
-      'መስከረም', 'ጥቅምት', 'ህዳር', 'ታህሳስ', 'ጥር', 'የካቲት',
-      'መጋቢት', 'ሚያዝያ', 'ግንቦት', 'ሰኔ', 'ሐምሌ', 'ነሐሴ', 'ጳጉሜን'
-    ];
-
-    return `${this.day} ${monthNames[this.month - 1]} ${this.year}`;
+    return format(this, {
+      date: true,
+      time: true,
+      year: true,
+      month: true,
+      day: true,
+      hour: true,
+      minute: true,
+      second: true
+    });
   }
 
-  // Get current Ethiopian date
-  static now() {
-    return EthiopianDate.fromGregorian(new Date());
+  toDateString() {
+    return format(this, {
+      date: true,
+      year: true,
+      month: true,
+      day: true,
+      dayName: true,
+      monthName: true
+    });
   }
 
-  // Add days to Ethiopian date
-  addDays(days) {
-    const gregorian = this.toGregorian();
-    gregorian.setDate(gregorian.getDate() + days);
-    return EthiopianDate.fromGregorian(gregorian);
+  toTimeString() {
+    return format(this, {
+      time: true,
+      hour: true,
+      minute: true,
+      second: true,
+      amPM: true
+    });
   }
 
-  // Add months to Ethiopian date
-  addMonths(months) {
-    const gregorian = this.toGregorian();
-    gregorian.setMonth(gregorian.getMonth() + months);
-    return EthiopianDate.fromGregorian(gregorian);
-  }
-
-  // Add years to Ethiopian date
-  addYears(years) {
-    return new EthiopianDate(this.year + years, this.month, this.day);
-  }
-
-  // Check if date is valid Ethiopian date
-  isValid() {
-    if (this.month < 1 || this.month > 13) return false;
-    if (this.day < 1) return false;
-
-    const monthDays = [30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 6];
-    if (this.month === 13) {
-      // Pagume has 5 days normally, 6 in leap years
-      const isLeapYear = (this.year % 4 === 3); // Ethiopian leap year rule
-      return this.day <= (isLeapYear ? 6 : 5);
-    }
-
-    return this.day <= monthDays[this.month - 1];
-  }
-
-  // Get day of week (0 = Sunday, 6 = Saturday)
-  getDayOfWeek() {
-    return this.toGregorian().getDay();
-  }
-
-  // Get month name
-  getMonthName() {
-    const monthNames = [
-      'መስከረም', 'ጥቅምት', 'ህዳር', 'ታህሳስ', 'ጥር', 'የካቲት',
-      'መጋቢት', 'ሚያዝያ', 'ግንቦት', 'ሰኔ', 'ሐምሌ', 'ነሐሴ', 'ጳጉሜን'
-    ];
-    return monthNames[this.month - 1];
-  }
-
-  // Get year name (for Ethiopian calendar)
-  getYearName() {
-    // Ethiopian years have names, but simplified here
-    return this.year.toString();
+  format(options) {
+    return format(this, options);
   }
 }
-
-// Utility functions
-export const formatEthiopianDate = (date) => {
-  if (date instanceof EthiopianDate) {
-    return date.toString();
-  }
-  return EthiopianDate.fromGregorian(date).toString();
-};
-
-export const parseEthiopianDate = (dateString) => {
-  // Parse Ethiopian date string (format: "day month year")
-  const parts = dateString.split(' ');
-  if (parts.length !== 3) return null;
-
-  const day = parseInt(parts[0]);
-  const monthName = parts[1];
-  const year = parseInt(parts[2]);
-
-  const monthNames = [
-    'መስከረም', 'ጥቅምት', 'ህዳር', 'ታህሳስ', 'ጥር', 'የካቲት',
-    'መጋቢት', 'ሚያዝያ', 'ግንቦት', 'ሰኔ', 'ሐምሌ', 'ነሐሴ', 'ጳጉሜን'
-  ];
-
-  const month = monthNames.indexOf(monthName) + 1;
-  if (month === 0) return null;
-
-  const ethiopianDate = new EthiopianDate(year, month, day);
-  return ethiopianDate.isValid() ? ethiopianDate : null;
-};
-
-export const getEthiopianMonths = () => {
-  return [
-    'መስከረም', 'ጥቅምት', 'ህዳር', 'ታህሳስ', 'ጥር', 'የካቲት',
-    'መጋቢት', 'ሚያዝያ', 'ግንቦት', 'ሰኔ', 'ሐምሌ', 'ነሐሴ', 'ጳጉሜን'
-  ];
-};
-
-export const getEthiopianMonthDays = (month, year) => {
-  const monthDays = [30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 6];
-  if (month === 13) {
-    const isLeapYear = (year % 4 === 3);
-    return isLeapYear ? 6 : 5;
-  }
-  return monthDays[month - 1];
-};

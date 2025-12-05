@@ -1,0 +1,91 @@
+/* Modal.css */
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 2rem 1rem; /* Add padding for smaller screens */
+  overflow-y: auto; /* Allow overlay to scroll if content is too tall */
+  align-items: flex-start; /* Align modal to the top */
+}
+
+.modal-content-wrapper {
+  background-color: var(--card-bg); /* Use CSS variable for consistency */
+  border-radius: var(--radius-lg); /* Use CSS variable for consistency */
+  box-shadow: var(--shadow-lg); /* Use CSS variable for consistency */
+  width: 100%;
+  max-width: 500px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  max-height: 95vh;
+  overflow: hidden;
+  margin-top: 5vh; /* Adjust to align with flex-start */
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color); /* Use CSS variable */
+}
+
+.modal-header h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--text-color); /* Use CSS variable */
+}
+
+.close-modal-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--gray-400); /* Use CSS variable */
+  transition: color 0.2s ease-in-out;
+}
+
+.close-modal-btn:hover {
+  color: var(--gray-600); /* Use CSS variable */
+}
+
+#modal-body {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding-right: 0.5rem; /* Add some padding for scrollbar */
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .modal-content-wrapper {
+    padding: 1rem;
+    max-height: 90vh;
+    max-width: 95vw;
+    margin-top: 2.5vh;
+  }
+
+  .modal-overlay {
+    padding: 1rem;
+  }
+
+  .modal-header h2 {
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-content-wrapper {
+    padding: 0.75rem;
+    margin: 0.5rem;
+  }
+}

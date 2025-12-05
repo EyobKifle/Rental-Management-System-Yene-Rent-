@@ -1,51 +1,86 @@
-// Minimal API utility to support Analytics page
-// In a real setup, replace with real HTTP calls.
+// YeneRent/src/utils/api.js
+import { MOCK_DATA, generateDynamicData } from './mockData';
 
-const mock = {
-  properties: [
-    { id: 'prop-1', name: 'Sunset Apartments', address: '123 Sunshine St, Addis Ababa', taxType: 'standard', rent: 8000 },
-    { id: 'prop-2', name: 'Hilltop Condos', address: '456 Hill Rd, Addis Ababa', taxType: 'standard', rent: 9000 },
-  ],
-  tenants: [
-    { id: 'ten-1', name: 'Abel Tesfaye', moveInDate: new Date(new Date().setMonth(new Date().getMonth()-1)).toISOString().slice(0,10) },
-    { id: 'ten-2', name: 'Lulit Bekele', moveInDate: new Date(new Date().setMonth(new Date().getMonth()-2)).toISOString().slice(0,10) },
-    { id: 'ten-3', name: 'Samuel Girma', moveInDate: new Date(new Date().setMonth(new Date().getMonth()-3)).toISOString().slice(0,10) },
-  ],
-  units: [
-    { id: 'unit-1', propertyId: 'prop-1', unitNumber: '101', rent: 8000, bedrooms: 2, bathrooms: 1, tenantId: 'ten-1' },
-    { id: 'unit-2', propertyId: 'prop-1', unitNumber: '102', rent: 7500, bedrooms: 2, bathrooms: 2, tenantId: null },
-    { id: 'unit-3', propertyId: 'prop-2', unitNumber: '201', rent: 9000, bedrooms: 3, bathrooms: 2, tenantId: 'ten-2' },
-  ],
-  leases: [
-    { id: 'lease-1', unitId: 'unit-1', tenantId: 'ten-1', startDate: new Date(new Date().setMonth(new Date().getMonth()-2)).toISOString().slice(0,10), endDate: new Date(new Date().setMonth(new Date().getMonth()+10)).toISOString().slice(0,10) },
-    { id: 'lease-2', unitId: 'unit-2', tenantId: null, startDate: null, endDate: null },
-    { id: 'lease-3', unitId: 'unit-3', tenantId: 'ten-2', startDate: new Date(new Date().setMonth(new Date().getMonth()-6)).toISOString().slice(0,10), endDate: new Date(new Date().setMonth(new Date().getMonth()+6)).toISOString().slice(0,10) },
-  ],
-  payments: Array.from({ length: 12 }).flatMap((_, i) => {
-    const d = new Date()
-    d.setMonth(d.getMonth() - (11 - i))
-    const iso = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-10`
-    return [
-      { id: `p-${i}-1`, leaseId: 'lease-1', date: iso, amount: 8000, status: 'Paid' },
-      { id: `p-${i}-2`, leaseId: 'lease-2', date: iso, amount: 7500, status: 'Paid' },
-      { id: `p-${i}-3`, leaseId: 'lease-3', date: iso, amount: 9000, status: 'Paid' },
-    ]
-  }),
-  expenses: Array.from({ length: 12 }).map((_, i) => {
-    const d = new Date()
-    d.setMonth(d.getMonth() - (11 - i))
-    const iso = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-15`
-    const cats = ['Maintenance', 'Utilities', 'Taxes']
-    return { id: `e-${i}`, propertyId: i%2===0 ? 'prop-1' : 'prop-2', date: iso, category: cats[i%cats.length], description: `${cats[i%cats.length]} expense`, amount: 3000 + (i%3)*500 }
-  }),
-}
+const api = {
+    /**
+     * Seeds localStorage with rich mock data if it's empty.
+     * This function relies on MOCK_DATA and generateDynamicData from mock-data.js
+     */
+    seedData() {
+        // generateDynamicData populates MOCK_DATA.payments and MOCK_DATA.expenses
+        generateDynamicData();
 
-export const api = {
-  async get(resource) {
-    // simulate latency
-    await new Promise(r => setTimeout(r, 50))
-    const data = mock[resource]
-    if (!data) return []
-    return JSON.parse(JSON.stringify(data))
-  }
-}
+        // Save to localStorage so it persists for the session
+        for (const table in MOCK_DATA) {
+            if (localStorage.getItem(table) === null) {
+                localStorage.setItem(table, JSON.stringify(MOCK_DATA[table]));
+            }
+        }
+    },
+
+    async get(table) {
+        console.log(`API: Fetching all from ${table}`);
+        await new Promise(res => setTimeout(res, 200)); // Simulate network delay
+        // In a real app, this would be a Supabase call. For now, we fall back to localStorage.
+        try {
+            const data = localStorage.getItem(table);
+            // If data is null or an empty array string, return and set demo data.
+            if (!data || JSON.parse(data).length === 0) {
+                console.log(`API: No data for ${table} in localStorage. Seeding all mock data.`);
+                this.seedData();
+                return JSON.parse(localStorage.getItem(table) || '[]');
+            }
+            return JSON.parse(data);
+        } catch (error) {
+            console.error(`Error retrieving ${table} from localStorage:`, error);
+            throw new Error(`Failed to retrieve data for ${table}: ${error.message}`); // Re-throw for component handling
+        }
+    },
+
+    async create(table, data) {
+        console.log(`API: Creating in ${table}`, data);
+        await new Promise(res => setTimeout(res, 200));
+        // Real app: supabase.from(table).insert(data)
+        try {
+            const currentData = await this.get(table);
+            const newData = [...currentData, { ...data, id: data.id || `mock-${Date.now()}` }]; // Ensure ID for new items
+            localStorage.setItem(table, JSON.stringify(newData));
+            return data;
+        } catch (error) {
+            console.error(`Error creating item in ${table}:`, error);
+            throw new Error(`Failed to create item in ${table}: ${error.message}`); // Re-throw for component handling
+        }
+    },
+
+    async update(table, id, data) {
+        console.log(`API: Updating ${id} in ${table}`, data);
+        await new Promise(res => setTimeout(res, 200));
+        // Real app: supabase.from(table).update(data).eq('id', id)
+        try {
+            let currentData = await this.get(table);
+            currentData = currentData.map(item => (item.id === id ? { ...item, ...data } : item));
+            localStorage.setItem(table, JSON.stringify(currentData));
+            return data;
+        } catch (error) {
+            console.error(`Error updating item ${id} in ${table}:`, error);
+            throw new Error(`Failed to update item ${id} in ${table}: ${error.message}`); // Re-throw for component handling
+        }
+    },
+
+    async delete(table, id) {
+        console.log(`API: Deleting ${id} from ${table}`);
+        await new Promise(res => setTimeout(res, 200));
+        // Real app: supabase.from(table).delete().eq('id', id)
+        try {
+            let currentData = await this.get(table);
+            currentData = currentData.filter(item => item.id !== id);
+            localStorage.setItem(table, JSON.stringify(currentData.length > 0 ? currentData : [])); // Ensure we don't save an empty array that looks like data
+            return { id };
+        } catch (error) {
+            console.error(`Error deleting item ${id} from ${table}:`, error);
+            throw new Error(`Failed to delete item ${id} from ${table}: ${error.message}`); // Re-throw for component handling
+        }
+    }
+};
+
+export default api;

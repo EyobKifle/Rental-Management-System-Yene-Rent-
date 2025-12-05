@@ -1,91 +1,61 @@
-import React, { createContext, useState, useEffect } from 'react';
+// YeneRent/src/contexts/AuthContext.jsx
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
-export const AuthContext = createContext();
+const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is logged in on app start
-    const checkAuthStatus = () => {
-      const loggedIn = sessionStorage.getItem('userLoggedIn') === 'true';
-      const userData = sessionStorage.getItem('userData');
-
-      if (loggedIn && userData) {
-        setUser(JSON.parse(userData));
-        setIsAuthenticated(true);
-      }
-
-      setLoading(false);
-    };
-
-    checkAuthStatus();
+    const storedUser = sessionStorage.getItem('currentUser');
+    const loggedIn = sessionStorage.getItem('userLoggedIn') === 'true';
+    if (loggedIn && storedUser) {
+      setUser(JSON.parse(storedUser));
+      setIsLoggedIn(true);
+    }
+    setLoading(false);
   }, []);
 
   const login = async (email, password) => {
-    try {
-      // This would normally make an API call
-      // For now, we'll simulate authentication
-      const mockUser = {
-        id: 1,
+    setLoading(true);
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    if (email === 'demo@user.com' && password === 'password') {
+      const dummyUser = {
+        id: 'user-1',
+        name: 'Demo User',
         email: email,
-        name: 'John Doe',
-        avatar: null,
-        role: 'admin'
+        avatarUrl: null,
       };
-
-      setUser(mockUser);
-      setIsAuthenticated(true);
+      setUser(dummyUser);
+      setIsLoggedIn(true);
+      sessionStorage.setItem('currentUser', JSON.stringify(dummyUser));
       sessionStorage.setItem('userLoggedIn', 'true');
-      sessionStorage.setItem('userData', JSON.stringify(mockUser));
-
+      setLoading(false);
       return { success: true };
-    } catch (error) {
-      return { success: false, error: error.message };
+    } else {
+      setLoading(false);
+      return { success: false, error: 'Invalid credentials' };
     }
   };
 
   const logout = () => {
     setUser(null);
-    setIsAuthenticated(false);
+    setIsLoggedIn(false);
+    sessionStorage.removeItem('currentUser');
     sessionStorage.removeItem('userLoggedIn');
-    sessionStorage.removeItem('userData');
-  };
-
-  const signup = async (userData) => {
-    try {
-      // This would normally make an API call
-      const newUser = {
-        id: Date.now(),
-        ...userData,
-        role: 'user'
-      };
-
-      setUser(newUser);
-      setIsAuthenticated(true);
-      sessionStorage.setItem('userLoggedIn', 'true');
-      sessionStorage.setItem('userData', JSON.stringify(newUser));
-
-      return { success: true };
-    } catch (error) {
-      return { success: false, error: error.message };
-    }
-  };
-
-  const value = {
-    user,
-    isAuthenticated,
-    loading,
-    login,
-    logout,
-    signup
   };
 
   return (
-    <AuthContext.Provider value={value}>
+    <AuthContext.Provider value={{ user, isLoggedIn, loading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
+};
+
+export const useAuth = () => {
+  return useContext(AuthContext);
 };

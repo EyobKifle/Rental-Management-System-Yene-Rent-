@@ -1,24 +1,149 @@
-/* Scoped analytics styles reused from legacy CSS */
-.page-actions { display: flex; gap: 0.75rem; }
-.page-header h1 { font-size: 1.875rem; font-weight: 700; }
-.page-header p { color: var(--gray-500); margin-top: 0.25rem; }
+/* YeneRent/src/pages/Analytics/Analytics.css */
 
-.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem; }
-.chart-grid { display: grid; grid-template-columns: 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
-@media (min-width: 1024px) {
-  .chart-grid { grid-template-columns: 2fr 1fr; }
-  .chart-grid .chart-container:first-child { grid-column: 1 / -1; }
+.analytics-page {
+    padding: 2rem;
+    background-color: var(--body-bg);
 }
-.chart-container { position: relative; height: 400px; width: 100%; }
-.chart-container canvas { width: 100% !important; height: 100% !important; }
 
-.summary-grid { display: flex; flex-direction: column; gap: 1.5rem; }
-.summary-section h4 { margin: 0 0 1rem; font-size: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; }
-.summary-item, .summary-total { display: flex; justify-content: space-between; font-size: 0.875rem; margin-bottom: 0.5rem; }
-.summary-total { font-weight: 600; margin-top: 1rem; padding-top: 0.75rem; border-top: 1px solid var(--border-color); }
+.chart-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
 
-.filter-bar { display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap; margin-bottom: 1.5rem; }
-.table-container { overflow-x: auto; }
-.data-table { width: 100%; border-collapse: collapse; }
-.data-table th, .data-table td { padding: 0.75rem; text-align: left; border-bottom: 1px solid var(--gray-200); white-space: nowrap; }
-.data-table th { font-size: 0.75rem; font-weight: 500; color: var(--gray-500); }
+.chart-card {
+    background-color: var(--card-bg);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Ensures content pushes to top/bottom */
+    min-height: 300px; /* Adjust as needed */
+}
+
+.chart-card h3 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--text-color);
+}
+
+.chart-container {
+    position: relative;
+    height: 250px; /* Fixed height for consistent chart display */
+    width: 100%;
+}
+
+@media (max-width: 768px) {
+    .analytics-page {
+        padding: 1rem;
+    }
+    .chart-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+}
+
+/* Optional: Additional styles for summary or tables if they are part of Analytics.jsx */
+.financial-summary,
+.detailed-tables {
+    background-color: var(--card-bg);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.financial-summary h2,
+.detailed-tables h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    color: var(--text-color);
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.75rem;
+}
+
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.summary-section {
+    background-color: var(--gray-50);
+    padding: 1rem;
+    border-radius: var(--radius-sm);
+}
+
+.summary-section h3 {
+    font-size: 1rem;
+    color: var(--gray-600);
+    margin-bottom: 0.75rem;
+}
+
+.summary-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-top: 1px dashed var(--gray-200);
+}
+
+.summary-item:first-of-type {
+    border-top: none;
+}
+
+.summary-item span:first-child {
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.summary-item span:last-child {
+    color: var(--text-color-secondary);
+}
+
+.detailed-tables table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+.detailed-tables th, .detailed-tables td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border-color);
+    text-align: left;
+}
+
+.detailed-tables th {
+    background-color: var(--gray-100);
+    font-size: 0.875rem;
+    color: var(--gray-600);
+    text-transform: uppercase;
+}
+
+/* Status badges for tables */
+.status-badge {
+    padding: 0.25rem 0.6rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-align: center;
+    display: inline-block;
+}
+
+.status-active { background-color: #d1fae5; color: #065f46; } /* Green */
+.status-expired { background-color: #fee2e2; color: #991b1b; } /* Red */
+.status-upcoming { background-color: #e0f2fe; color: #0c4a6e; } /* Blue */
+
+/* Text colors within tables */
+.text-green { color: var(--success-color); }
+.text-red { color: var(--danger-color); }
+
+/* Loading State for Analytics Page */
+.analytics-loading {
+    opacity: 0.6;
+    pointer-events: none;
+    cursor: wait;
+}
